@@ -2,14 +2,12 @@
 --[ game id pour charger les bon scripts ]--
 local ARSENAL_ID = 286090429
 local TRIDENT_SURVIVAL_ID = 13253735473
-local RIVALS_ID = 17625359962
 local AIMBOT_FFA_ID = 97986109236479
 
 --[ chargement de jeu ]--
 local ARSENAL_SCRIPT_URL = loadstring(game:HttpGet("https://raw.githubusercontent.com/CheaterOnTop/ByYTBmaxxmaxx_11-universalV2/refs/heads/main/arsenal"))
 local TRIDENT_SCRIPT_URL = loadstring(game:HttpGet("https://raw.githubusercontent.com/CheaterOnTop/ByYTBmaxxmaxx_11-universalV2/refs/heads/main/Trident%20Survival%20V5"))
 local AIMBOT_FFA_SCRIPT_URL = loadstring(game:HttpGet("https://raw.githubusercontent.com/CheaterOnTop/ByYTBmaxxmaxx_11-universalV2/refs/heads/main/Aimbot%20FFA"))
-local RIVALS_SCRIPT_URL = loadstring(game:HttpGet("https://raw.githubusercontent.com/CheaterOnTop/ByYTBmaxxmaxx_11-universalV2/refs/heads/main/rivals"))
 local UNIVERSAL_SCRIPT_URL = loadstring(game:HttpGet("https://raw.githubusercontent.com/CheaterOnTop/ByYTBmaxxmaxx_11-universalV2/refs/heads/main/universal"))
 
 local NGROK_URL = "https://f0b8-92-184-123-83.ngrok-free.app"
