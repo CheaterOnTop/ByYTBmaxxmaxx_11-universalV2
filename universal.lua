@@ -1,22 +1,21 @@
-loadstring(game:HttpGet("soon"))()
+
 -- IDs des jeux
 local ARSENAL_ID = 286090429
 local TRIDENT_SURVIVAL_ID = 13253735473
 local RIVALS_ID = 17625359962
 local AIMBOT_FFA_ID = 97986109236479
 
--- Définir les scripts comme des fonctions loadstring (sans exécution immédiate)
+--[ chargement de jeu ]--
 local ARSENAL_SCRIPT_URL = loadstring(game:HttpGet("https://raw.githubusercontent.com/CheaterOnTop/ByYTBmaxxmaxx_11-universalV2/refs/heads/main/arsenal"))
 local TRIDENT_SCRIPT_URL = loadstring(game:HttpGet("https://raw.githubusercontent.com/CheaterOnTop/ByYTBmaxxmaxx_11-universalV2/refs/heads/main/Trident%20Survival%20V5"))
 local AIMBOT_FFA_SCRIPT_URL = loadstring(game:HttpGet("https://raw.githubusercontent.com/CheaterOnTop/ByYTBmaxxmaxx_11-universalV2/refs/heads/main/Aimbot%20FFA"))
 local RIVALS_SCRIPT_URL = loadstring(game:HttpGet("https://raw.githubusercontent.com/CheaterOnTop/ByYTBmaxxmaxx_11-universalV2/refs/heads/main/rivals"))
 local UNIVERSAL_SCRIPT_URL = loadstring(game:HttpGet("https://raw.githubusercontent.com/CheaterOnTop/ByYTBmaxxmaxx_11-universalV2/refs/heads/main/universal"))
 
--- URL ngrok pour récupérer la clé
-local NGROK_URL = "https://fa34-92-184-123-83.ngrok-free.app" -- Remplace par le lien ngrok actuel
-local DISCORD_LINK = "https://discord.gg/C27sdkDjqv" -- Remplace par ton lien Discord
+local NGROK_URL = "https://fa34-92-184-123-83.ngrok-free.app"
+local DISCORD_LINK = "https://discord.gg/C27sdkDjqv"
 
--- Fonction utilitaire pour décoder les chaînes Base64
+--[ Key system ]--
 local function _0xdec(str)
     local _0xabc = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
     local _0xdef = ""
@@ -44,7 +43,7 @@ local function _0xdec(str)
     return _0xdef
 end
 
--- Fonction principale obfusquée
+--[ Hall principal ]--
 local function _0x789(_0xxyz)
     if not _0xxyz or _0xxyz == "" then
         warn(_0xdec("RmFpbGVkIHRvIHJldHJpZXZlIGtleTogVVJMIHBvaW50IG5vdCBkZWZpbmVk"))
@@ -55,18 +54,14 @@ local function _0x789(_0xxyz)
         _0xxyz = "https://" .. _0xxyz
     end
 
-    -- Code inutile pour brouiller
     local _0x123 = math.random(1, 100) * 42
     if _0x123 > 0 then _0x123 = _0x123 - 1 end
 
-    -- Token obfusqué : GIyf__1mJiHEMzAYKcL
-    -- Base64 : R0l5Zl9fMW1KaUhFTXpBWUtjTA==
     local _0x456 = "R0l5Zl9"
     local _0x789a = "fMW1KaU"
     local _0xbcd = "hFTXpBW"
     local _0xefe = "UtjTA=="
 
-    -- Recombiner et décoder
     local _0x111 = _0x456 .. _0x789a .. _0xbcd .. _0xefe
     local _0x222 = _0xdec(_0x111)
     if not _0x222 then
@@ -74,7 +69,6 @@ local function _0x789(_0xxyz)
         return nil
     end
 
-    -- Encoder pour l'URL
     local _0x333 = ""
     for _0x444 = 1, #_0x222 do
         local _0x555 = _0x222:sub(_0x444, _0x444)
@@ -121,10 +115,9 @@ end
 
 local _0xddd = {};
 
--- CoreGui.RobloxGui._0xeee
+--[ menu pour la key ]--
 _0xddd["1"] = Instance.new("Folder", game:GetService("CoreGui").RobloxGui);
 
--- CoreGui.RobloxGui._0xeee._0xffff
 _0xddd["2"] = Instance.new("Frame", _0xddd["1"]);
 _0xddd["2"]["BorderSizePixel"] = 0;
 _0xddd["2"]["BackgroundColor3"] = Color3.fromRGB(10, 0, 32);
@@ -134,11 +127,9 @@ _0xddd["2"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 _0xddd["2"]["Name"] = [[_0xffff]];
 _0xddd["2"]["Size"] = UDim2.new(0, 250, 0, 200);
 
--- CoreGui.RobloxGui._0xeee._0xffff._0x1111
 _0xddd["3"] = Instance.new("LocalScript", _0xddd["2"]);
 _0xddd["3"]["Name"] = [[_0x1111]];
 
--- CoreGui.RobloxGui._0xeee._0xffff._0x2222
 _0xddd["40"] = Instance.new("Frame", _0xddd["2"]);
 _0xddd["40"]["Visible"] = true;
 _0xddd["40"]["BorderSizePixel"] = 0;
@@ -148,7 +139,6 @@ _0xddd["40"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 _0xddd["40"]["Name"] = [[_0x2222]];
 _0xddd["40"]["BackgroundTransparency"] = 1;
 
--- CoreGui.RobloxGui._0xeee._0xffff._0x2222._0x3333
 _0xddd["44"] = Instance.new("TextLabel", _0xddd["40"]);
 _0xddd["44"]["TextWrapped"] = true;
 _0xddd["44"]["ZIndex"] = 4;
@@ -165,7 +155,6 @@ _0xddd["44"]["Text"] = _0xdec("Tm92YSBTY3JpcHQ=");
 _0xddd["44"]["Name"] = [[_0x3333]];
 _0xddd["44"]["Position"] = UDim2.new(0, 0, 0, 12);
 
--- CoreGui.RobloxGui._0xeee._0xffff._0x2222._0x4444
 _0xddd["47"] = Instance.new("Frame", _0xddd["40"]);
 _0xddd["47"]["BorderSizePixel"] = 0;
 _0xddd["47"]["BackgroundColor3"] = Color3.fromRGB(12, 8, 50);
@@ -175,16 +164,13 @@ _0xddd["47"]["Position"] = UDim2.new(1, -15, 0, 80);
 _0xddd["47"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 _0xddd["47"]["Name"] = [[_0x4444]];
 
--- CoreGui.RobloxGui._0xeee._0xffff._0x2222._0x4444.UICorner
 _0xddd["48"] = Instance.new("UICorner", _0xddd["47"]);
 _0xddd["48"]["CornerRadius"] = UDim.new(0, 4);
 
--- CoreGui.RobloxGui._0xeee._0xffff._0x2222._0x4444.UIStroke
 _0xddd["49"] = Instance.new("UIStroke", _0xddd["47"]);
 _0xddd["49"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
 _0xddd["49"]["Color"] = Color3.fromRGB(56, 44, 94);
 
--- CoreGui.RobloxGui._0xeee._0xffff._0x2222._0x4444._0x5555
 _0xddd["4a"] = Instance.new("TextBox", _0xddd["47"]);
 _0xddd["4a"]["TextColor3"] = Color3.fromRGB(255, 255, 255);
 _0xddd["4a"]["PlaceholderColor3"] = Color3.fromRGB(98, 94, 164);
@@ -202,7 +188,6 @@ _0xddd["4a"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 _0xddd["4a"]["Text"] = [[]];
 _0xddd["4a"]["BackgroundTransparency"] = 1;
 
--- CoreGui.RobloxGui._0xeee._0xffff._0x2222._0x6666
 _0xddd["41"] = Instance.new("TextButton", _0xddd["40"]);
 _0xddd["41"]["BorderSizePixel"] = 0;
 _0xddd["41"]["TextSize"] = 18;
@@ -216,16 +201,13 @@ _0xddd["41"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 _0xddd["41"]["Text"] = _0xdec("bG9naW4=");
 _0xddd["41"]["Position"] = UDim2.new(0.5, -10, 1, -15);
 
--- CoreGui.RobloxGui._0xeee._0xffff._0x2222._0x6666.UICorner
 _0xddd["42"] = Instance.new("UICorner", _0xddd["41"]);
 _0xddd["42"]["CornerRadius"] = UDim.new(0, 4);
 
--- CoreGui.RobloxGui._0xeee._0xffff._0x2222._0x6666.UIStroke
 _0xddd["43"] = Instance.new("UIStroke", _0xddd["41"]);
 _0xddd["43"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
 _0xddd["43"]["Color"] = Color3.fromRGB(56, 44, 94);
 
--- CoreGui.RobloxGui._0xeee._0xffff._0x2222._0x7777
 _0xddd["discord"] = Instance.new("TextButton", _0xddd["40"]);
 _0xddd["discord"]["BorderSizePixel"] = 0;
 _0xddd["discord"]["TextSize"] = 14;
@@ -239,16 +221,13 @@ _0xddd["discord"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 _0xddd["discord"]["Text"] = _0xdec("R2V0IEtleSAoRGlzY29yZCk=");
 _0xddd["discord"]["Position"] = UDim2.new(1, -15, 1, -15);
 
--- CoreGui.RobloxGui._0xeee._0xffff._0x2222._0x7777.UICorner
 _0xddd["discord_corner"] = Instance.new("UICorner", _0xddd["discord"]);
 _0xddd["discord_corner"]["CornerRadius"] = UDim.new(0, 4);
 
--- CoreGui.RobloxGui._0xeee._0xffff._0x2222._0x7777.UIStroke
 _0xddd["discord_stroke"] = Instance.new("UIStroke", _0xddd["discord"]);
 _0xddd["discord_stroke"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
 _0xddd["discord_stroke"]["Color"] = Color3.fromRGB(56, 44, 94);
 
--- CoreGui.RobloxGui._0xeee._0xffff._0x8888
 _0xddd["3c"] = Instance.new("Frame", _0xddd["2"]);
 _0xddd["3c"]["Visible"] = false;
 _0xddd["3c"]["ZIndex"] = 999999;
@@ -259,7 +238,6 @@ _0xddd["3c"]["Position"] = UDim2.new(0, 0, 0, 2);
 _0xddd["3c"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 _0xddd["3c"]["Name"] = [[_0x8888]];
 
--- CoreGui.RobloxGui._0xeee._0xffff._0x8888.TextLabel
 _0xddd["3d"] = Instance.new("TextLabel", _0xddd["3c"]);
 _0xddd["3d"]["BorderSizePixel"] = 0;
 _0xddd["3d"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
@@ -271,7 +249,6 @@ _0xddd["3d"]["Size"] = UDim2.new(1, 0, 1, 0);
 _0xddd["3d"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 _0xddd["3d"]["Text"] = [[]];
 
--- CoreGui.RobloxGui._0xeee._0xffff._0x1111
 local function _0x9999()
     local _0xaaaa = game:GetService("UserInputService")
     local _0xbbbb = _0xddd["2"]
@@ -314,7 +291,6 @@ local function _0x9999()
 end;
 task.spawn(_0x9999);
 
--- CoreGui.RobloxGui._0xeee.LocalScript
 local function _0xjjjj()
     local _0xkkkk = game:GetService("TweenService")
 
