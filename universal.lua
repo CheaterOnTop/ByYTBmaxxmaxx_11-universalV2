@@ -1,5 +1,5 @@
 
--- IDs des jeux
+--[ game id pour charger les bon scripts ]--
 local ARSENAL_ID = 286090429
 local TRIDENT_SURVIVAL_ID = 13253735473
 local RIVALS_ID = 17625359962
