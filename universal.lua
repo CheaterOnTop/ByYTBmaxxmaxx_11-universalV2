@@ -10,7 +10,6 @@ local TRIDENT_SCRIPT_URL = loadstring(game:HttpGet("https://raw.githubuserconten
 local AIMBOT_FFA_SCRIPT_URL = loadstring(game:HttpGet("https://raw.githubusercontent.com/CheaterOnTop/ByYTBmaxxmaxx_11-universalV2/refs/heads/main/Aimbot%20FFA"))
 local UNIVERSAL_SCRIPT_URL = loadstring(game:HttpGet("https://raw.githubusercontent.com/CheaterOnTop/ByYTBmaxxmaxx_11-universalV2/refs/heads/main/universal"))
 
-local NGROK_URL = "https://f0b8-92-184-123-83.ngrok-free.app"
 local DISCORD_LINK = "https://discord.gg/C27sdkDjqv"
 local NGROK_URL = "https://aba1-92-184-123-188.ngrok-free.app"
 --[ Key system ]--
