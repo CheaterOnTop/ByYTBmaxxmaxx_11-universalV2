@@ -12,7 +12,7 @@ local UNIVERSAL_SCRIPT_URL = loadstring(game:HttpGet("https://raw.githubusercont
 local DISCORD_LINK = "https://discord.gg/C27sdkDjqv"
 local NGROK_URL = "https://6b53-92-184-123-161.ngrok-free.app"
 
-local isAuthorized = false
+local NGROK_URL = "https://1da2-92-184-123-161.ngrok-free.app"
 
 function user_free_key_system_universal(token)
     if token == "SD90w_Ck4Z-zCO?-P#TRB!b" then
