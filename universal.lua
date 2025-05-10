@@ -12,7 +12,7 @@ local UNIVERSAL_SCRIPT_URL = loadstring(game:HttpGet("https://raw.githubusercont
 
 local DISCORD_LINK = "https://discord.gg/C27sdkDjqv"
 local NGROK_URL = "https://bde1-92-184-121-216.ngrok-free.app"
-
+local NGROK_URL = "https://9886-92-184-121-216.ngrok-free.app"
 local function _0xdec(str)
     local _0xabc = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
     local _0xdef = ""
