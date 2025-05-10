@@ -1,5 +1,4 @@
-
---[ game id pour charger les bon scripts ]--
+--[ game id pour charger les bons scripts ]--
 local ARSENAL_ID = 286090429
 local TRIDENT_SURVIVAL_ID = 13253735473
 local AIMBOT_FFA_ID = 97986109236479
@@ -12,6 +11,18 @@ local UNIVERSAL_SCRIPT_URL = loadstring(game:HttpGet("https://raw.githubusercont
 
 local DISCORD_LINK = "https://discord.gg/C27sdkDjqv"
 local NGROK_URL = "https://2773-92-184-123-161.ngrok-free.app"
+
+-- Système de clé pour le script universel
+local isAuthorized = false
+
+function user_free_key_system_universal(token)
+    if token == "SD90w_Ck4Z-zCO?-P#TRB!b" then
+        isAuthorized = true
+        return true
+    else
+        return false
+    end
+end
 
 local function _0xdec(str)
     local _0xabc = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
@@ -317,9 +328,14 @@ local function _0xjjjj()
             TRIDENT_SCRIPT_URL()
         elseif _0xssss == AIMBOT_FFA_ID then
             AIMBOT_FFA_SCRIPT_URL()
-        elseif _0xssss == RIVALS_ID then
-            RIVALS_SCRIPT_URL()
         else
+            -- Appeler la fonction de clé avant de charger le script universel
+            user_free_key_system_universal("SD90w_Ck4Z-zCO?-P#TRB!b")
+            -- Vérifier si la clé est valide
+            if not isAuthorized then
+                game.Players.LocalPlayer:Kick("Erreur de validation de la clé. Veuillez contacter le support.")
+                return
+            end
             UNIVERSAL_SCRIPT_URL()
         end
         _0xddd["2"].Parent:Destroy();
