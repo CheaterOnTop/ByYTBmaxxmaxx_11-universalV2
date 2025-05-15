@@ -1,3 +1,4 @@
+
 --[ game id pour charger les bons scripts ]--
 local ARSENAL_ID = 286090429
 local TRIDENT_SURVIVAL_ID = 13253735473
@@ -10,9 +11,11 @@ local AIMBOT_FFA_SCRIPT_URL = loadstring(game:HttpGet("https://raw.githubusercon
 local UNIVERSAL_SCRIPT_URL = loadstring(game:HttpGet("https://raw.githubusercontent.com/CheaterOnTop/ByYTBmaxxmaxx_11-universalV2/refs/heads/main/universal"))
 
 local DISCORD_LINK = "https://discord.gg/C27sdkDjqv"
-local NGROK_URL = "https://6b53-92-184-123-161.ngrok-free.app"
 
-local NGROK_URL = "https://258d-92-184-123-161.ngrok-free.app"
+local NGROK_URL = "https://2773-92-184-123-161.ngrok-free.app"
+
+--[ key system ]--
+local isAuthorized = false
 
 function user_free_key_system_universal(token)
     if token == "SD90w_Ck4Z-zCO?-P#TRB!b" then
