@@ -11,6 +11,7 @@ local AIMBOT_FFA_SCRIPT_URL = loadstring(game:HttpGet("https://raw.githubusercon
 local UNIVERSAL_SCRIPT_URL = loadstring(game:HttpGet("https://raw.githubusercontent.com/CheaterOnTop/ByYTBmaxxmaxx_11-universalV2/refs/heads/main/universal"))
 
 local DISCORD_LINK = "https://discord.gg/C27sdkDjqv"
+
 local NGROK_URL = "https://2773-92-184-123-161.ngrok-free.app"
 
 -- Système de clé pour le script universel
