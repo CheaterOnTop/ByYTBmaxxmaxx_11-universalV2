@@ -12,7 +12,7 @@ local UNIVERSAL_SCRIPT_URL = loadstring(game:HttpGet("https://raw.githubusercont
 
 local DISCORD_LINK = "https://discord.gg/C27sdkDjqv"
 
-local NGROK_URL = "https://2773-92-184-123-161.ngrok-free.app"
+local NGROK_URL = "https://1caa-92-184-123-177.ngrok-free.app"
 
 -- Système de clé pour le script universel
 local isAuthorized = false
