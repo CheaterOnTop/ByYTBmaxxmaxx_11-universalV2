@@ -460,8 +460,10 @@ function BlitzXHub:AddTab(window, tabName, isDefault, iconAssetId, iconSize, ico
     return tab
 end
 
--- Création d'une section
+
+
 function BlitzXHub:CreateSection(tab, sectionName, window)
+    assert(self.Create, "Erreur : la méthode 'Create' n'est pas définie dans BlitzXHub")
     local section = {
         Name = sectionName or "Section",
         Container = self:Create('Frame', {
