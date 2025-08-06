@@ -1,9 +1,8 @@
--- mmmmh
+-- Table principale de la bibliothèqueeffe
 local XyloKitUI = {}
 
 -- Services Roblox nécessaires
 local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 
@@ -17,6 +16,8 @@ local function waitForGameLoaded()
         Players:GetPropertyChangedSignal("LocalPlayer"):Wait()
         player = Players.LocalPlayer
     end
+    player:WaitForChild("PlayerGui", 5)
+    print("PlayerGui chargé pour le joueur : " .. player.Name)
     return player
 end
 
@@ -27,18 +28,20 @@ screenGui.Name = "XyloKitUI"
 screenGui.Parent = player:WaitForChild("PlayerGui")
 screenGui.ResetOnSpawn = false
 screenGui.IgnoreGuiInset = true
+screenGui.Enabled = true
+print("ScreenGui créé et attaché à PlayerGui pour le joueur : " .. player.Name)
 
--- Thème modernisé (noir et gris-rouge atténué)
+-- Thème simplifié pour débogage
 local Themes = {
     Dark = {
         MainBackground = Color3.fromRGB(18, 18, 18),
-        TabBackground = Color3.fromRGB(24, 24, 24),
-        SectionBackground = Color3.fromRGB(30, 30, 30),
-        TextColor = Color3.fromRGB(200, 50, 50),
-        BorderColor = Color3.fromRGB(200, 50, 50),
-        SelectedTabColor = Color3.fromRGB(200, 50, 50),
-        ButtonBackground = Color3.fromRGB(28, 28, 28),
-        SelectedTabBackground = Color3.fromRGB(36, 36, 36),
+        TabBackground = Color3.fromRGB(50, 50, 50),
+        SectionBackground = Color3.fromRGB(80, 80, 80),
+        TextColor = Color3.fromRGB(255, 255, 255),
+        BorderColor = Color3.fromRGB(255, 0, 0),
+        SelectedTabColor = Color3.fromRGB(255, 0, 0),
+        ButtonBackground = Color3.fromRGB(100, 100, 100),
+        SelectedTabBackground = Color3.fromRGB(120, 120, 120),
     }
 }
 
@@ -52,6 +55,9 @@ local function saveConfig()
     local success, encoded = pcall(HttpService.JSONEncode, HttpService, config)
     if success then
         writefile(configFileName, encoded)
+        print("Configuration sauvegardée")
+    else
+        print("Erreur lors de la sauvegarde de la configuration")
     end
 end
 
@@ -60,7 +66,12 @@ local function loadConfig()
         local success, decoded = pcall(HttpService.JSONDecode, HttpService, readfile(configFileName))
         if success then
             config = decoded
+            print("Configuration chargée : " .. HttpService:JSONEncode(config))
+        else
+            print("Erreur lors du chargement de la configuration")
         end
+    else
+        print("Aucun fichier de configuration trouvé")
     end
 end
 
@@ -92,7 +103,9 @@ function XyloKitUI:CreateWindow(title)
     mainFrame.BackgroundColor3 = currentTheme.MainBackground
     mainFrame.BorderSizePixel = 0
     mainFrame.ClipsDescendants = true
+    mainFrame.Visible = true
     mainFrame.Parent = screenGui
+    print("MainFrame position : " .. tostring(mainFrame.Position))
 
     local mainFrameStroke = Instance.new("UIStroke")
     mainFrameStroke.Thickness = 2
@@ -131,6 +144,7 @@ function XyloKitUI:CreateWindow(title)
 
     if config.WindowPosition then
         mainFrame.Position = UDim2.new(0.5, config.WindowPosition.X, 0.5, config.WindowPosition.Y)
+        print("Position chargée depuis la configuration : " .. tostring(mainFrame.Position))
     end
 
     -- Titre
@@ -195,23 +209,7 @@ function XyloKitUI:CreateWindow(title)
 
     closeButton.MouseButton1Click:Connect(function()
         screenGui:Destroy()
-    end)
-
-    -- Toggle avec RightShift
-    local isMenuOpen = true
-    local defaultPosition = mainFrame.Position
-    local hiddenPosition = UDim2.new(0.5, mainFrame.Position.X.Offset, 2, 0)
-
-    local function toggleMenu()
-        isMenuOpen = not isMenuOpen
-        mainFrame.Position = isMenuOpen and defaultPosition or hiddenPosition
-    end
-
-    UserInputService.InputBegan:Connect(function(input, gameProcessed)
-        if gameProcessed then return end
-        if input.KeyCode == Enum.KeyCode.RightShift then
-            toggleMenu()
-        end
+        print("Fenêtre fermée")
     end)
 
     -- Gestion des onglets
@@ -249,11 +247,12 @@ function XyloKitUI:CreateWindow(title)
         tabIndicator.Visible = false
         tabIndicator.Parent = tabButton
 
-        -- Contenu de l'onglet avec deux conteneurs
+        -- Contenu de l'onglet
         local tabContent = Instance.new("Frame")
         tabContent.Size = UDim2.new(1, -20, 1, -110)
         tabContent.Position = UDim2.new(0, 10, 0, 10)
         tabContent.BackgroundTransparency = 1
+        tabContent.Visible = false -- Invisible par défaut
         tabContent.Parent = contentFrame
 
         -- Conteneur principal pour les 3 premières sections
@@ -316,8 +315,18 @@ function XyloKitUI:CreateWindow(title)
                 tabContent.Visible = true
                 currentTab = tab
                 updateContainerPositions()
+                print("Onglet activé : " .. name)
             end
         end)
+
+        -- Activer le premier onglet par défaut
+        if not currentTab then
+            tabButton.BackgroundColor3 = currentTheme.SelectedTabBackground
+            tabIndicator.Visible = true
+            tabContent.Visible = true
+            currentTab = tab
+            print("Premier onglet activé par défaut : " .. name)
+        end
 
         -- Création d'une section (limité à 6 sections)
         local sectionCount = 0
