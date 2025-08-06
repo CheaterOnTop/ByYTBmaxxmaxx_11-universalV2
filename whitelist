@@ -1,4 +1,4 @@
--- Table principale de la bibliothèquedefenfnejfn
+-- Table principale de la bibliothèque
 local XyloKitUI = {}
 
 -- Services Roblox nécessaires
@@ -31,17 +31,17 @@ screenGui.IgnoreGuiInset = true
 screenGui.Enabled = true
 print("ScreenGui créé et attaché à PlayerGui pour le joueur : " .. player.Name)
 
--- Thème simplifié
+-- Thème avec les couleurs originales
 local Themes = {
     Dark = {
         MainBackground = Color3.fromRGB(18, 18, 18),
-        TabBackground = Color3.fromRGB(50, 50, 50),
-        SectionBackground = Color3.fromRGB(80, 80, 80),
-        TextColor = Color3.fromRGB(255, 255, 255),
-        BorderColor = Color3.fromRGB(255, 0, 0),
-        SelectedTabColor = Color3.fromRGB(255, 0, 0),
-        ButtonBackground = Color3.fromRGB(100, 100, 100),
-        SelectedTabBackground = Color3.fromRGB(120, 120, 120),
+        TabBackground = Color3.fromRGB(24, 24, 24),
+        SectionBackground = Color3.fromRGB(30, 30, 30),
+        TextColor = Color3.fromRGB(200, 50, 50),
+        BorderColor = Color3.fromRGB(200, 50, 50),
+        SelectedTabColor = Color3.fromRGB(200, 50, 50),
+        ButtonBackground = Color3.fromRGB(28, 28, 28),
+        SelectedTabBackground = Color3.fromRGB(36, 36, 36),
     }
 }
 
@@ -99,7 +99,6 @@ function XyloKitUI:CreateWindow(title)
     -- Fond principal
     local mainFrame = Instance.new("Frame")
     mainFrame.Size = UDim2.new(0, 1000, 0, 700)
-    -- Centrer au milieu de l'écran
     mainFrame.Position = UDim2.new(0.5, -500, 0.5, -350) -- Valeur par défaut
     mainFrame.BackgroundColor3 = currentTheme.MainBackground
     mainFrame.BorderSizePixel = 0
@@ -113,7 +112,7 @@ function XyloKitUI:CreateWindow(title)
     mainFrameStroke.Color = currentTheme.BorderColor
     mainFrameStroke.Parent = mainFrame
 
-    -- Vérifier la taille de l'écran pour centrer correctement
+    -- Centrer au milieu de l'écran
     local screenSize = game:GetService("GuiService"):GetScreenResolution()
     print("Taille de l'écran : " .. tostring(screenSize))
     local centeredPosition = UDim2.new(0.5, -mainFrame.Size.X.Offset / 2, 0.5, -mainFrame.Size.Y.Offset / 2)
@@ -154,7 +153,6 @@ function XyloKitUI:CreateWindow(title)
     -- Charger la position depuis la configuration uniquement si elle est valide
     if config.WindowPosition then
         local configPos = UDim2.new(0.5, config.WindowPosition.X, 0.5, config.WindowPosition.Y)
-        -- Vérifier si la position est dans les limites de l'écran
         local isValidPosition = config.WindowPosition.X >= -screenSize.X / 2 and
                                config.WindowPosition.X <= screenSize.X / 2 and
                                config.WindowPosition.Y >= -screenSize.Y / 2 and
