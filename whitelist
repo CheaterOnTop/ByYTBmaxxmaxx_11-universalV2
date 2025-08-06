@@ -791,14 +791,14 @@ function BlitzXHub:AddButton(section, ...)
         end
 
         if type(SubButton.Tooltip) == 'string' then
-            SubButton:AddTooltip(SubButton.Tooltip)
+            self:AddToolTip(SubButton.Tooltip, SubButton.Outer)
         end
 
         return SubButton
     end
 
     if type(Button.Tooltip) == 'string' then
-        Button:AddTooltip(Button.Tooltip)
+        self:AddToolTip(Button.Tooltip, Outer)
     end
 
     section:AddBlank(5)
