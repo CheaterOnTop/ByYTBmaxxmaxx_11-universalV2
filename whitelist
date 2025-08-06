@@ -1,4 +1,4 @@
--- Table principale de la bibliothèque
+-- Table principale de la bibliothèqueffffffffffffff
 local XyloKitUI = {}
 
 -- Services Roblox nécessaires
@@ -102,7 +102,7 @@ function XyloKitUI:CreateWindow(title)
     mainFrame.Position = UDim2.new(0.5, -500, 0.5, -350) -- Valeur par défaut
     mainFrame.BackgroundColor3 = currentTheme.MainBackground
     mainFrame.BorderSizePixel = 0
-    mainFrame.ClipsDescendants = true
+    mainFrame.ClipsDescendants = false -- Désactivé pour éviter les coupures
     mainFrame.Visible = true
     mainFrame.Parent = screenGui
     print("MainFrame créé avec taille : " .. tostring(mainFrame.Size))
@@ -174,6 +174,7 @@ function XyloKitUI:CreateWindow(title)
     titleLabel.Text = title
     titleLabel.TextColor3 = currentTheme.TextColor
     titleLabel.TextSize = 24
+    titleLabel.TextScaled = false -- Désactivé pour éviter le flou
     titleLabel.Font = Enum.Font.Code
     titleLabel.TextXAlignment = Enum.TextXAlignment.Left
     titleLabel.Parent = mainFrame
@@ -184,6 +185,7 @@ function XyloKitUI:CreateWindow(title)
     tabBar.Position = UDim2.new(0, 0, 0, 50)
     tabBar.BackgroundColor3 = currentTheme.TabBackground
     tabBar.BorderSizePixel = 0
+    tabBar.ClipsDescendants = false -- Désactivé pour éviter les coupures
     tabBar.Parent = mainFrame
 
     local tabBarStroke = Instance.new("UIStroke")
@@ -203,6 +205,7 @@ function XyloKitUI:CreateWindow(title)
     contentFrame.Position = UDim2.new(0, 200, 0, 50)
     contentFrame.BackgroundColor3 = currentTheme.MainBackground
     contentFrame.BorderSizePixel = 0
+    contentFrame.ClipsDescendants = false -- Désactivé pour éviter les coupures
     contentFrame.Parent = mainFrame
 
     local contentFrameStroke = Instance.new("UIStroke")
@@ -218,6 +221,7 @@ function XyloKitUI:CreateWindow(title)
     closeButton.Text = "✕"
     closeButton.TextColor3 = currentTheme.TextColor
     closeButton.TextSize = 20
+    closeButton.TextScaled = false -- Désactivé pour éviter le flou
     closeButton.Font = Enum.Font.Code
     closeButton.Parent = mainFrame
 
@@ -244,10 +248,12 @@ function XyloKitUI:CreateWindow(title)
         -- Bouton de l'onglet
         local tabButton = Instance.new("TextButton")
         tabButton.Size = UDim2.new(1, -10, 0, 40)
+        tabButton.Position = UDim2.new(0, 5, 0, 0) -- Alignement à gauche avec marge
         tabButton.BackgroundColor3 = currentTheme.TabBackground
         tabButton.Text = name
         tabButton.TextColor3 = currentTheme.TextColor
         tabButton.TextSize = 16
+        tabButton.TextScaled = false -- Désactivé pour éviter le flou
         tabButton.Font = Enum.Font.Code
         tabButton.BorderSizePixel = 0
         tabButton.Parent = tabBar
@@ -268,11 +274,12 @@ function XyloKitUI:CreateWindow(title)
 
         -- Contenu de l'onglet
         local tabContent = Instance.new("Frame")
-        tabContent.Size = UDim2.new(1, -20, 1, -110)
-        tabContent.Position = UDim2.new(0, 10, 0, 10)
+        tabContent.Size = UDim2.new(1, 0, 1, 0) -- Ajusté pour remplir tout contentFrame
+        tabContent.Position = UDim2.new(0, 0, 0, 0) -- Aligné au coin supérieur gauche
         tabContent.BackgroundTransparency = 1
         tabContent.Visible = false
         tabContent.Parent = contentFrame
+        print("Contenu de l'onglet créé : " .. name .. ", Visible : " .. tostring(tabContent.Visible))
 
         -- Conteneur principal pour les 3 premières sections
         local topContainer = Instance.new("Frame")
@@ -312,6 +319,7 @@ function XyloKitUI:CreateWindow(title)
             end
             topContainer.Size = UDim2.new(1, 0, 0, maxTopHeight)
             bottomContainer.Position = UDim2.new(0, 0, 0, maxTopHeight + 10)
+            print("Mise à jour des conteneurs pour l'onglet : " .. name .. ", Hauteur topContainer : " .. maxTopHeight)
         end
 
         tab.Button = tabButton
@@ -328,6 +336,7 @@ function XyloKitUI:CreateWindow(title)
                     currentTab.Content.Visible = false
                     currentTab.Indicator.Visible = false
                     currentTab.Button.BackgroundColor3 = currentTheme.TabBackground
+                    print("Onglet désactivé : " .. currentTab.Name)
                 end
                 tabButton.BackgroundColor3 = currentTheme.SelectedTabBackground
                 tabIndicator.Visible = true
@@ -344,6 +353,7 @@ function XyloKitUI:CreateWindow(title)
             tabIndicator.Visible = true
             tabContent.Visible = true
             currentTab = tab
+            updateContainerPositions()
             print("Premier onglet activé par défaut : " .. name)
         end
 
@@ -362,6 +372,7 @@ function XyloKitUI:CreateWindow(title)
             sectionFrame.Size = UDim2.new(0, 250, 0, 300)
             sectionFrame.BackgroundColor3 = currentTheme.SectionBackground
             sectionFrame.BorderSizePixel = 0
+            sectionFrame.ClipsDescendants = false -- Désactivé pour éviter les coupures
             sectionFrame.Parent = (sectionCount < 3 and topContainer or bottomContainer)
 
             local sectionStroke = Instance.new("UIStroke")
@@ -376,6 +387,7 @@ function XyloKitUI:CreateWindow(title)
             sectionLabel.Text = name
             sectionLabel.TextColor3 = currentTheme.TextColor
             sectionLabel.TextSize = 18
+            sectionLabel.TextScaled = false -- Désactivé pour éviter le flou
             sectionLabel.Font = Enum.Font.Code
             sectionLabel.TextXAlignment = Enum.TextXAlignment.Center
             sectionLabel.Parent = sectionFrame
@@ -388,6 +400,7 @@ function XyloKitUI:CreateWindow(title)
             scrollFrame.ScrollBarThickness = 6
             scrollFrame.ScrollBarImageColor3 = currentTheme.BorderColor
             scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+            scrollFrame.ClipsDescendants = false -- Désactivé pour éviter les coupures
             scrollFrame.Parent = sectionFrame
 
             local scrollLayout = Instance.new("UIListLayout")
@@ -423,6 +436,7 @@ function XyloKitUI:CreateWindow(title)
                 toggleLabel.Text = name
                 toggleLabel.TextColor3 = currentTheme.TextColor
                 toggleLabel.TextSize = 16
+                toggleLabel.TextScaled = false -- Désactivé pour éviter le flou
                 toggleLabel.Font = Enum.Font.Code
                 toggleLabel.TextXAlignment = Enum.TextXAlignment.Left
                 toggleLabel.Parent = toggleFrame
@@ -434,6 +448,7 @@ function XyloKitUI:CreateWindow(title)
                 toggleButton.Text = default and "✔" or ""
                 toggleButton.TextColor3 = Color3.fromRGB(0, 200, 0)
                 toggleButton.TextSize = 18
+                toggleButton.TextScaled = false -- Désactivé pour éviter le flou
                 toggleButton.Font = Enum.Font.Code
                 toggleButton.BorderSizePixel = 0
                 toggleButton.Parent = toggleFrame
@@ -475,6 +490,7 @@ function XyloKitUI:CreateWindow(title)
                 sliderLabel.Text = name .. ": " .. default
                 sliderLabel.TextColor3 = currentTheme.TextColor
                 sliderLabel.TextSize = 16
+                sliderLabel.TextScaled = false -- Désactivé pour éviter le flou
                 sliderLabel.Font = Enum.Font.Code
                 sliderLabel.TextXAlignment = Enum.TextXAlignment.Left
                 sliderLabel.Parent = sliderFrame
@@ -564,6 +580,7 @@ function XyloKitUI:CreateWindow(title)
                 dropdownLabel.Text = name .. ": " .. default
                 dropdownLabel.TextColor3 = currentTheme.TextColor
                 dropdownLabel.TextSize = 16
+                dropdownLabel.TextScaled = false -- Désactivé pour éviter le flou
                 dropdownLabel.Font = Enum.Font.Code
                 dropdownLabel.TextXAlignment = Enum.TextXAlignment.Left
                 dropdownLabel.Parent = dropdownFrame
@@ -575,6 +592,7 @@ function XyloKitUI:CreateWindow(title)
                 dropdownButton.Text = "▼"
                 dropdownButton.TextColor3 = currentTheme.TextColor
                 dropdownButton.TextSize = 14
+                dropdownButton.TextScaled = false -- Désactivé pour éviter le flou
                 dropdownButton.Font = Enum.Font.Code
                 dropdownButton.BorderSizePixel = 0
                 dropdownButton.Parent = dropdownFrame
@@ -592,6 +610,7 @@ function XyloKitUI:CreateWindow(title)
                 dropdownList.ScrollBarThickness = 4
                 dropdownList.ScrollBarImageColor3 = currentTheme.BorderColor
                 dropdownList.CanvasSize = UDim2.new(0, 0, 0, #options * 30)
+                dropdownList.ClipsDescendants = false -- Désactivé pour éviter les coupures
                 dropdownList.Parent = dropdownFrame
 
                 local dropdownListStroke = Instance.new("UIStroke")
@@ -617,6 +636,7 @@ function XyloKitUI:CreateWindow(title)
                     optionButton.Text = option
                     optionButton.TextColor3 = currentTheme.TextColor
                     optionButton.TextSize = 14
+                    optionButton.TextScaled = false -- Désactivé pour éviter le flou
                     optionButton.Font = Enum.Font.Code
                     optionButton.BorderSizePixel = 0
                     optionButton.Parent = dropdownList
@@ -668,6 +688,7 @@ function XyloKitUI:CreateWindow(title)
         playerName.Text = player and player.Name or "Loading..."
         playerName.TextColor3 = currentTheme.TextColor
         playerName.TextSize = 16
+        playerName.TextScaled = false -- Désactivé pour éviter le flou
         playerName.Font = Enum.Font.Code
         playerName.TextXAlignment = Enum.TextXAlignment.Left
         playerName.Parent = playerInfoFrame
