@@ -2133,15 +2133,15 @@ function Library:ConnectEvent(eventName, callback)
     return connection
 end
 
-function Library:FireEvent(eventName, ...)
+--[[function Library:FireEvent(eventName, ...)
     if Library.Events[eventName] then
         for _, callback in ipairs(Library.Events[eventName]) do
             spawn(function()
                 callback(...)
             end)
-        end
-    end
-end
+        end--
+    end--
+end--]]
 
 -- Événements prédéfinis
 Library:CreateEvent("WindowCreated")
