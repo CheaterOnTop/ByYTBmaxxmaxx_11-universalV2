@@ -1,6 +1,229 @@
-{
-  "whitelist": [
-    "32816A05-D638-469F-B681-5A6EB24B03A7",
-    "un-autre-hwid"
-  ]
-}
+-- Protection de la mémoire (cache)
+if not memorystats then 
+    memorystats = {}
+    memorystats.cache = function(a) end
+    memorystats.restore = function(a) end 
+end
+for i, v in pairs({
+    "Internal", "HttpCache", "Instances", "Signals", "Script", 
+    "PhysicsCollision", "PhysicsParts", "GraphicsSolidModels", 
+    "GraphicsMeshParts", "GraphicsParticles", "GraphicsParts", 
+    "GraphicsSpatialHash", "GraphicsTerrain", "GraphicsTexture", 
+    "GraphicsTextureCharacter", "Sounds", "StreamingSounds", 
+    "TerrainVoxels", "Gui", "Animation", "Navigation", "GeometryCSG"
+}) do
+    memorystats.cache(v)
+end
+
+-- Services Roblox avec cloneref
+local workspace = cloneref(game:GetService("Workspace"))
+local Players = cloneref(game:GetService("Players"))
+local RunService = cloneref(game:GetService("RunService"))
+local Lighting = cloneref(game:GetService("Lighting"))
+local UserInputService = cloneref(game:GetService("UserInputService"))
+local HttpService = cloneref(game:GetService("HttpService"))
+local GuiInset = cloneref(game:GetService("GuiService")):GetGuiInset()
+local LocalPlayer = Players.LocalPlayer
+local Mouse = LocalPlayer:GetMouse()
+local Camera = workspace.CurrentCamera
+
+-- Bibliothèque UI pour Roblox (Client-Side)
+local BlitzXHub = {}
+
+-- Fonction pour créer une fenêtre principale
+function BlitzXHub:CreateWindow(windowName, gameName, introText, iconAssetId, themesEnabled, configFolder, theme)
+    local window = {}
+    window.Name = windowName or "UI Window"
+    window.GameName = gameName or "Unknown Game"
+    window.ThemesEnabled = themesEnabled or false
+    window.ConfigFolder = configFolder or "UIConfigs"
+    window.Theme = theme or "Default"
+
+    -- Création de la ScreenGui
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = windowName
+    screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+    screenGui.ResetOnSpawn = false
+
+    -- Création du cadre principal de la fenêtre
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(0, 600, 0, 400)
+    mainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    mainFrame.BorderSizePixel = 0
+    mainFrame.Parent = screenGui
+
+    -- Ajout d'un effet d'ombre
+    local shadow = Instance.new("UIStroke")
+    shadow.Thickness = 2
+    shadow.Color = Color3.fromRGB(0, 0, 0)
+    shadow.Parent = mainFrame
+
+    -- Titre de la fenêtre
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size = UDim2.new(1, 0, 0, 50)
+    titleLabel.Position = UDim2.new(0, 0, 0, 0)
+    titleLabel.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    titleLabel.Text = windowName .. " | " .. gameName
+    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLabel.TextSize = 18
+    titleLabel.Font = Enum.Font.SourceSansBold
+    titleLabel.Parent = mainFrame
+
+    -- Conteneur pour les onglets
+    local tabContainer = Instance.new("Frame")
+    tabContainer.Size = UDim2.new(0, 150, 1, -50)
+    tabContainer.Position = UDim2.new(0, 0, 0, 50)
+    tabContainer.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    tabContainer.Parent = mainFrame
+
+    -- Conteneur pour le contenu des onglets
+    local contentContainer = Instance.new("Frame")
+    contentContainer.Size = UDim2.new(1, -150, 1, -50)
+    contentContainer.Position = UDim2.new(0, 150, 0, 50)
+    contentContainer.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    contentContainer.Parent = mainFrame
+
+    window.ScreenGui = screenGui
+    window.MainFrame = mainFrame
+    window.TabContainer = tabContainer
+    window.ContentContainer = contentContainer
+    window.Tabs = {}
+
+    -- Rendre la fenêtre déplaçable
+    local dragging, dragInput, dragStart, startPos
+    local function updateInput(input)
+        local delta = input.Position - dragStart
+        mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+
+    titleLabel.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = mainFrame.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    titleLabel.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            dragInput = input
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            updateInput(input)
+        end
+    end)
+
+    return window
+end
+
+-- Fonction pour ajouter un onglet
+function BlitzXHub:AddTab(window, tabName, isDefault, iconAssetId, iconSize, iconPosition)
+    local tab = {}
+    tab.Name = tabName or "Tab"
+    tab.IsDefault = isDefault or false
+
+    -- Bouton de l'onglet
+    local tabButton = Instance.new("TextButton")
+    tabButton.Size = UDim2.new(1, 0, 0, 40)
+    tabButton.Position = UDim2.new(0, 0, 0, #window.Tabs * 40)
+    tabButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    tabButton.Text = tabName
+    tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    tabButton.TextSize = 16
+    tabButton.Font = Enum.Font.SourceSans
+    tabButton.Parent = window.TabContainer
+
+    -- Conteneur pour le contenu de l'onglet
+    local tabContent = Instance.new("Frame")
+    tabContent.Size = UDim2.new(1, 0, 1, 0)
+    tabContent.BackgroundTransparency = 1
+    tabContent.Parent = window.ContentContainer
+    tabContent.Visible = isDefault
+
+    tab.Button = tabButton
+    tab.Content = tabContent
+    table.insert(window.Tabs, tab)
+
+    -- Gestion du clic sur l'onglet
+    tabButton.MouseButton1Click:Connect(function()
+        for _, otherTab in ipairs(window.Tabs) do
+            otherTab.Content.Visible = false
+            otherTab.Button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        end
+        tabContent.Visible = true
+        tabButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+    end)
+
+    return tab
+end
+
+-- Fonction pour créer une section dans un onglet
+function BlitzXHub:CreateSection(tab, sectionName)
+    local section = {}
+    section.Name = sectionName or "Section"
+
+    local sectionFrame = Instance.new("Frame")
+    sectionFrame.Size = UDim2.new(1, -10, 0, 100)
+    sectionFrame.Position = UDim2.new(0, 5, 0, #tab.Content:GetChildren() * 110)
+    sectionFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    sectionFrame.Parent = tab.Content
+
+    local sectionLabel = Instance.new("TextLabel")
+    sectionLabel.Size = UDim2.new(1, 0, 0, 30)
+    sectionLabel.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    sectionLabel.Text = sectionName
+    sectionLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    sectionLabel.TextSize = 16
+    sectionLabel.Font = Enum.Font.SourceSansBold
+    sectionLabel.Parent = sectionFrame
+
+    section.Frame = sectionFrame
+    return section
+end
+
+-- Fonction pour créer un bouton
+function BlitzXHub:CreateButton(section, buttonName, callback)
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(1, -10, 0, 30)
+    button.Position = UDim2.new(0, 5, 0, #section.Frame:GetChildren() * 40)
+    button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    button.Text = buttonName or "Button"
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.TextSize = 14
+    button.Font = Enum.Font.SourceSans
+    button.Parent = section.Frame
+
+    button.MouseButton1Click:Connect(function()
+        if callback then
+            callback()
+        end
+    end)
+
+    return button
+end
+
+-- Fonction pour créer un label
+function BlitzXHub:CreateLabel(section, labelText)
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, -10, 0, 30)
+    label.Position = UDim2.new(0, 5, 0, #section.Frame:GetChildren() * 40)
+    label.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    label.Text = labelText or "Label"
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.TextSize = 14
+    label.Font = Enum.Font.SourceSans
+    label.Parent = section.Frame
+
+    return label
+end
+
+return BlitzXHub
