@@ -4,7 +4,7 @@ if not memorystats then
     memorystats.cache = function(a) end
     memorystats.restore = function(a) end 
 end
-for i, v in pairs({
+for _, v in pairs({
     "Internal", "HttpCache", "Instances", "Signals", "Script", 
     "PhysicsCollision", "PhysicsParts", "GraphicsSolidModels", 
     "GraphicsMeshParts", "GraphicsParticles", "GraphicsParts", 
@@ -16,15 +16,12 @@ for i, v in pairs({
 end
 
 -- Services Roblox avec cloneref
-local workspace = cloneref(game:GetService("Workspace"))
+local CoreGui = cloneref(game:GetService("CoreGui"))
 local Players = cloneref(game:GetService("Players"))
 local RunService = cloneref(game:GetService("RunService"))
-local Lighting = cloneref(game:GetService("Lighting"))
 local UserInputService = cloneref(game:GetService("UserInputService"))
 local HttpService = cloneref(game:GetService("HttpService"))
 local TweenService = cloneref(game:GetService("TweenService"))
-local GuiInset = cloneref(game:GetService("GuiService")):GetGuiInset()
-local SoundService = cloneref(game:GetService("SoundService"))
 
 -- Vérification du LocalPlayer
 local LocalPlayer = Players.LocalPlayer
@@ -44,7 +41,7 @@ if not Mouse then
     LocalPlayer:GetPropertyChangedSignal("Mouse"):Wait()
     Mouse = LocalPlayer:GetMouse()
 end
-local Camera = workspace.CurrentCamera
+local Camera = cloneref(game:GetService("Workspace")).CurrentCamera
 
 -- Bibliothèque UI pour Roblox (Client-Side)
 local BlitzXHub = {}
@@ -52,15 +49,13 @@ local BlitzXHub = {}
 -- Thèmes disponibles
 local Themes = {
     Dark = {
-        Background = Color3.fromRGB(25, 25, 25),
-        Accent = Color3.fromRGB(60, 60, 60),
+        Background = Color3.fromRGB(20, 20, 20),
+        Accent = Color3.fromRGB(50, 50, 50),
         Highlight = Color3.fromRGB(0, 120, 255),
         Text = Color3.fromRGB(255, 255, 255),
-        Section = Color3.fromRGB(35, 35, 35),
-        Header = Color3.fromRGB(20, 20, 20),
-        NotificationSuccess = Color3.fromRGB(50, 200, 50),
-        NotificationError = Color3.fromRGB(200, 50, 50),
-        NotificationInfo = Color3.fromRGB(50, 150, 255),
+        Section = Color3.fromRGB(30, 30, 30),
+        Header = Color3.fromRGB(15, 15, 15),
+        Border = Color3.fromRGB(0, 80, 200),
     },
     Light = {
         Background = Color3.fromRGB(240, 240, 240),
@@ -68,90 +63,28 @@ local Themes = {
         Highlight = Color3.fromRGB(0, 100, 200),
         Text = Color3.fromRGB(0, 0, 0),
         Section = Color3.fromRGB(220, 220, 220),
-        Header = Color3.fromRGB(200, 200, 200),
-        NotificationSuccess = Color3.fromRGB(50, 200, 50),
-        NotificationError = Color3.fromRGB(200, 50, 50),
-        NotificationInfo = Color3.fromRGB(50, 150, 255),
+        Header = Color3.fromRGB(180, 180, 180),
+        Border = Color3.fromRGB(0, 50, 150),
     },
-    Neon = {
-        Background = Color3.fromRGB(10, 10, 20),
-        Accent = Color3.fromRGB(40, 40, 60),
+    Synapse = {
+        Background = Color3.fromRGB(10, 10, 15),
+        Accent = Color3.fromRGB(30, 30, 45),
         Highlight = Color3.fromRGB(0, 255, 255),
         Text = Color3.fromRGB(200, 255, 255),
-        Section = Color3.fromRGB(30, 30, 50),
-        Header = Color3.fromRGB(20, 20, 40),
-        NotificationSuccess = Color3.fromRGB(0, 255, 128),
-        NotificationError = Color3.fromRGB(255, 50, 50),
-        NotificationInfo = Color3.fromRGB(50, 200, 255),
+        Section = Color3.fromRGB(20, 20, 30),
+        Header = Color3.fromRGB(5, 5, 10),
+        Border = Color3.fromRGB(0, 200, 200),
     },
     Custom = {
-        Background = Color3.fromRGB(25, 25, 25),
-        Accent = Color3.fromRGB(60, 60, 60),
+        Background = Color3.fromRGB(20, 20, 20),
+        Accent = Color3.fromRGB(50, 50, 50),
         Highlight = Color3.fromRGB(0, 120, 255),
         Text = Color3.fromRGB(255, 255, 255),
-        Section = Color3.fromRGB(35, 35, 35),
-        Header = Color3.fromRGB(20, 20, 20),
-        NotificationSuccess = Color3.fromRGB(50, 200, 50),
-        NotificationError = Color3.fromRGB(200, 50, 50),
-        NotificationInfo = Color3.fromRGB(50, 150, 255),
+        Section = Color3.fromRGB(30, 30, 30),
+        Header = Color3.fromRGB(15, 15, 15),
+        Border = Color3.fromRGB(0, 80, 200),
     }
 }
-
--- Fonction pour créer une notification
-function BlitzXHub:CreateNotification(message, duration, notificationType)
-    local notification = Instance.new("ScreenGui")
-    notification.Name = "BlitzXNotification"
-    notification.Parent = LocalPlayer:WaitForChild("PlayerGui")
-    notification.ResetOnSpawn = false
-
-    local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(0, 300, 0, 60)
-    frame.Position = UDim2.new(1, -310, 0, 10)
-    frame.BackgroundColor3 = Themes.Neon[notificationType] or Themes.Neon.NotificationInfo
-    frame.BorderSizePixel = 0
-    frame.Parent = notification
-
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 8)
-    corner.Parent = frame
-
-    local icon = Instance.new("ImageLabel")
-    icon.Size = UDim2.new(0, 24, 0, 24)
-    icon.Position = UDim2.new(0, 10, 0, 18)
-    icon.BackgroundTransparency = 1
-    icon.Image = notificationType == "NotificationSuccess" and "rbxassetid://7072706769" or notificationType == "NotificationError" and "rbxassetid://7072719338" or "rbxassetid://7072706620"
-    icon.Parent = frame
-
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, -50, 1, -10)
-    label.Position = UDim2.new(0, 40, 0, 5)
-    label.BackgroundTransparency = 1
-    label.Text = message
-    label.TextColor3 = Themes.Neon.Text
-    label.TextSize = 14
-    label.Font = Enum.Font.Code
-    label.TextWrapped = true
-    label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Parent = frame
-
-    -- Son de notification
-    local sound = Instance.new("Sound")
-    sound.SoundId = "rbxassetid://515200000"
-    sound.Volume = 0.5
-    sound.Parent = frame
-    sound:Play()
-
-    local tween = TweenService:Create(frame, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = UDim2.new(1, -310, 0, 10)})
-    tween:Play()
-
-    task.spawn(function()
-        task.wait(duration or 3)
-        local tweenOut = TweenService:Create(frame, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Position = UDim2.new(1, 10, 0, 10)})
-        tweenOut:Play()
-        tweenOut.Completed:Wait()
-        notification:Destroy()
-    end)
-end
 
 -- Fonction pour créer une fenêtre principale
 function BlitzXHub:CreateWindow(windowName, gameName, introText, iconAssetId, themesEnabled, configFolder, theme)
@@ -160,51 +93,54 @@ function BlitzXHub:CreateWindow(windowName, gameName, introText, iconAssetId, th
     window.GameName = gameName or "Unknown Game"
     window.ThemesEnabled = themesEnabled or false
     window.ConfigFolder = configFolder or "BlitzXConfigs"
-    window.Theme = Themes[theme] or Themes.Neon
+    window.Theme = Themes[theme] or Themes.Synapse
     window.Visible = true
     window.Connections = {}
     window.Config = {}
 
-    -- Création de la ScreenGui
+    -- Création de la ScreenGui dans CoreGui
     local screenGui = Instance.new("ScreenGui")
     screenGui.Name = "BlitzXHub_" .. windowName
-    screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+    screenGui.Parent = CoreGui
     screenGui.ResetOnSpawn = false
     screenGui.IgnoreGuiInset = true
+    screenGui.DisplayOrder = 1000
 
-    -- Création du cadre principal de la fenêtre
+    -- Création du cadre principal
     local mainFrame = Instance.new("Frame")
     mainFrame.Size = UDim2.new(0, 600, 0, 400)
     mainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
     mainFrame.BackgroundColor3 = window.Theme.Background
+    mainFrame.BackgroundTransparency = 0.1
     mainFrame.BorderSizePixel = 0
     mainFrame.Parent = screenGui
     mainFrame.ClipsDescendants = true
-    mainFrame.BackgroundTransparency = 1
 
     local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 8)
+    corner.CornerRadius = UDim.new(0, 12)
     corner.Parent = mainFrame
 
-    local shadow = Instance.new("UIStroke")
-    shadow.Thickness = 2
-    shadow.Color = window.Theme.Highlight
-    shadow.Transparency = 0.5
-    shadow.Parent = mainFrame
+    local stroke = Instance.new("UIStroke")
+    stroke.Thickness = 2
+    stroke.Color = window.Theme.Border
+    stroke.Transparency = 0.4
+    stroke.Parent = mainFrame
 
     -- Animation d'ouverture
-    local tweenOpen = TweenService:Create(mainFrame, TweenInfo.new(0.7, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 0, Size = UDim2.new(0, 600, 0, 400)})
+    mainFrame.Size = UDim2.new(0, 0, 0, 0)
+    local tweenOpen = TweenService:Create(mainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), {Size = UDim2.new(0, 600, 0, 400), BackgroundTransparency = 0})
     tweenOpen:Play()
 
     -- Titre de la fenêtre
     local titleLabel = Instance.new("TextLabel")
-    titleLabel.Size = UDim2.new(1, 0, 0, 50)
+    titleLabel.Size = UDim2.new(1, -40, 0, 40)
     titleLabel.Position = UDim2.new(0, 0, 0, 0)
     titleLabel.BackgroundColor3 = window.Theme.Header
     titleLabel.Text = "BlitzXHub | " .. windowName .. " | " .. gameName
     titleLabel.TextColor3 = window.Theme.Text
     titleLabel.TextSize = 18
     titleLabel.Font = Enum.Font.Code
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
     titleLabel.Parent = mainFrame
 
     local titleGradient = Instance.new("UIGradient")
@@ -215,11 +151,23 @@ function BlitzXHub:CreateWindow(windowName, gameName, introText, iconAssetId, th
     titleCorner.CornerRadius = UDim.new(0, 8)
     titleCorner.Parent = titleLabel
 
-    -- Bouton pour fermer/minimiser
+    -- Watermark
+    local watermark = Instance.new("TextLabel")
+    watermark.Size = UDim2.new(1, 0, 0, 20)
+    watermark.Position = UDim2.new(0, 0, 1, -20)
+    watermark.BackgroundTransparency = 1
+    watermark.Text = "BlitzXHub v1.0"
+    watermark.TextColor3 = window.Theme.Text
+    watermark.TextSize = 12
+    watermark.Font = Enum.Font.Code
+    watermark.TextTransparency = 0.5
+    watermark.Parent = mainFrame
+
+    -- Bouton de fermeture
     local closeButton = Instance.new("TextButton")
     closeButton.Size = UDim2.new(0, 30, 0, 30)
-    closeButton.Position = UDim2.new(1, -40, 0, 10)
-    closeButton.BackgroundColor3 = window.Theme.NotificationError
+    closeButton.Position = UDim2.new(1, -35, 0, 5)
+    closeButton.BackgroundColor3 = window.Theme.Border
     closeButton.Text = "X"
     closeButton.TextColor3 = window.Theme.Text
     closeButton.TextSize = 14
@@ -227,19 +175,21 @@ function BlitzXHub:CreateWindow(windowName, gameName, introText, iconAssetId, th
     closeButton.Parent = mainFrame
 
     local closeCorner = Instance.new("UICorner")
-    closeCorner.CornerRadius = UDim.new(0, 6)
+    closeCorner.CornerRadius = UDim.new(0, 8)
     closeCorner.Parent = closeButton
 
-    -- Conteneur pour les onglets
-    local tabContainer = Instance.new("Frame")
-    tabContainer.Size = UDim2.new(0, 150, 1, -50)
-    tabContainer.Position = UDim2.new(0, 0, 0, 50)
-    tabContainer.BackgroundColor3 = window.Theme.Background
+    -- Conteneur pour les onglets (scrollable)
+    local tabContainer = Instance.new("ScrollingFrame")
+    tabContainer.Size = UDim2.new(0, 150, 1, -60)
+    tabContainer.Position = UDim2.new(0, 0, 0, 40)
+    tabContainer.BackgroundTransparency = 1
+    tabContainer.ScrollBarThickness = 4
+    tabContainer.ScrollBarImageColor3 = window.Theme.Highlight
     tabContainer.Parent = mainFrame
 
     local tabListLayout = Instance.new("UIListLayout")
     tabListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    tabListLayout.Padding = UDim.new(0, 5)
+    tabListLayout.Padding = UDim.new(0, 4)
     tabListLayout.Parent = tabContainer
 
     local tabPadding = Instance.new("UIPadding")
@@ -249,11 +199,22 @@ function BlitzXHub:CreateWindow(windowName, gameName, introText, iconAssetId, th
 
     -- Conteneur pour le contenu des onglets
     local contentContainer = Instance.new("Frame")
-    contentContainer.Size = UDim2.new(1, -150, 1, -50)
-    contentContainer.Position = UDim2.new(0, 150, 0, 50)
-    contentContainer.BackgroundColor3 = window.Theme.Background
+    contentContainer.Size = UDim2.new(1, -150, 1, -60)
+    contentContainer.Position = UDim2.new(0, 150, 0, 40)
+    contentContainer.BackgroundTransparency = 1
     contentContainer.Parent = mainFrame
     contentContainer.ClipsDescendants = true
+
+    -- Resize handle
+    local resizeHandle = Instance.new("Frame")
+    resizeHandle.Size = UDim2.new(0, 10, 0, 10)
+    resizeHandle.Position = UDim2.new(1, -10, 1, -10)
+    resizeHandle.BackgroundColor3 = window.Theme.Highlight
+    resizeHandle.Parent = mainFrame
+
+    local resizeCorner = Instance.new("UICorner")
+    resizeCorner.CornerRadius = UDim.new(0, 4)
+    resizeCorner.Parent = resizeHandle
 
     window.ScreenGui = screenGui
     window.MainFrame = mainFrame
@@ -261,7 +222,7 @@ function BlitzXHub:CreateWindow(windowName, gameName, introText, iconAssetId, th
     window.ContentContainer = contentContainer
     window.Tabs = {}
 
-    -- Rendre la fenêtre déplaçable
+    -- Drag functionality
     local dragging, dragInput, dragStart, startPos
     local function updateInput(input)
         local delta = input.Position - dragStart
@@ -293,30 +254,54 @@ function BlitzXHub:CreateWindow(windowName, gameName, introText, iconAssetId, th
         end
     end))
 
-    -- Gestion du bouton fermer
-    table.insert(window.Connections, closeButton.MouseButton1Click:Connect(function()
-        window.Visible = not window.Visible
-        local tween = TweenService:Create(mainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {BackgroundTransparency = window.Visible and 0 or 1, Size = window.Visible and UDim2.new(0, 600, 0, 400) or UDim2.new(0, 600, 0, 0)})
-        tween:Play()
-        mainFrame.Visible = window.Visible
-        BlitzXHub:CreateNotification(window.Visible and "Interface BlitzXHub affichée" or "Interface BlitzXHub masquée", 2, "NotificationInfo")
-    end))
-
-    -- Toggle UI avec la touche Insert
-    table.insert(window.Connections, UserInputService.InputBegan:Connect(function(input)
-        if input.KeyCode == Enum.KeyCode.Insert then
-            window.Visible = not window.Visible
-            local tween = TweenService:Create(mainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {BackgroundTransparency = window.Visible and 0 or 1, Size = window.Visible and UDim2.new(0, 600, 0, 400) or UDim2.new(0, 600, 0, 0)})
-            tween:Play()
-            mainFrame.Visible = window.Visible
-            BlitzXHub:CreateNotification(window.Visible and "Interface BlitzXHub affichée" or "Interface BlitzXHub masquée", 2, "NotificationInfo")
+    -- Resize functionality
+    local resizing, resizeStart, resizeStartSize
+    table.insert(window.Connections, resizeHandle.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            resizing = true
+            resizeStart = input.Position
+            resizeStartSize = mainFrame.Size
         end
     end))
 
-    -- Sauvegarde de la configuration
+    table.insert(window.Connections, resizeHandle.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            resizing = false
+        end
+    end))
+
+    table.insert(window.Connections, UserInputService.InputChanged:Connect(function(input)
+        if resizing and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - resizeStart
+            local newWidth = math.clamp(resizeStartSize.X.Offset + delta.X, 400, 1000)
+            local newHeight = math.clamp(resizeStartSize.Y.Offset + delta.Y, 300, 800)
+            mainFrame.Size = UDim2.new(0, newWidth, 0, newHeight)
+        end
+    end))
+
+    -- Close button
+    table.insert(window.Connections, closeButton.MouseButton1Click:Connect(function()
+        window.Visible = not window.Visible
+        local tween = TweenService:Create(mainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Bounce, Enum.EasingDirection.InOut), {Size = window.Visible and UDim2.new(0, mainFrame.Size.X.Offset, 0, mainFrame.Size.Y.Offset) or UDim2.new(0, 0, 0, 0), BackgroundTransparency = window.Visible and 0 or 1})
+        tween:Play()
+        mainFrame.Visible = window.Visible
+    end))
+
+    -- Toggle UI with Insert key
+    table.insert(window.Connections, UserInputService.InputBegan:Connect(function(input)
+        if input.KeyCode == Enum.KeyCode.Insert then
+            window.Visible = not window.Visible
+            local tween = TweenService:Create(mainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Bounce, Enum.EasingDirection.InOut), {Size = window.Visible and UDim2.new(0, mainFrame.Size.X.Offset, 0, mainFrame.Size.Y.Offset) or UDim2.new(0, 0, 0, 0), BackgroundTransparency = window.Visible and 0 or 1})
+            tween:Play()
+            mainFrame.Visible = window.Visible
+        end
+    end))
+
+    -- Save configuration
     local function saveConfig()
         local config = {
             WindowPosition = {mainFrame.Position.X.Scale, mainFrame.Position.X.Offset, mainFrame.Position.Y.Scale, mainFrame.Position.Y.Offset},
+            WindowSize = {mainFrame.Size.X.Offset, mainFrame.Size.Y.Offset},
             Theme = theme,
             Settings = window.Config
         }
@@ -326,13 +311,16 @@ function BlitzXHub:CreateWindow(windowName, gameName, introText, iconAssetId, th
         end
     end
 
-    -- Chargement de la configuration
+    -- Load configuration
     local function loadConfig()
         if isfile(window.ConfigFolder .. "/config.json") then
             local success, config = pcall(HttpService.JSONDecode, HttpService, readfile(window.ConfigFolder .. "/config.json"))
             if success then
                 if config.WindowPosition then
                     mainFrame.Position = UDim2.new(config.WindowPosition[1], config.WindowPosition[2], config.WindowPosition[3], config.WindowPosition[4])
+                end
+                if config.WindowSize then
+                    mainFrame.Size = UDim2.new(0, config.WindowSize[1], 0, config.WindowSize[2])
                 end
                 if config.Theme and Themes[config.Theme] then
                     window.Theme = Themes[config.Theme]
@@ -341,32 +329,31 @@ function BlitzXHub:CreateWindow(windowName, gameName, introText, iconAssetId, th
                     tabContainer.BackgroundColor3 = window.Theme.Background
                     titleLabel.BackgroundColor3 = window.Theme.Header
                     titleLabel.TextColor3 = window.Theme.Text
-                    closeButton.BackgroundColor3 = window.Theme.NotificationError
+                    closeButton.BackgroundColor3 = window.Theme.Border
                     closeButton.TextColor3 = window.Theme.Text
+                    watermark.TextColor3 = window.Theme.Text
                 end
                 window.Config = config.Settings or {}
             end
         end
     end
 
-    -- Initialisation de la configuration
+    -- Initialize configuration
     if not isfolder(window.ConfigFolder) then
         pcall(makefolder, window.ConfigFolder)
     end
     loadConfig()
 
     table.insert(window.Connections, mainFrame:GetPropertyChangedSignal("Position"):Connect(saveConfig))
+    table.insert(window.Connections, mainFrame:GetPropertyChangedSignal("Size"):Connect(saveConfig))
 
-    -- Nettoyage des ressources
+    -- Cleanup
     function window:Destroy()
         for _, connection in ipairs(window.Connections) do
             connection:Disconnect()
         end
         screenGui:Destroy()
     end
-
-    -- Notification de bienvenue
-    BlitzXHub:CreateNotification(introText or "Bienvenue dans BlitzXHub !", 3, "NotificationInfo")
 
     return window
 end
@@ -380,7 +367,7 @@ function BlitzXHub:AddTab(window, tabName, isDefault, iconAssetId, iconSize, ico
 
     -- Bouton de l'onglet
     local tabButton = Instance.new("TextButton")
-    tabButton.Size = UDim2.new(1, 0, 0, 40)
+    tabButton.Size = UDim2.new(1, -10, 0, 40)
     tabButton.BackgroundColor3 = window.Theme.Accent
     tabButton.Text = tabName
     tabButton.TextColor3 = window.Theme.Text
@@ -389,16 +376,20 @@ function BlitzXHub:AddTab(window, tabName, isDefault, iconAssetId, iconSize, ico
     tabButton.Parent = window.TabContainer
 
     local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 6)
+    corner.CornerRadius = UDim.new(0, 8)
     corner.Parent = tabButton
 
     local stroke = Instance.new("UIStroke")
     stroke.Thickness = 1
-    stroke.Color = window.Theme.Highlight
+    stroke.Color = window.Theme.Border
     stroke.Transparency = 0.5
     stroke.Parent = tabButton
 
-    -- Ajout d'une icône si fournie
+    local gradient = Instance.new("UIGradient")
+    gradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, window.Theme.Accent), ColorSequenceKeypoint.new(1, window.Theme.Highlight)})
+    gradient.Parent = tabButton
+
+    -- Icon
     if iconAssetId then
         local icon = Instance.new("ImageLabel")
         icon.Size = UDim2.new(0, iconSize and iconSize.X or 24, 0, iconSize and iconSize.Y or 24)
@@ -425,47 +416,47 @@ function BlitzXHub:AddTab(window, tabName, isDefault, iconAssetId, iconSize, ico
     tab.Content = tabContent
     table.insert(window.Tabs, tab)
 
-    -- Animation au survol
+    -- Hover animation
     table.insert(tab.Connections, tabButton.MouseEnter:Connect(function()
-        TweenService:Create(tabButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {BackgroundColor3 = window.Theme.Highlight, TextColor3 = window.Theme.Background, Size = UDim2.new(1, 0, 0, 42)}):Play()
+        TweenService:Create(tabButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {BackgroundColor3 = window.Theme.Highlight, TextColor3 = window.Theme.Background, Size = UDim2.new(1, -10, 0, 42)}):Play()
         TweenService:Create(stroke, TweenInfo.new(0.2), {Transparency = 0.2}):Play()
     end))
     table.insert(tab.Connections, tabButton.MouseLeave:Connect(function()
         if not tabContent.Visible then
-            TweenService:Create(tabButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {BackgroundColor3 = window.Theme.Accent, TextColor3 = window.Theme.Text, Size = UDim2.new(1, 0, 0, 40)}):Play()
+            TweenService:Create(tabButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {BackgroundColor3 = window.Theme.Accent, TextColor3 = window.Theme.Text, Size = UDim2.new(1, -10, 0, 40)}):Play()
             TweenService:Create(stroke, TweenInfo.new(0.2), {Transparency = 0.5}):Play()
         end
     end))
 
-    -- Gestion du clic sur l'onglet
+    -- Tab click
     table.insert(tab.Connections, tabButton.MouseButton1Click:Connect(function()
         for _, otherTab in ipairs(window.Tabs) do
             otherTab.Content.Visible = false
-            TweenService:Create(otherTab.Button, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {BackgroundColor3 = window.Theme.Accent, TextColor3 = window.Theme.Text, Size = UDim2.new(1, 0, 0, 40)}):Play()
+            TweenService:Create(otherTab.Button, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {BackgroundColor3 = window.Theme.Accent, TextColor3 = window.Theme.Text, Size = UDim2.new(1, -10, 0, 40)}):Play()
             TweenService:Create(otherTab.Button:FindFirstChildOfClass("UIStroke"), TweenInfo.new(0.2), {Transparency = 0.5}):Play()
         end
         tabContent.Visible = true
-        TweenService:Create(tabButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {BackgroundColor3 = window.Theme.Highlight, TextColor3 = window.Theme.Background, Size = UDim2.new(1, 0, 0, 42)}):Play()
+        TweenService:Create(tabButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {BackgroundColor3 = window.Theme.Highlight, TextColor3 = window.Theme.Background, Size = UDim2.new(1, -10, 0, 42)}):Play()
         TweenService:Create(stroke, TweenInfo.new(0.2), {Transparency = 0.2}):Play()
     end))
 
     return tab
 end
 
--- Fonction pour créer une section dans un onglet
-function BlitzXHub:CreateSection(tab, sectionName)
+-- Fonction pour créer une section
+function BlitzXHub:CreateSection(tab, sectionName, window) -- Added window parameter to fix theme access
     local section = {}
     section.Name = sectionName or "Section"
 
     local sectionFrame = Instance.new("Frame")
     sectionFrame.Size = UDim2.new(1, -10, 0, 0)
     sectionFrame.Position = UDim2.new(0, 5, 0, 0)
-    sectionFrame.BackgroundColor3 = tab.Content.Parent.Parent.Theme.Section
+    sectionFrame.BackgroundColor3 = window.Theme.Section -- Fixed theme access
     sectionFrame.Parent = tab.Content
     sectionFrame.AutomaticSize = Enum.AutomaticSize.Y
 
     local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 6)
+    corner.CornerRadius = UDim.new(0, 8)
     corner.Parent = sectionFrame
 
     local sectionLayout = Instance.new("UIListLayout")
@@ -481,83 +472,80 @@ function BlitzXHub:CreateSection(tab, sectionName)
 
     local sectionLabel = Instance.new("TextLabel")
     sectionLabel.Size = UDim2.new(1, 0, 0, 30)
-    sectionLabel.BackgroundColor3 = tab.Content.Parent.Parent.Theme.Header
-    sectionLabel.Text = sectionName
-    sectionLabel.TextColor3 = tab.Content.Parent.Parent.Theme.Text
+    sectionLabel.BackgroundColor3 = window.Theme.Header -- Fixed theme access
+    sectionLabel.Text = "BlitzXHub | " .. sectionName
+    sectionLabel.TextColor3 = window.Theme.Text
     sectionLabel.TextSize = 16
     sectionLabel.Font = Enum.Font.Code
     sectionLabel.Parent = sectionFrame
 
     local labelCorner = Instance.new("UICorner")
-    labelCorner.CornerRadius = UDim.new(0, 6)
+    labelCorner.CornerRadius = UDim.new(0, 8)
     labelCorner.Parent = sectionLabel
 
     section.Frame = sectionFrame
     return section
 end
 
--- Fonction pour créer un bouton (style exploit)
-function BlitzXHub:CreateButton(section, buttonName, callback, tooltip)
+-- Fonction pour créer un bouton
+function BlitzXHub:CreateButton(section, buttonName, callback, tooltip, window)
     local button = Instance.new("TextButton")
     button.Size = UDim2.new(1, -10, 0, 35)
-    button.BackgroundColor3 = section.Frame.Parent.Parent.Parent.Theme.Accent
-    button.Text = buttonName or "Button"
-    button.TextColor3 = section.Frame.Parent.Parent.Parent.Theme.Text
+    button.BackgroundColor3 = window.Theme.Accent
+    button.Text = "BlitzXHub | " .. buttonName
+    button.TextColor3 = window.Theme.Text
     button.TextSize = 14
     button.Font = Enum.Font.Code
     button.Parent = section.Frame
 
     local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 8)
+    corner.CornerRadius = UDim.new(0, 10)
     corner.Parent = button
 
     local stroke = Instance.new("UIStroke")
-    stroke.Thickness = 1
-    stroke.Color = section.Frame.Parent.Parent.Parent.Theme.Highlight
+    stroke.Thickness = 2
+    stroke.Color = window.Theme.Border
     stroke.Transparency = 0.3
     stroke.Parent = button
 
     local gradient = Instance.new("UIGradient")
-    gradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, section.Frame.Parent.Parent.Parent.Theme.Accent), ColorSequenceKeypoint.new(1, section.Frame.Parent.Parent.Parent.Theme.Highlight)})
+    gradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, window.Theme.Accent), ColorSequenceKeypoint.new(1, window.Theme.Highlight)})
     gradient.Parent = button
 
-    -- Animation pulse
-    local function pulse()
+    -- Pulse animation
+    task.spawn(function()
         while button.Parent do
-            TweenService:Create(stroke, TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {Transparency = 0.6}):Play()
+            TweenService:Create(stroke, TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {Transparency = 0.6}):Play()
             task.wait(2)
         end
-    end
-    task.spawn(pulse)
+    end)
 
-    -- Animation au survol
+    -- Hover and click animations
     button.MouseEnter:Connect(function()
-        TweenService:Create(button, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {BackgroundColor3 = section.Frame.Parent.Parent.Parent.Theme.Highlight, TextColor3 = section.Frame.Parent.Parent.Parent.Theme.Background, Size = UDim2.new(1, -10, 0, 37)}):Play()
+        TweenService:Create(button, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {Size = UDim2.new(1, -8, 0, 37), BackgroundColor3 = window.Theme.Highlight, TextColor3 = window.Theme.Background}):Play()
         TweenService:Create(stroke, TweenInfo.new(0.2), {Transparency = 0.1}):Play()
     end)
     button.MouseLeave:Connect(function()
-        TweenService:Create(button, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {BackgroundColor3 = section.Frame.Parent.Parent.Parent.Theme.Accent, TextColor3 = section.Frame.Parent.Parent.Parent.Theme.Text, Size = UDim2.new(1, -10, 0, 35)}):Play()
+        TweenService:Create(button, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {Size = UDim2.new(1, -10, 0, 35), BackgroundColor3 = window.Theme.Accent, TextColor3 = window.Theme.Text}):Play()
         TweenService:Create(stroke, TweenInfo.new(0.2), {Transparency = 0.3}):Play()
     end)
-
-    -- Animation au clic
     button.MouseButton1Down:Connect(function()
         TweenService:Create(button, TweenInfo.new(0.1, Enum.EasingStyle.Quad), {Size = UDim2.new(1, -12, 0, 33)}):Play()
     end)
     button.MouseButton1Up:Connect(function()
-        TweenService:Create(button, TweenInfo.new(0.1, Enum.EasingStyle.Quad), {Size = UDim2.new(1, -10, 0, 37)}):Play()
+        TweenService:Create(button, TweenInfo.new(0.1, Enum.EasingStyle.Quad), {Size = UDim2.new(1, -8, 0, 37)}):Play()
     end)
 
     -- Tooltip
     if tooltip then
         local tooltipFrame = Instance.new("Frame")
         tooltipFrame.Size = UDim2.new(0, 150, 0, 30)
-        tooltipFrame.BackgroundColor3 = section.Frame.Parent.Parent.Parent.Theme.Background
+        tooltipFrame.BackgroundColor3 = window.Theme.Background
         tooltipFrame.Visible = false
-        tooltipFrame.Parent = section.Frame.Parent.Parent.Parent.MainFrame
+        tooltipFrame.Parent = window.MainFrame
 
         local tooltipCorner = Instance.new("UICorner")
-        tooltipCorner.CornerRadius = UDim.new(0, 4)
+        tooltipCorner.CornerRadius = UDim.new(0, 6)
         tooltipCorner.Parent = tooltipFrame
 
         local tooltipLabel = Instance.new("TextLabel")
@@ -565,14 +553,14 @@ function BlitzXHub:CreateButton(section, buttonName, callback, tooltip)
         tooltipLabel.Position = UDim2.new(0, 5, 0, 5)
         tooltipLabel.BackgroundTransparency = 1
         tooltipLabel.Text = tooltip
-        tooltipLabel.TextColor3 = section.Frame.Parent.Parent.Parent.Theme.Text
+        tooltipLabel.TextColor3 = window.Theme.Text
         tooltipLabel.TextSize = 12
         tooltipLabel.Font = Enum.Font.Code
         tooltipLabel.TextWrapped = true
         tooltipLabel.Parent = tooltipFrame
 
         button.MouseMoved:Connect(function(x, y)
-            tooltipFrame.Position = UDim2.new(0, x - section.Frame.Parent.Parent.Parent.MainFrame.AbsolutePosition.X + 10, 0, y - section.Frame.Parent.Parent.Parent.MainFrame.AbsolutePosition.Y + 10)
+            tooltipFrame.Position = UDim2.new(0, x - window.MainFrame.AbsolutePosition.X + 10, 0, y - window.MainFrame.AbsolutePosition.Y + 10)
             tooltipFrame.Visible = true
         end)
         button.MouseLeave:Connect(function()
@@ -582,12 +570,7 @@ function BlitzXHub:CreateButton(section, buttonName, callback, tooltip)
 
     button.MouseButton1Click:Connect(function()
         if callback then
-            local success, err = pcall(callback)
-            if not success then
-                BlitzXHub:CreateNotification("Erreur dans le callback : " .. tostring(err), 3, "NotificationError")
-            else
-                BlitzXHub:CreateNotification("Action " .. buttonName .. " exécutée", 2, "NotificationSuccess")
-            end
+            pcall(callback)
         end
     end)
 
@@ -595,52 +578,66 @@ function BlitzXHub:CreateButton(section, buttonName, callback, tooltip)
 end
 
 -- Fonction pour créer un label
-function BlitzXHub:CreateLabel(section, labelText)
+function BlitzXHub:CreateLabel(section, labelText, window)
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(1, -10, 0, 30)
-    label.BackgroundColor3 = section.Frame.Parent.Parent.Parent.Theme.Section
-    label.Text = labelText or "Label"
-    label.TextColor3 = section.Frame.Parent.Parent.Parent.Theme.Text
+    label.BackgroundColor3 = window.Theme.Section
+    label.Text = "BlitzXHub | " .. labelText
+    label.TextColor3 = window.Theme.Text
     label.TextSize = 14
     label.Font = Enum.Font.Code
     label.TextWrapped = true
     label.Parent = section.Frame
 
     local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 6)
+    corner.CornerRadius = UDim.new(0, 8)
     corner.Parent = label
 
     return label
 end
 
 -- Fonction pour créer un slider
-function BlitzXHub:CreateSlider(section, sliderName, minValue, maxValue, defaultValue, callback, tooltip)
+function BlitzXHub:CreateSlider(section, sliderName, minValue, maxValue, defaultValue, step, callback, tooltip, window)
     local slider = {}
     slider.Value = defaultValue or minValue or 0
     window.Config[sliderName] = slider.Value
 
     local sliderFrame = Instance.new("Frame")
     sliderFrame.Size = UDim2.new(1, -10, 0, 50)
-    sliderFrame.BackgroundColor3 = section.Frame.Parent.Parent.Parent.Theme.Section
+    sliderFrame.BackgroundColor3 = window.Theme.Section
     sliderFrame.Parent = section.Frame
 
     local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 6)
+    corner.CornerRadius = UDim.new(0, 8)
     corner.Parent = sliderFrame
 
     local sliderLabel = Instance.new("TextLabel")
-    sliderLabel.Size = UDim2.new(1, 0, 0, 20)
+    sliderLabel.Size = UDim2.new(1, -40, 0, 20)
     sliderLabel.BackgroundTransparency = 1
     sliderLabel.Text = "BlitzXHub | " .. sliderName .. ": " .. tostring(slider.Value)
-    sliderLabel.TextColor3 = section.Frame.Parent.Parent.Parent.Theme.Text
+    sliderLabel.TextColor3 = window.Theme.Text
     sliderLabel.TextSize = 14
     sliderLabel.Font = Enum.Font.Code
     sliderLabel.Parent = sliderFrame
 
+    local valueIndicator = Instance.new("TextLabel")
+    valueIndicator.Size = UDim2.new(0, 30, 0, 20)
+    valueIndicator.Position = UDim2.new(1, -35, 0, 0)
+    valueIndicator.BackgroundColor3 = window.Theme.Background
+    valueIndicator.Text = tostring(slider.Value)
+    valueIndicator.TextColor3 = window.Theme.Text
+    valueIndicator.TextSize = 12
+    valueIndicator.Font = Enum.Font.Code
+    valueIndicator.Parent = sliderFrame
+
+    local indicatorCorner = Instance.new("UICorner")
+    indicatorCorner.CornerRadius = UDim.new(0, 4)
+    indicatorCorner.Parent = valueIndicator
+
     local sliderBar = Instance.new("Frame")
-    sliderBar.Size = UDim2.new(1, -10, 0, 10)
-    sliderBar.Position = UDim2.new(0, 5, 0, 25)
-    sliderBar.BackgroundColor3 = section.Frame.Parent.Parent.Parent.Theme.Accent
+    sliderBar.Size = UDim2.new(1, -10, 0, 8)
+    sliderBar.Position = UDim2.new(0, 5, 0, 30)
+    sliderBar.BackgroundColor3 = window.Theme.Accent
     sliderBar.Parent = sliderFrame
 
     local barCorner = Instance.new("UICorner")
@@ -649,7 +646,7 @@ function BlitzXHub:CreateSlider(section, sliderName, minValue, maxValue, default
 
     local fill = Instance.new("Frame")
     fill.Size = UDim2.new((slider.Value - minValue) / (maxValue - minValue), 0, 1, 0)
-    fill.BackgroundColor3 = section.Frame.Parent.Parent.Parent.Theme.Highlight
+    fill.BackgroundColor3 = window.Theme.Highlight
     fill.Parent = sliderBar
 
     local fillCorner = Instance.new("UICorner")
@@ -666,6 +663,10 @@ function BlitzXHub:CreateSlider(section, sliderName, minValue, maxValue, default
     sliderBar.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = false
+            window.Config[sliderName] = slider.Value
+            if callback then
+                pcall(callback, slider.Value)
+            end
         end
     end)
 
@@ -676,16 +677,14 @@ function BlitzXHub:CreateSlider(section, sliderName, minValue, maxValue, default
             local barWidth = sliderBar.AbsoluteSize.X
             local relativeX = math.clamp((mouseX - barPos) / barWidth, 0, 1)
             slider.Value = minValue + relativeX * (maxValue - minValue)
-            slider.Value = math.floor(slider.Value + 0.5)
+            if step then
+                slider.Value = math.floor(slider.Value / step + 0.5) * step
+            else
+                slider.Value = math.round(slider.Value * 100) / 100
+            end
             fill.Size = UDim2.new(relativeX, 0, 1, 0)
             sliderLabel.Text = "BlitzXHub | " .. sliderName .. ": " .. tostring(slider.Value)
-            window.Config[sliderName] = slider.Value
-            if callback then
-                local success, err = pcall(callback, slider.Value)
-                if not success then
-                    BlitzXHub:CreateNotification("Erreur dans le callback du slider : " .. tostring(err), 3, "NotificationError")
-                end
-            end
+            valueIndicator.Text = tostring(slider.Value)
         end
     end)
 
@@ -693,12 +692,12 @@ function BlitzXHub:CreateSlider(section, sliderName, minValue, maxValue, default
     if tooltip then
         local tooltipFrame = Instance.new("Frame")
         tooltipFrame.Size = UDim2.new(0, 150, 0, 30)
-        tooltipFrame.BackgroundColor3 = section.Frame.Parent.Parent.Parent.Theme.Background
+        tooltipFrame.BackgroundColor3 = window.Theme.Background
         tooltipFrame.Visible = false
-        tooltipFrame.Parent = section.Frame.Parent.Parent.Parent.MainFrame
+        tooltipFrame.Parent = window.MainFrame
 
         local tooltipCorner = Instance.new("UICorner")
-        tooltipCorner.CornerRadius = UDim.new(0, 4)
+        tooltipCorner.CornerRadius = UDim.new(0, 6)
         tooltipCorner.Parent = tooltipFrame
 
         local tooltipLabel = Instance.new("TextLabel")
@@ -706,14 +705,14 @@ function BlitzXHub:CreateSlider(section, sliderName, minValue, maxValue, default
         tooltipLabel.Position = UDim2.new(0, 5, 0, 5)
         tooltipLabel.BackgroundTransparency = 1
         tooltipLabel.Text = tooltip
-        tooltipLabel.TextColor3 = section.Frame.Parent.Parent.Parent.Theme.Text
+        tooltipLabel.TextColor3 = window.Theme.Text
         tooltipLabel.TextSize = 12
         tooltipLabel.Font = Enum.Font.Code
         tooltipLabel.TextWrapped = true
         tooltipLabel.Parent = tooltipFrame
 
         sliderBar.MouseMoved:Connect(function(x, y)
-            tooltipFrame.Position = UDim2.new(0, x - section.Frame.Parent.Parent.Parent.MainFrame.AbsolutePosition.X + 10, 0, y - section.Frame.Parent.Parent.Parent.MainFrame.AbsolutePosition.Y + 10)
+            tooltipFrame.Position = UDim2.new(0, x - window.MainFrame.AbsolutePosition.X + 10, 0, y - window.MainFrame.AbsolutePosition.Y + 10)
             tooltipFrame.Visible = true
         end)
         sliderBar.MouseLeave:Connect(function()
@@ -725,7 +724,7 @@ function BlitzXHub:CreateSlider(section, sliderName, minValue, maxValue, default
 end
 
 -- Fonction pour créer un dropdown
-function BlitzXHub:CreateDropdown(section, dropdownName, options, defaultOption, callback, tooltip)
+function BlitzXHub:CreateDropdown(section, dropdownName, options, defaultOption, callback, tooltip, window)
     local dropdown = {}
     dropdown.Options = options or {}
     dropdown.Selected = defaultOption or options[1] or "None"
@@ -733,38 +732,40 @@ function BlitzXHub:CreateDropdown(section, dropdownName, options, defaultOption,
     window.Config[dropdownName] = dropdown.Selected
 
     local dropdownFrame = Instance.new("Frame")
-    dropdownFrame.Size = UDim2.new(1, -10, 0, 30)
-    dropdownFrame.BackgroundColor3 = section.Frame.Parent.Parent.Parent.Theme.Section
+    dropdownFrame.Size = UDim2.new(1, -10, 0, 35)
+    dropdownFrame.BackgroundColor3 = window.Theme.Section
     dropdownFrame.Parent = section.Frame
 
     local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 6)
+    corner.CornerRadius = UDim.new(0, 8)
     corner.Parent = dropdownFrame
 
     local dropdownButton = Instance.new("TextButton")
-    dropdownButton.Size = UDim2.new(1, 0, 0, 30)
-    dropdownButton.BackgroundColor3 = section.Frame.Parent.Parent.Parent.Theme.Accent
+    dropdownButton.Size = UDim2.new(1, 0, 0, 35)
+    dropdownButton.BackgroundColor3 = window.Theme.Accent
     dropdownButton.Text = "BlitzXHub | " .. dropdownName .. ": " .. dropdown.Selected
-    dropdownButton.TextColor3 = section.Frame.Parent.Parent.Parent.Theme.Text
+    dropdownButton.TextColor3 = window.Theme.Text
     dropdownButton.TextSize = 14
     dropdownButton.Font = Enum.Font.Code
     dropdownButton.Parent = dropdownFrame
 
     local buttonCorner = Instance.new("UICorner")
-    buttonCorner.CornerRadius = UDim.new(0, 6)
+    buttonCorner.CornerRadius = UDim.new(0, 8)
     buttonCorner.Parent = dropdownButton
 
-    local dropdownList = Instance.new("Frame")
+    local dropdownList = Instance.new("ScrollingFrame")
     dropdownList.Size = UDim2.new(1, 0, 0, 0)
-    dropdownList.Position = UDim2.new(0, 0, 0, 30)
-    dropdownList.BackgroundColor3 = section.Frame.Parent.Parent.Parent.Theme.Background
+    dropdownList.Position = UDim2.new(0, 0, 0, 35)
+    dropdownList.BackgroundColor3 = window.Theme.Background
     dropdownList.ClipsDescendants = true
     dropdownList.Visible = false
+    dropdownList.ScrollBarThickness = 4
+    dropdownList.ScrollBarImageColor3 = window.Theme.Highlight
+    dropdownList.CanvasSize = UDim2.new(0, 0, 0, #dropdown.Options * 32)
     dropdownList.Parent = dropdownFrame
-    dropdownList.AutomaticSize = Enum.AutomaticSize.Y
 
     local listCorner = Instance.new("UICorner")
-    listCorner.CornerRadius = UDim.new(0, 6)
+    listCorner.CornerRadius = UDim.new(0, 8)
     listCorner.Parent = dropdownList
 
     local listLayout = Instance.new("UIListLayout")
@@ -780,22 +781,22 @@ function BlitzXHub:CreateDropdown(section, dropdownName, options, defaultOption,
 
     local function updateDropdown()
         dropdownList.Visible = dropdown.Open
-        dropdownList.Size = dropdown.Open and UDim2.new(1, 0, 0, #dropdown.Options * 32) or UDim2.new(1, 0, 0, 0)
-        TweenService:Create(dropdownList, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {Size = dropdown.Open and UDim2.new(1, 0, 0, #dropdown.Options * 32) or UDim2.new(1, 0, 0, 0)}):Play()
+        dropdownList.Size = dropdown.Open and UDim2.new(1, 0, 0, math.min(#dropdown.Options * 32, 150)) or UDim2.new(1, 0, 0, 0)
+        TweenService:Create(dropdownList, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {Size = dropdown.Open and UDim2.new(1, 0, 0, math.min(#dropdown.Options * 32, 150)) or UDim2.new(1, 0, 0, 0)}):Play()
     end
 
     for _, option in ipairs(dropdown.Options) do
         local optionButton = Instance.new("TextButton")
         optionButton.Size = UDim2.new(1, 0, 0, 30)
-        optionButton.BackgroundColor3 = section.Frame.Parent.Parent.Parent.Theme.Accent
+        optionButton.BackgroundColor3 = window.Theme.Accent
         optionButton.Text = option
-        optionButton.TextColor3 = section.Frame.Parent.Parent.Parent.Theme.Text
+        optionButton.TextColor3 = window.Theme.Text
         optionButton.TextSize = 14
         optionButton.Font = Enum.Font.Code
         optionButton.Parent = dropdownList
 
         local optionCorner = Instance.new("UICorner")
-        optionCorner.CornerRadius = UDim.new(0, 4)
+        optionCorner.CornerRadius = UDim.new(0, 6)
         optionCorner.Parent = optionButton
 
         optionButton.MouseButton1Click:Connect(function()
@@ -805,11 +806,15 @@ function BlitzXHub:CreateDropdown(section, dropdownName, options, defaultOption,
             updateDropdown()
             window.Config[dropdownName] = dropdown.Selected
             if callback then
-                local success, err = pcall(callback, option)
-                if not success then
-                    BlitzXHub:CreateNotification("Erreur dans le callback du dropdown : " .. tostring(err), 3, "NotificationError")
-                end
+                pcall(callback, option)
             end
+        end)
+
+        optionButton.MouseEnter:Connect(function()
+            TweenService:Create(optionButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {BackgroundColor3 = window.Theme.Highlight, TextColor3 = window.Theme.Background}):Play()
+        end)
+        optionButton.MouseLeave:Connect(function()
+            TweenService:Create(optionButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {BackgroundColor3 = window.Theme.Accent, TextColor3 = window.Theme.Text}):Play()
         end)
     end
 
@@ -822,12 +827,12 @@ function BlitzXHub:CreateDropdown(section, dropdownName, options, defaultOption,
     if tooltip then
         local tooltipFrame = Instance.new("Frame")
         tooltipFrame.Size = UDim2.new(0, 150, 0, 30)
-        tooltipFrame.BackgroundColor3 = section.Frame.Parent.Parent.Parent.Theme.Background
+        tooltipFrame.BackgroundColor3 = window.Theme.Background
         tooltipFrame.Visible = false
-        tooltipFrame.Parent = section.Frame.Parent.Parent.Parent.MainFrame
+        tooltipFrame.Parent = window.MainFrame
 
         local tooltipCorner = Instance.new("UICorner")
-        tooltipCorner.CornerRadius = UDim.new(0, 4)
+        tooltipCorner.CornerRadius = UDim.new(0, 6)
         tooltipCorner.Parent = tooltipFrame
 
         local tooltipLabel = Instance.new("TextLabel")
@@ -835,14 +840,14 @@ function BlitzXHub:CreateDropdown(section, dropdownName, options, defaultOption,
         tooltipLabel.Position = UDim2.new(0, 5, 0, 5)
         tooltipLabel.BackgroundTransparency = 1
         tooltipLabel.Text = tooltip
-        tooltipLabel.TextColor3 = section.Frame.Parent.Parent.Parent.Theme.Text
+        tooltipLabel.TextColor3 = window.Theme.Text
         tooltipLabel.TextSize = 12
         tooltipLabel.Font = Enum.Font.Code
         tooltipLabel.TextWrapped = true
         tooltipLabel.Parent = tooltipFrame
 
         dropdownButton.MouseMoved:Connect(function(x, y)
-            tooltipFrame.Position = UDim2.new(0, x - section.Frame.Parent.Parent.Parent.MainFrame.AbsolutePosition.X + 10, 0, y - section.Frame.Parent.Parent.Parent.MainFrame.AbsolutePosition.Y + 10)
+            tooltipFrame.Position = UDim2.new(0, x - window.MainFrame.AbsolutePosition.X + 10, 0, y - window.MainFrame.AbsolutePosition.Y + 10)
             tooltipFrame.Visible = true
         end)
         dropdownButton.MouseLeave:Connect(function()
@@ -854,33 +859,39 @@ function BlitzXHub:CreateDropdown(section, dropdownName, options, defaultOption,
 end
 
 -- Fonction pour créer un keybind
-function BlitzXHub:CreateKeybind(section, keybindName, defaultKey, callback, tooltip)
+function BlitzXHub:CreateKeybind(section, keybindName, defaultKey, callback, tooltip, window)
     local keybind = {}
     keybind.Key = defaultKey or Enum.KeyCode.Unknown
     keybind.Binding = false
     window.Config[keybindName] = keybind.Key.Name
 
     local keybindFrame = Instance.new("Frame")
-    keybindFrame.Size = UDim2.new(1, -10, 0, 30)
-    keybindFrame.BackgroundColor3 = section.Frame.Parent.Parent.Parent.Theme.Section
+    keybindFrame.Size = UDim2.new(1, -10, 0, 35)
+    keybindFrame.BackgroundColor3 = window.Theme.Section
     keybindFrame.Parent = section.Frame
 
     local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 6)
+    corner.CornerRadius = UDim.new(0, 8)
     corner.Parent = keybindFrame
 
     local keybindButton = Instance.new("TextButton")
-    keybindButton.Size = UDim2.new(1, 0, 0, 30)
-    keybindButton.BackgroundColor3 = section.Frame.Parent.Parent.Parent.Theme.Accent
+    keybindButton.Size = UDim2.new(1, 0, 0, 35)
+    keybindButton.BackgroundColor3 = window.Theme.Accent
     keybindButton.Text = "BlitzXHub | " .. keybindName .. ": " .. (keybind.Key.Name or "None")
-    keybindButton.TextColor3 = section.Frame.Parent.Parent.Parent.Theme.Text
+    keybindButton.TextColor3 = window.Theme.Text
     keybindButton.TextSize = 14
     keybindButton.Font = Enum.Font.Code
     keybindButton.Parent = keybindFrame
 
     local buttonCorner = Instance.new("UICorner")
-    buttonCorner.CornerRadius = UDim.new(0, 6)
+    buttonCorner.CornerRadius = UDim.new(0, 8)
     buttonCorner.Parent = keybindButton
+
+    local stroke = Instance.new("UIStroke")
+    stroke.Thickness = 1
+    stroke.Color = window.Theme.Border
+    stroke.Transparency = 0.3
+    stroke.Parent = keybindButton
 
     local connection
     keybindButton.MouseButton1Click:Connect(function()
@@ -893,6 +904,9 @@ function BlitzXHub:CreateKeybind(section, keybindName, defaultKey, callback, too
                 keybind.Binding = false
                 window.Config[keybindName] = input.KeyCode.Name
                 connection:Disconnect()
+                if callback then
+                    pcall(callback)
+                end
             end
         end)
     end)
@@ -900,12 +914,12 @@ function BlitzXHub:CreateKeybind(section, keybindName, defaultKey, callback, too
     UserInputService.InputBegan:Connect(function(input)
         if not keybind.Binding and input.KeyCode == keybind.Key then
             if callback then
-                local success, err = pcall(callback)
-                if not success then
-                    BlitzXHub:CreateNotification("Erreur dans le callback du keybind : " .. tostring(err), 3, "NotificationError")
-                else
-                    BlitzXHub:CreateNotification("Keybind " .. keybindName .. " déclenché", 2, "NotificationSuccess")
-                end
+                TweenService:Create(stroke, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {Transparency = 0}):Play()
+                task.spawn(function()
+                    task.wait(0.3)
+                    TweenService:Create(stroke, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {Transparency = 0.3}):Play()
+                end)
+                pcall(callback)
             end
         end
     end)
@@ -914,12 +928,12 @@ function BlitzXHub:CreateKeybind(section, keybindName, defaultKey, callback, too
     if tooltip then
         local tooltipFrame = Instance.new("Frame")
         tooltipFrame.Size = UDim2.new(0, 150, 0, 30)
-        tooltipFrame.BackgroundColor3 = section.Frame.Parent.Parent.Parent.Theme.Background
+        tooltipFrame.BackgroundColor3 = window.Theme.Background
         tooltipFrame.Visible = false
-        tooltipFrame.Parent = section.Frame.Parent.Parent.Parent.MainFrame
+        tooltipFrame.Parent = window.MainFrame
 
         local tooltipCorner = Instance.new("UICorner")
-        tooltipCorner.CornerRadius = UDim.new(0, 4)
+        tooltipCorner.CornerRadius = UDim.new(0, 6)
         tooltipCorner.Parent = tooltipFrame
 
         local tooltipLabel = Instance.new("TextLabel")
@@ -927,14 +941,14 @@ function BlitzXHub:CreateKeybind(section, keybindName, defaultKey, callback, too
         tooltipLabel.Position = UDim2.new(0, 5, 0, 5)
         tooltipLabel.BackgroundTransparency = 1
         tooltipLabel.Text = tooltip
-        tooltipLabel.TextColor3 = section.Frame.Parent.Parent.Parent.Theme.Text
+        tooltipLabel.TextColor3 = window.Theme.Text
         tooltipLabel.TextSize = 12
         tooltipLabel.Font = Enum.Font.Code
         tooltipLabel.TextWrapped = true
         tooltipLabel.Parent = tooltipFrame
 
         keybindButton.MouseMoved:Connect(function(x, y)
-            tooltipFrame.Position = UDim2.new(0, x - section.Frame.Parent.Parent.Parent.MainFrame.AbsolutePosition.X + 10, 0, y - section.Frame.Parent.Parent.Parent.MainFrame.AbsolutePosition.Y + 10)
+            tooltipFrame.Position = UDim2.new(0, x - window.MainFrame.AbsolutePosition.X + 10, 0, y - window.MainFrame.AbsolutePosition.Y + 10)
             tooltipFrame.Visible = true
         end)
         keybindButton.MouseLeave:Connect(function()
@@ -946,54 +960,54 @@ function BlitzXHub:CreateKeybind(section, keybindName, defaultKey, callback, too
 end
 
 -- Fonction pour créer un color picker
-function BlitzXHub:CreateColorPicker(section, pickerName, defaultColor, callback, tooltip)
+function BlitzXHub:CreateColorPicker(section, pickerName, defaultColor, callback, tooltip, window)
     local colorPicker = {}
     colorPicker.Color = defaultColor or Color3.fromRGB(255, 255, 255)
     window.Config[pickerName] = {R = colorPicker.Color.R, G = colorPicker.Color.G, B = colorPicker.Color.B}
 
     local pickerFrame = Instance.new("Frame")
     pickerFrame.Size = UDim2.new(1, -10, 0, 50)
-    pickerFrame.BackgroundColor3 = section.Frame.Parent.Parent.Parent.Theme.Section
+    pickerFrame.BackgroundColor3 = window.Theme.Section
     pickerFrame.Parent = section.Frame
 
     local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 6)
+    corner.CornerRadius = UDim.new(0, 8)
     corner.Parent = pickerFrame
 
     local pickerButton = Instance.new("TextButton")
-    pickerButton.Size = UDim2.new(1, -50, 0, 30)
-    pickerButton.Position = UDim2.new(0, 5, 0, 10)
-    pickerButton.BackgroundColor3 = section.Frame.Parent.Parent.Parent.Theme.Accent
-    pickerButton.Text = "BlitzXHub | " .. pickerName .. ": " .. string.format("R:%.0f G:%.0f B:%.0f", colorPicker.Color.R * 255, colorPicker.Color.G * 255, colorPicker.Color.B * 255)
-    pickerButton.TextColor3 = section.Frame.Parent.Parent.Parent.Theme.Text
+    pickerButton.Size = UDim2.new(1, -50, 0, 35)
+    pickerButton.Position = UDim2.new(0, 5, 0, 7)
+    pickerButton.BackgroundColor3 = window.Theme.Accent
+    pickerButton.Text = "BlitzXHub | " .. pickerName .. ": " .. string.format("#%02X%02X%02X", colorPicker.Color.R * 255, colorPicker.Color.G * 255, colorPicker.Color.B * 255)
+    pickerButton.TextColor3 = window.Theme.Text
     pickerButton.TextSize = 14
     pickerButton.Font = Enum.Font.Code
     pickerButton.Parent = pickerFrame
 
     local buttonCorner = Instance.new("UICorner")
-    buttonCorner.CornerRadius = UDim.new(0, 6)
+    buttonCorner.CornerRadius = UDim.new(0, 8)
     buttonCorner.Parent = pickerButton
 
     local colorPreview = Instance.new("Frame")
-    colorPreview.Size = UDim2.new(0, 30, 0, 30)
-    colorPreview.Position = UDim2.new(1, -40, 0, 10)
+    colorPreview.Size = UDim2.new(0, 35, 0, 35)
+    colorPreview.Position = UDim2.new(1, -40, 0, 7)
     colorPreview.BackgroundColor3 = colorPicker.Color
     colorPreview.Parent = pickerFrame
 
     local previewCorner = Instance.new("UICorner")
-    previewCorner.CornerRadius = UDim.new(0, 6)
+    previewCorner.CornerRadius = UDim.new(0, 8)
     previewCorner.Parent = colorPreview
 
     local pickerPanel = Instance.new("Frame")
     pickerPanel.Size = UDim2.new(1, -10, 0, 0)
     pickerPanel.Position = UDim2.new(0, 5, 0, 45)
-    pickerPanel.BackgroundColor3 = section.Frame.Parent.Parent.Parent.Theme.Background
+    pickerPanel.BackgroundColor3 = window.Theme.Background
     pickerPanel.Visible = false
     pickerPanel.Parent = pickerFrame
     pickerPanel.AutomaticSize = Enum.AutomaticSize.Y
 
     local panelCorner = Instance.new("UICorner")
-    panelCorner.CornerRadius = UDim.new(0, 6)
+    panelCorner.CornerRadius = UDim.new(0, 8)
     panelCorner.Parent = pickerPanel
 
     local panelLayout = Instance.new("UIListLayout")
@@ -1001,61 +1015,52 @@ function BlitzXHub:CreateColorPicker(section, pickerName, defaultColor, callback
     panelLayout.Padding = UDim.new(0, 5)
     panelLayout.Parent = pickerPanel
 
-    local rSlider = BlitzXHub:CreateSlider({Frame = pickerPanel}, "Red", 0, 255, colorPicker.Color.R * 255, function(value)
+    local rSlider = BlitzXHub:CreateSlider({Frame = pickerPanel}, "Red", 0, 255, colorPicker.Color.R * 255, 1, function(value)
         colorPicker.Color = Color3.fromRGB(value, colorPicker.Color.G * 255, colorPicker.Color.B * 255)
         colorPreview.BackgroundColor3 = colorPicker.Color
-        pickerButton.Text = "BlitzXHub | " .. pickerName .. ": " .. string.format("R:%.0f G:%.0f B:%.0f", value, colorPicker.Color.G * 255, colorPicker.Color.B * 255)
+        pickerButton.Text = "BlitzXHub | " .. pickerName .. ": " .. string.format("#%02X%02X%02X", value, colorPicker.Color.G * 255, colorPicker.Color.B * 255)
         window.Config[pickerName] = {R = colorPicker.Color.R, G = colorPicker.Color.G, B = colorPicker.Color.B}
         if callback then
-            local success, err = pcall(callback, colorPicker.Color)
-            if not success then
-                BlitzXHub:CreateNotification("Erreur dans le callback du color picker : " .. tostring(err), 3, "NotificationError")
-            end
+            pcall(callback, colorPicker.Color)
         end
-    end)
+    end, nil, window)
 
-    local gSlider = BlitzXHub:CreateSlider({Frame = pickerPanel}, "Green", 0, 255, colorPicker.Color.G * 255, function(value)
+    local gSlider = BlitzXHub:CreateSlider({Frame = pickerPanel}, "Green", 0, 255, colorPicker.Color.G * 255, 1, function(value)
         colorPicker.Color = Color3.fromRGB(colorPicker.Color.R * 255, value, colorPicker.Color.B * 255)
         colorPreview.BackgroundColor3 = colorPicker.Color
-        pickerButton.Text = "BlitzXHub | " .. pickerName .. ": " .. string.format("R:%.0f G:%.0f B:%.0f", colorPicker.Color.R * 255, value, colorPicker.Color.B * 255)
+        pickerButton.Text = "BlitzXHub | " .. pickerName .. ": " .. string.format("#%02X%02X%02X", colorPicker.Color.R * 255, value, colorPicker.Color.B * 255)
         window.Config[pickerName] = {R = colorPicker.Color.R, G = colorPicker.Color.G, B = colorPicker.Color.B}
         if callback then
-            local success, err = pcall(callback, colorPicker.Color)
-            if not success then
-                BlitzXHub:CreateNotification("Erreur dans le callback du color picker : " .. tostring(err), 3, "NotificationError")
-            end
+            pcall(callback, colorPicker.Color)
         end
-    end)
+    end, nil, window)
 
-    local bSlider = BlitzXHub:CreateSlider({Frame = pickerPanel}, "Blue", 0, 255, colorPicker.Color.B * 255, function(value)
+    local bSlider = BlitzXHub:CreateSlider({Frame = pickerPanel}, "Blue", 0, 255, colorPicker.Color.B * 255, 1, function(value)
         colorPicker.Color = Color3.fromRGB(colorPicker.Color.R * 255, colorPicker.Color.G * 255, value)
         colorPreview.BackgroundColor3 = colorPicker.Color
-        pickerButton.Text = "BlitzXHub | " .. pickerName .. ": " .. string.format("R:%.0f G:%.0f B:%.0f", colorPicker.Color.R * 255, colorPicker.Color.G * 255, value)
+        pickerButton.Text = "BlitzXHub | " .. pickerName .. ": " .. string.format("#%02X%02X%02X", colorPicker.Color.R * 255, colorPicker.Color.G * 255, value)
         window.Config[pickerName] = {R = colorPicker.Color.R, G = colorPicker.Color.G, B = colorPicker.Color.B}
         if callback then
-            local success, err = pcall(callback, colorPicker.Color)
-            if not success then
-                BlitzXHub:CreateNotification("Erreur dans le callback du color picker : " .. tostring(err), 3, "NotificationError")
-            end
+            pcall(callback, colorPicker.Color)
         end
-    end)
+    end, nil, window)
 
     pickerButton.MouseButton1Click:Connect(function()
         pickerPanel.Visible = not pickerPanel.Visible
-        pickerPanel.Size = pickerPanel.Visible and UDim2.new(1, -10, 0, 150) or UDim2.new(1, -10, 0, 0)
-        TweenService:Create(pickerPanel, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {Size = pickerPanel.Visible and UDim2.new(1, -10, 0, 150) or UDim2.new(1, -10, 0, 0)}):Play()
+        pickerPanel.Size = pickerPanel.Visible and UDim2.new(1, -10, 0, 170) or UDim2.new(1, -10, 0, 0)
+        TweenService:Create(pickerPanel, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {Size = pickerPanel.Visible and UDim2.new(1, -10, 0, 170) or UDim2.new(1, -10, 0, 0)}):Play()
     end)
 
     -- Tooltip
     if tooltip then
         local tooltipFrame = Instance.new("Frame")
         tooltipFrame.Size = UDim2.new(0, 150, 0, 30)
-        tooltipFrame.BackgroundColor3 = section.Frame.Parent.Parent.Parent.Theme.Background
+        tooltipFrame.BackgroundColor3 = window.Theme.Background
         tooltipFrame.Visible = false
-        tooltipFrame.Parent = section.Frame.Parent.Parent.Parent.MainFrame
+        tooltipFrame.Parent = window.MainFrame
 
         local tooltipCorner = Instance.new("UICorner")
-        tooltipCorner.CornerRadius = UDim.new(0, 4)
+        tooltipCorner.CornerRadius = UDim.new(0, 6)
         tooltipCorner.Parent = tooltipFrame
 
         local tooltipLabel = Instance.new("TextLabel")
@@ -1063,14 +1068,14 @@ function BlitzXHub:CreateColorPicker(section, pickerName, defaultColor, callback
         tooltipLabel.Position = UDim2.new(0, 5, 0, 5)
         tooltipLabel.BackgroundTransparency = 1
         tooltipLabel.Text = tooltip
-        tooltipLabel.TextColor3 = section.Frame.Parent.Parent.Parent.Theme.Text
+        tooltipLabel.TextColor3 = window.Theme.Text
         tooltipLabel.TextSize = 12
         tooltipLabel.Font = Enum.Font.Code
         tooltipLabel.TextWrapped = true
         tooltipLabel.Parent = tooltipFrame
 
         pickerButton.MouseMoved:Connect(function(x, y)
-            tooltipFrame.Position = UDim2.new(0, x - section.Frame.Parent.Parent.Parent.MainFrame.AbsolutePosition.X + 10, 0, y - section.Frame.Parent.Parent.Parent.MainFrame.AbsolutePosition.Y + 10)
+            tooltipFrame.Position = UDim2.new(0, x - window.MainFrame.AbsolutePosition.X + 10, 0, y - window.MainFrame.AbsolutePosition.Y + 10)
             tooltipFrame.Visible = true
         end)
         pickerButton.MouseLeave:Connect(function()
