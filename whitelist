@@ -1,4 +1,4 @@
--- Table principale de la bibliothèqueeffe
+-- Table principale de la bibliothèquedefenfnejfn
 local XyloKitUI = {}
 
 -- Services Roblox nécessaires
@@ -31,7 +31,7 @@ screenGui.IgnoreGuiInset = true
 screenGui.Enabled = true
 print("ScreenGui créé et attaché à PlayerGui pour le joueur : " .. player.Name)
 
--- Thème simplifié pour débogage
+-- Thème simplifié
 local Themes = {
     Dark = {
         MainBackground = Color3.fromRGB(18, 18, 18),
@@ -99,18 +99,26 @@ function XyloKitUI:CreateWindow(title)
     -- Fond principal
     local mainFrame = Instance.new("Frame")
     mainFrame.Size = UDim2.new(0, 1000, 0, 700)
-    mainFrame.Position = UDim2.new(0.5, -500, 0.5, -350)
+    -- Centrer au milieu de l'écran
+    mainFrame.Position = UDim2.new(0.5, -500, 0.5, -350) -- Valeur par défaut
     mainFrame.BackgroundColor3 = currentTheme.MainBackground
     mainFrame.BorderSizePixel = 0
     mainFrame.ClipsDescendants = true
     mainFrame.Visible = true
     mainFrame.Parent = screenGui
-    print("MainFrame position : " .. tostring(mainFrame.Position))
+    print("MainFrame créé avec taille : " .. tostring(mainFrame.Size))
 
     local mainFrameStroke = Instance.new("UIStroke")
     mainFrameStroke.Thickness = 2
     mainFrameStroke.Color = currentTheme.BorderColor
     mainFrameStroke.Parent = mainFrame
+
+    -- Vérifier la taille de l'écran pour centrer correctement
+    local screenSize = game:GetService("GuiService"):GetScreenResolution()
+    print("Taille de l'écran : " .. tostring(screenSize))
+    local centeredPosition = UDim2.new(0.5, -mainFrame.Size.X.Offset / 2, 0.5, -mainFrame.Size.Y.Offset / 2)
+    mainFrame.Position = centeredPosition
+    print("MainFrame centré à : " .. tostring(mainFrame.Position))
 
     -- Drag-and-drop
     local dragging = false
@@ -139,12 +147,25 @@ function XyloKitUI:CreateWindow(title)
             mainFrame.Position = newPos
             config.WindowPosition = {X = newPos.X.Offset, Y = newPos.Y.Offset}
             saveConfig()
+            print("MainFrame déplacé à : " .. tostring(newPos))
         end
     end)
 
+    -- Charger la position depuis la configuration uniquement si elle est valide
     if config.WindowPosition then
-        mainFrame.Position = UDim2.new(0.5, config.WindowPosition.X, 0.5, config.WindowPosition.Y)
-        print("Position chargée depuis la configuration : " .. tostring(mainFrame.Position))
+        local configPos = UDim2.new(0.5, config.WindowPosition.X, 0.5, config.WindowPosition.Y)
+        -- Vérifier si la position est dans les limites de l'écran
+        local isValidPosition = config.WindowPosition.X >= -screenSize.X / 2 and
+                               config.WindowPosition.X <= screenSize.X / 2 and
+                               config.WindowPosition.Y >= -screenSize.Y / 2 and
+                               config.WindowPosition.Y <= screenSize.Y / 2
+        if isValidPosition then
+            mainFrame.Position = configPos
+            print("Position chargée depuis la configuration : " .. tostring(configPos))
+        else
+            print("Position de configuration invalide, utilisation de la position centrée")
+            mainFrame.Position = centeredPosition
+        end
     end
 
     -- Titre
@@ -252,7 +273,7 @@ function XyloKitUI:CreateWindow(title)
         tabContent.Size = UDim2.new(1, -20, 1, -110)
         tabContent.Position = UDim2.new(0, 10, 0, 10)
         tabContent.BackgroundTransparency = 1
-        tabContent.Visible = false -- Invisible par défaut
+        tabContent.Visible = false
         tabContent.Parent = contentFrame
 
         -- Conteneur principal pour les 3 premières sections
