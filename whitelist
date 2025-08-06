@@ -22,28 +22,83 @@ local RunService = cloneref(game:GetService("RunService"))
 local Lighting = cloneref(game:GetService("Lighting"))
 local UserInputService = cloneref(game:GetService("UserInputService"))
 local HttpService = cloneref(game:GetService("HttpService"))
+local TweenService = cloneref(game:GetService("TweenService"))
 local GuiInset = cloneref(game:GetService("GuiService")):GetGuiInset()
+
+-- Vérification du LocalPlayer
 local LocalPlayer = Players.LocalPlayer
-local Mouse = LocalPlayer:GetMouse()
+if not LocalPlayer then
+    error("Script client not found")
+    game:Kick("Erreur : Joueur local non détecté. Veuillez relancer le jeu.")
+end
+
+-- Initialisation sécurisée de la souris
+local function getMouseSafely()
+    local success, result = pcall(function() return LocalPlayer:GetMouse() end)
+    return success and result or nil
+end
+local Mouse = getMouseSafely()
+if not Mouse then
+    LocalPlayer:GetPropertyChangedSignal("Mouse"):Wait()
+    Mouse = LocalPlayer:GetMouse()
+end
 local Camera = workspace.CurrentCamera
 
 -- Bibliothèque UI pour Roblox (Client-Side)
 local BlitzXHub = {}
 
+-- Fonction pour créer une notification
+function BlitzXHub:CreateNotification(message, duration)
+    local notification = Instance.new("ScreenGui")
+    notification.Name = "BlitzXNotification"
+    notification.Parent = LocalPlayer:WaitForChild("PlayerGui")
+    notification.ResetOnSpawn = false
+
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 300, 0, 50)
+    frame.Position = UDim2.new(1, -310, 0, 10)
+    frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    frame.BorderSizePixel = 0
+    frame.Parent = notification
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.Text = message
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.TextSize = 14
+    label.Font = Enum.Font.Code
+    label.TextWrapped = true
+    label.Parent = frame
+
+    local tween = TweenService:Create(frame, TweenInfo.new(0.5), {Position = UDim2.new(1, -310, 0, 10)})
+    tween:Play()
+
+    task.spawn(function()
+        task.wait(duration or 3)
+        local tweenOut = TweenService:Create(frame, TweenInfo.new(0.5), {Position = UDim2.new(1, 10, 0, 10)})
+        tweenOut:Play()
+        tweenOut.Completed:Wait()
+        notification:Destroy()
+    end)
+end
+
 -- Fonction pour créer une fenêtre principale
 function BlitzXHub:CreateWindow(windowName, gameName, introText, iconAssetId, themesEnabled, configFolder, theme)
     local window = {}
-    window.Name = windowName or "UI Window"
+    window.Name = windowName or "BlitzX Hub"
     window.GameName = gameName or "Unknown Game"
     window.ThemesEnabled = themesEnabled or false
-    window.ConfigFolder = configFolder or "UIConfigs"
+    window.ConfigFolder = configFolder or "BlitzXConfigs"
     window.Theme = theme or "Default"
+    window.Visible = true
 
     -- Création de la ScreenGui
     local screenGui = Instance.new("ScreenGui")
     screenGui.Name = windowName
     screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
     screenGui.ResetOnSpawn = false
+    screenGui.IgnoreGuiInset = true
 
     -- Création du cadre principal de la fenêtre
     local mainFrame = Instance.new("Frame")
@@ -52,6 +107,7 @@ function BlitzXHub:CreateWindow(windowName, gameName, introText, iconAssetId, th
     mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     mainFrame.BorderSizePixel = 0
     mainFrame.Parent = screenGui
+    mainFrame.ClipsDescendants = true
 
     -- Ajout d'un effet d'ombre
     local shadow = Instance.new("UIStroke")
@@ -67,8 +123,19 @@ function BlitzXHub:CreateWindow(windowName, gameName, introText, iconAssetId, th
     titleLabel.Text = windowName .. " | " .. gameName
     titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     titleLabel.TextSize = 18
-    titleLabel.Font = Enum.Font.SourceSansBold
+    titleLabel.Font = Enum.Font.Code
     titleLabel.Parent = mainFrame
+
+    -- Bouton pour fermer/minimiser
+    local closeButton = Instance.new("TextButton")
+    closeButton.Size = UDim2.new(0, 30, 0, 30)
+    closeButton.Position = UDim2.new(1, -40, 0, 10)
+    closeButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+    closeButton.Text = "X"
+    closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    closeButton.TextSize = 14
+    closeButton.Font = Enum.Font.Code
+    closeButton.Parent = mainFrame
 
     -- Conteneur pour les onglets
     local tabContainer = Instance.new("Frame")
@@ -77,12 +144,17 @@ function BlitzXHub:CreateWindow(windowName, gameName, introText, iconAssetId, th
     tabContainer.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     tabContainer.Parent = mainFrame
 
+    local tabListLayout = Instance.new("UIListLayout")
+    tabListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    tabListLayout.Parent = tabContainer
+
     -- Conteneur pour le contenu des onglets
     local contentContainer = Instance.new("Frame")
     contentContainer.Size = UDim2.new(1, -150, 1, -50)
     contentContainer.Position = UDim2.new(0, 150, 0, 50)
     contentContainer.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     contentContainer.Parent = mainFrame
+    contentContainer.ClipsDescendants = true
 
     window.ScreenGui = screenGui
     window.MainFrame = mainFrame
@@ -122,6 +194,54 @@ function BlitzXHub:CreateWindow(windowName, gameName, introText, iconAssetId, th
         end
     end)
 
+    -- Gestion du bouton fermer
+    closeButton.MouseButton1Click:Connect(function()
+        window.Visible = not window.Visible
+        mainFrame.Visible = window.Visible
+        BlitzXHub:CreateNotification(window.Visible and "Interface affichée" or "Interface masquée", 2)
+    end)
+
+    -- Toggle UI avec la touche Insert
+    UserInputService.InputBegan:Connect(function(input)
+        if input.KeyCode == Enum.KeyCode.Insert then
+            window.Visible = not window.Visible
+            mainFrame.Visible = window.Visible
+            BlitzXHub:CreateNotification(window.Visible and "Interface affichée" or "Interface masquée", 2)
+        end
+    end)
+
+    -- Sauvegarde de la configuration
+    local function saveConfig()
+        local config = {}
+        config.WindowPosition = {mainFrame.Position.X.Scale, mainFrame.Position.X.Offset, mainFrame.Position.Y.Scale, mainFrame.Position.Y.Offset}
+        local success, encoded = pcall(HttpService.JSONEncode, HttpService, config)
+        if success then
+            writefile(window.ConfigFolder .. "/config.json", encoded)
+        end
+    end
+
+    -- Chargement de la configuration
+    local function loadConfig()
+        if isfile(window.ConfigFolder .. "/config.json") then
+            local success, config = pcall(HttpService.JSONDecode, HttpService, readfile(window.ConfigFolder .. "/config.json"))
+            if success and config.WindowPosition then
+                mainFrame.Position = UDim2.new(config.WindowPosition[1], config.WindowPosition[2], config.WindowPosition[3], config.WindowPosition[4])
+            end
+        end
+    end
+
+    -- Initialisation de la configuration
+    if isfolder(window.ConfigFolder) then
+        loadConfig()
+    else
+        makefolder(window.ConfigFolder)
+    end
+
+    mainFrame:GetPropertyChangedSignal("Position"):Connect(saveConfig)
+
+    -- Notification de bienvenue
+    BlitzXHub:CreateNotification(introText or "Bienvenue dans BlitzX Hub !", 3)
+
     return window
 end
 
@@ -134,13 +254,23 @@ function BlitzXHub:AddTab(window, tabName, isDefault, iconAssetId, iconSize, ico
     -- Bouton de l'onglet
     local tabButton = Instance.new("TextButton")
     tabButton.Size = UDim2.new(1, 0, 0, 40)
-    tabButton.Position = UDim2.new(0, 0, 0, #window.Tabs * 40)
     tabButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     tabButton.Text = tabName
     tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     tabButton.TextSize = 16
-    tabButton.Font = Enum.Font.SourceSans
+    tabButton.Font = Enum.Font.Code
     tabButton.Parent = window.TabContainer
+
+    -- Ajout d'une icône si fournie
+    if iconAssetId then
+        local icon = Instance.new("ImageLabel")
+        icon.Size = UDim2.new(0, iconSize and iconSize.X or 24, 0, iconSize and iconSize.Y or 24)
+        icon.Position = UDim2.new(0, iconPosition and iconPosition.X or 5, 0, iconPosition and iconPosition.Y or 8)
+        icon.BackgroundTransparency = 1
+        icon.Image = iconAssetId
+        icon.Parent = tabButton
+        tabButton.TextXAlignment = Enum.TextXAlignment.Right
+    end
 
     -- Conteneur pour le contenu de l'onglet
     local tabContent = Instance.new("Frame")
@@ -149,18 +279,33 @@ function BlitzXHub:AddTab(window, tabName, isDefault, iconAssetId, iconSize, ico
     tabContent.Parent = window.ContentContainer
     tabContent.Visible = isDefault
 
+    local contentLayout = Instance.new("UIListLayout")
+    contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    contentLayout.Padding = UDim.new(0, 5)
+    contentLayout.Parent = tabContent
+
     tab.Button = tabButton
     tab.Content = tabContent
     table.insert(window.Tabs, tab)
+
+    -- Animation au survol
+    tabButton.MouseEnter:Connect(function()
+        TweenService:Create(tabButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(70, 70, 70)}):Play()
+    end)
+    tabButton.MouseLeave:Connect(function()
+        if not tabContent.Visible then
+            TweenService:Create(tabButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 50, 50)}):Play()
+        end
+    end)
 
     -- Gestion du clic sur l'onglet
     tabButton.MouseButton1Click:Connect(function()
         for _, otherTab in ipairs(window.Tabs) do
             otherTab.Content.Visible = false
-            otherTab.Button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+            TweenService:Create(otherTab.Button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 50, 50)}):Play()
         end
         tabContent.Visible = true
-        tabButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        TweenService:Create(tabButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(70, 70, 70)}):Play()
     end)
 
     return tab
@@ -173,9 +318,15 @@ function BlitzXHub:CreateSection(tab, sectionName)
 
     local sectionFrame = Instance.new("Frame")
     sectionFrame.Size = UDim2.new(1, -10, 0, 100)
-    sectionFrame.Position = UDim2.new(0, 5, 0, #tab.Content:GetChildren() * 110)
+    sectionFrame.Position = UDim2.new(0, 5, 0, 0)
     sectionFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
     sectionFrame.Parent = tab.Content
+    sectionFrame.AutomaticSize = Enum.AutomaticSize.Y
+
+    local sectionLayout = Instance.new("UIListLayout")
+    sectionLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    sectionLayout.Padding = UDim.new(0, 5)
+    sectionLayout.Parent = sectionFrame
 
     local sectionLabel = Instance.new("TextLabel")
     sectionLabel.Size = UDim2.new(1, 0, 0, 30)
@@ -183,7 +334,7 @@ function BlitzXHub:CreateSection(tab, sectionName)
     sectionLabel.Text = sectionName
     sectionLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     sectionLabel.TextSize = 16
-    sectionLabel.Font = Enum.Font.SourceSansBold
+    sectionLabel.Font = Enum.Font.Code
     sectionLabel.Parent = sectionFrame
 
     section.Frame = sectionFrame
@@ -194,17 +345,26 @@ end
 function BlitzXHub:CreateButton(section, buttonName, callback)
     local button = Instance.new("TextButton")
     button.Size = UDim2.new(1, -10, 0, 30)
-    button.Position = UDim2.new(0, 5, 0, #section.Frame:GetChildren() * 40)
     button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     button.Text = buttonName or "Button"
     button.TextColor3 = Color3.fromRGB(255, 255, 255)
     button.TextSize = 14
-    button.Font = Enum.Font.SourceSans
+    button.Font = Enum.Font.Code
     button.Parent = section.Frame
+
+    button.MouseEnter:Connect(function()
+        TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(80, 80, 80)}):Play()
+    end)
+    button.MouseLeave:Connect(function()
+        TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(60, 60, 60)}):Play()
+    end)
 
     button.MouseButton1Click:Connect(function()
         if callback then
-            callback()
+            local success, err = pcall(callback)
+            if not success then
+                BlitzXHub:CreateNotification("Erreur dans le callback : " .. tostring(err), 3)
+            end
         end
     end)
 
@@ -215,12 +375,12 @@ end
 function BlitzXHub:CreateLabel(section, labelText)
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(1, -10, 0, 30)
-    label.Position = UDim2.new(0, 5, 0, #section.Frame:GetChildren() * 40)
     label.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     label.Text = labelText or "Label"
     label.TextColor3 = Color3.fromRGB(255, 255, 255)
     label.TextSize = 14
-    label.Font = Enum.Font.SourceSans
+    label.Font = Enum.Font.Code
+    label.TextWrapped = true
     label.Parent = section.Frame
 
     return label
