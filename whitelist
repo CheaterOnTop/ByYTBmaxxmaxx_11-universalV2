@@ -154,9 +154,15 @@ function BlitzXHub:MapValue(Value, InMin, InMax, OutMin, OutMax)
 end
 
 function BlitzXHub:MouseIsOverOpenedFrame()
-    for _, frame in pairs(self.Registry) do
-        if frame:IsA("Frame") and frame.Visible and frame:IsMouseOver() then
-            return true
+    local mousePos = UserInputService:GetMouseLocation()
+    for frame, _ in pairs(self.Registry) do
+        if frame:IsA("GuiObject") and frame.Visible then
+            local pos = frame.AbsolutePosition
+            local size = frame.AbsoluteSize
+            if mousePos.X >= pos.X and mousePos.X <= pos.X + size.X and
+               mousePos.Y >= pos.Y and mousePos.Y <= pos.Y + size.Y then
+                return true
+            end
         end
     end
     return false
@@ -777,15 +783,15 @@ function BlitzXHub:AddButton(section, ...)
             self:SafeCallback(SubButton.Func)
         end)
 
-        if type(SubButton.Tooltip) == 'string' then
-            SubButton:AddTooltip(SubButton.Tooltip)
-        end
-
         function SubButton:AddTooltip(tooltip)
             if type(tooltip) == 'string' then
                 self:AddToolTip(tooltip, SubButton.Outer)
             end
             return SubButton
+        end
+
+        if type(SubButton.Tooltip) == 'string' then
+            SubButton:AddTooltip(SubButton.Tooltip)
         end
 
         return SubButton
