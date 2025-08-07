@@ -1,4 +1,4 @@
--- Table principale de la bibliothèqueded
+-- Table principale de la bibliothèque
 local XyloKitUI = {}
 
 -- Services Roblox nécessaires
@@ -34,7 +34,7 @@ local Themes = {
         MainBackground = Color3.fromRGB(18, 18, 18),
         TabBackground = Color3.fromRGB(24, 24, 24),
         SectionBackground = Color3.fromRGB(30, 30, 30),
-        TextColor = Color3.fromRGB(200, 50, 50), -- Rouge atténué
+        TextColor = Color3.fromRGB(200, 50, 50), -- Rouge atténué (modifiable si illisible)
         TextHoverColor = Color3.fromRGB(220, 80, 80), -- Rouge atténué au survol
         BorderColor = Color3.fromRGB(200, 50, 50), -- Rouge atténué pour les bordures
         SelectedTabColor = Color3.fromRGB(200, 50, 50), -- Rouge atténué pour l'indicateur
@@ -244,10 +244,9 @@ function XyloKitUI:CreateWindow(title)
         tabButton.BackgroundColor3 = currentTheme.TabBackground
         tabButton.Text = name
         tabButton.TextColor3 = currentTheme.TextColor
-        tabButton.TextSize = 14 -- Réduit de 16 à 14 pour mieux s'adapter à Enum.Font.Code
+        tabButton.TextSize = 16 -- Revenu à 16
         tabButton.Font = Enum.Font.Code
-        tabButton.TextXAlignment = Enum.TextXAlignment.Left -- Alignement à gauche pour éviter le débordement
-        tabButton.TextTruncate = Enum.TextTruncate.AtEnd -- Tronquer le texte s'il est trop long
+        tabButton.TextXAlignment = Enum.TextXAlignment.Center -- Alignement centré
         tabButton.BorderSizePixel = 0
         tabButton.Parent = tabBar
 
@@ -299,7 +298,7 @@ function XyloKitUI:CreateWindow(title)
         topContainerLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
         topContainerLayout.Parent = topContainer
 
-        -- Conteneur inférieur pour les sections 4 à 6
+                -- Conteneur inférieur
         local bottomContainer = Instance.new("Frame")
         bottomContainer.Size = UDim2.new(1, 0, 0, 0)
         bottomContainer.Position = UDim2.new(0, 0, 0, 0)
@@ -407,7 +406,6 @@ function XyloKitUI:CreateWindow(title)
                 updateContainerPositions()
             end)
 
-            section.Frame = sectionFrame
             sectionCount = sectionCount + 1
 
             -- Création d'un toggle
@@ -699,7 +697,7 @@ function XyloKitUI:CreateWindow(title)
         playerName.TextSize = 16
         playerName.Font = Enum.Font.Code
         playerName.TextXAlignment = Enum.TextXAlignment.Left
-        playerName.Parent = playerInfoFrame
+                playerName.Parent = playerInfoFrame
 
         -- Profil rond à droite du nom
         local playerProfileImage = Instance.new("ImageLabel")
