@@ -1,11 +1,10 @@
--- CustomGuiLibff
 local CustomGuiLib = {}
 
--- Services nécessaires
+-- Services nécessairesfefe
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 
--- Configuration des styles
+-- Configuration du thème
 local THEME = {
     PrimaryColor = Color3.fromRGB(50, 50, 50), -- Gris foncé
     SecondaryColor = Color3.fromRGB(200, 0, 0), -- Rouge pour les bandes
@@ -17,8 +16,8 @@ local THEME = {
 -- Fonction pour créer une fenêtre
 function CustomGuiLib:CreateWindow(title, size, position)
     local screenGui = Instance.new("ScreenGui")
-    screenGui.Name = title or "CustomGui"
-    screenGui.Parent = game.Players.LocalPlayer.PlayerGui
+    screenGui.Name = title or "ExploitGui"
+    screenGui.Parent = game:GetService("Players").LocalPlayer.PlayerGui
     screenGui.ResetOnSpawn = false
 
     -- Frame principale
@@ -34,7 +33,7 @@ function CustomGuiLib:CreateWindow(title, size, position)
     corner.CornerRadius = THEME.CornerRadius
     corner.Parent = frame
 
-    -- Bande rouge décorative (haut)
+    -- Bande rouge (haut)
     local topBand = Instance.new("Frame")
     topBand.Size = UDim2.new(1, 0, 0, 10)
     topBand.Position = UDim2.new(0, 0, 0, 0)
@@ -47,7 +46,7 @@ function CustomGuiLib:CreateWindow(title, size, position)
     titleLabel.Size = UDim2.new(1, -20, 0, 30)
     titleLabel.Position = UDim2.new(0, 10, 0, 10)
     titleLabel.BackgroundTransparency = 1
-    titleLabel.Text = title or "Custom GUI"
+    titleLabel.Text = title or "Exploit GUI"
     titleLabel.TextColor3 = THEME.TextColor
     titleLabel.Font = THEME.Font
     titleLabel.TextSize = 18
