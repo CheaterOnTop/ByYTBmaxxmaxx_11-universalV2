@@ -431,7 +431,7 @@ function XyloKitUI:CreateWindow(title)
         -- Créer la section et le toggle Auto Safe Execute
 local paramSection = createSection("Setting & Visual")
 if paramSection then
-    paramSection:CreateToggle("FPS boost", config["FPS_Boost"] or false, function(state)
+    paramSection:CreateToggle("FPS boost", false, function(state)
         config["FPS_Boost"] = state
         saveConfig()
 
@@ -442,13 +442,6 @@ if paramSection then
             end)
         end
     end)
-
-    -- Vérifie au lancement si le FPS boost est activé
-    if config["FPS_Boost"] then
-        pcall(function()
-            loadstring(game:HttpGet("https://pastebin.com/raw/UJ0nXJQZ"))()
-        end)
-    end
 end
 
         return tab
