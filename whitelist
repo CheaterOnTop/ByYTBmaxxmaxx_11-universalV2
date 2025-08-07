@@ -1,6 +1,6 @@
 local XyloKitUI = {}
 
--- Services Roblox nécessairesdddddd
+-- Services Roblox nécessaires
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
@@ -143,7 +143,7 @@ function XyloKitUI:CreateWindow(title)
     -- Titre
     local titleLabel = Instance.new("TextLabel")
     titleLabel.Size = UDim2.new(1, -180, 0, 50)
-    titleLabel.Position = UDim2.new(0,180, 0, 0)
+    titleLabel.Position = UDim2.new(0, 180, 0, 0)
     titleLabel.BackgroundTransparency = 1
     titleLabel.Text = title
     titleLabel.TextColor3 = currentTheme.TextColor
@@ -203,9 +203,9 @@ function XyloKitUI:CreateWindow(title)
     -- Bouton Paramètres
     local settingsButton = Instance.new("TextButton")
     settingsButton.Size = UDim2.new(0, 40, 0, 40)
-    settingsButton.Position = UDim2.new(1, -100, 0, 5) -- À gauche du bouton de fermeture
+    settingsButton.Position = UDim2.new(1, -100, 0, 5)
     settingsButton.BackgroundColor3 = currentTheme.ButtonBackground
-    settingsButton.Text = "⚙" -- Symbole d'engrenage pour les paramètres
+    settingsButton.Text = "⚙"
     settingsButton.TextColor3 = currentTheme.TextColor
     settingsButton.TextSize = 20
     settingsButton.Font = Enum.Font.Code
@@ -215,56 +215,6 @@ function XyloKitUI:CreateWindow(title)
     settingsStroke.Thickness = 2
     settingsStroke.Color = currentTheme.BorderColor
     settingsStroke.Parent = settingsButton
-
-    -- Frame des paramètres (caché par défaut)
-    local settingsFrame = Instance.new("Frame")
-    settingsFrame.Size = UDim2.new(0, 200, 0, 100)
-    settingsFrame.Position = UDim2.new(1, -260, 0, 50)
-    settingsFrame.BackgroundColor3 = currentTheme.SectionBackground
-    settingsFrame.Visible = false
-    settingsFrame.Parent = mainFrame
-
-    local settingsFrameStroke = Instance.new("UIStroke")
-    settingsFrameStroke.Thickness = 2
-    settingsFrameStroke.Color = currentTheme.BorderColor
-    settingsFrameStroke.Parent = settingsFrame
-
-    -- Bouton Auto Safe Execute
-    local autoSafeExecuteButton = Instance.new("TextButton")
-    autoSafeExecuteButton.Size = UDim2.new(0, 180, 0, 40)
-    autoSafeExecuteButton.Position = UDim2.new(0, 10, 0, 10)
-    autoSafeExecuteButton.BackgroundColor3 = currentTheme.ButtonBackground
-    autoSafeExecuteButton.Text = "Auto Safe Execute"
-    autoSafeExecuteButton.TextColor3 = currentTheme.TextColor
-    autoSafeExecuteButton.TextSize = 16
-    autoSafeExecuteButton.Font = Enum.Font.Code
-    autoSafeExecuteButton.Parent = settingsFrame
-
-    local autoSafeExecuteStroke = Instance.new("UIStroke")
-    autoSafeExecuteStroke.Thickness = 2
-    autoSafeExecuteStroke.Color = currentTheme.BorderColor
-    autoSafeExecuteStroke.Parent = autoSafeExecuteButton
-
-    -- Logique du bouton Auto Safe Execute
-    autoSafeExecuteButton.MouseButton1Click:Connect(function()
-        print("Auto Safe Execute activé !")
-        -- Insérez ici votre logique pour Auto Safe Execute
-        -- Exemple : queue_on_teleport("print('Script exécuté en toute sécurité')")
-    end)
-
-    -- Effets de survol pour le bouton paramètres
-    settingsButton.MouseEnter:Connect(function()
-        settingsButton.BackgroundColor3 = currentTheme.ButtonHoverBackground
-    end)
-
-    settingsButton.MouseLeave:Connect(function()
-        settingsButton.BackgroundColor3 = currentTheme.ButtonBackground
-    end)
-
-    -- Afficher/masquer le menu des paramètres
-    settingsButton.MouseButton1Click:Connect(function()
-        settingsFrame.Visible = not settingsFrame.Visible
-    end)
 
     closeButton.MouseButton1Click:Connect(function()
         local tweenClose = TweenService:Create(mainFrame, TweenInfo.new(0.6, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {Position = UDim2.new(0.5, mainFrame.Position.X.Offset, -0.5, 0)})
@@ -296,6 +246,287 @@ function XyloKitUI:CreateWindow(title)
     -- Gestion des onglets
     local tabs = {}
     local currentTab = nil
+
+    -- Création de l'onglet Paramètres
+    local settingsTab = nil -- Déclaration pour référence ultérieure
+    local function createSettingsTab()
+        local tab = {}
+        tab.Name = "Paramètres"
+
+        -- Bouton de l'onglet
+        local tabButton = Instance.new("TextButton")
+        tabButton.Size = UDim2.new(1, -10, 0, 40)
+        tabButton.BackgroundColor3 = currentTheme.TabBackground
+        tabButton.Text = "Paramètres"
+        tabButton.TextColor3 = currentTheme.TextColor
+        tabButton.TextSize = 16
+        tabButton.Font = Enum.Font.Code
+        tabButton.BorderSizePixel = 0
+        tabButton.Parent = tabBar
+
+        local tabStroke = Instance.new("UIStroke")
+        tabStroke.Thickness = 0.5
+        tabStroke.Color = currentTheme.BorderColor
+        tabStroke.Parent = tabButton
+
+        -- Indicateur de sélection
+        local tabIndicator = Instance.new("Frame")
+        tabIndicator.Size = UDim2.new(0, 4, 1, 0)
+        tabIndicator.Position = UDim2.new(0, 0, 0, 0)
+        tabIndicator.BackgroundColor3 = currentTheme.SelectedTabColor
+        tabIndicator.BorderSizePixel = 0
+        tabIndicator.Visible = false
+        tabIndicator.Parent = tabButton
+
+        -- Effet de survol
+        tabButton.MouseEnter:Connect(function()
+            if currentTab ~= tab then
+                tabButton.BackgroundColor3 = currentTheme.ButtonHoverBackground
+            end
+        end)
+
+        tabButton.MouseLeave:Connect(function()
+            if currentTab ~= tab then
+                tabButton.BackgroundColor3 = currentTheme.TabBackground
+            end
+        end)
+
+        -- Contenu de l'onglet
+        local tabContent = Instance.new("Frame")
+        tabContent.Size = UDim2.new(1, -20, 1, -110)
+        tabContent.Position = UDim2.new(0, 10, 0, 10)
+        tabContent.BackgroundTransparency = 1
+        tabContent.Parent = contentFrame
+        tabContent.Visible = false -- Caché par défaut
+
+        -- Conteneur principal
+        local topContainer = Instance.new("Frame")
+        topContainer.Size = UDim2.new(1, 0, 0, 0)
+        topContainer.Position = UDim2.new(0, 0, 0, 0)
+        topContainer.BackgroundTransparency = 1
+        topContainer.Parent = tabContent
+
+        local topContainerLayout = Instance.new("UIListLayout")
+        topContainerLayout.FillDirection = Enum.FillDirection.Horizontal
+        topContainerLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        topContainerLayout.Padding = UDim.new(0, 15)
+        topContainerLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+        topContainerLayout.Parent = topContainer
+
+        -- Conteneur inférieur
+        local bottomContainer = Instance.new("Frame")
+        bottomContainer.Size = UDim2.new(1, 0, 0, 0)
+        bottomContainer.Position = UDim2.new(0, 0, 0, 0)
+        bottomContainer.BackgroundTransparency = 1
+        bottomContainer.Parent = tabContent
+
+        local bottomContainerLayout = Instance.new("UIListLayout")
+        bottomContainerLayout.FillDirection = Enum.FillDirection.Horizontal
+        bottomContainerLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        bottomContainerLayout.Padding = UDim.new(0, 15)
+        bottomContainerLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+        bottomContainerLayout.Parent = bottomContainer
+
+        -- Ajustement dynamique
+        local function updateContainerPositions()
+            local maxTopHeight = 0
+            for _, child in pairs(topContainer:GetChildren()) do
+                if child:IsA("Frame") and child ~= topContainerLayout then
+                    maxTopHeight = math.max(maxTopHeight, child.AbsoluteSize.Y)
+                end
+            end
+            topContainer.Size = UDim2.new(1, 0, 0, maxTopHeight)
+            bottomContainer.Position = UDim2.new(0, 0, 0, maxTopHeight + 10)
+        end
+
+        tab.Button = tabButton
+        tab.Content = tabContent
+        tab.TopContainer = topContainer
+        tab.BottomContainer = bottomContainer
+        tab.Indicator = tabIndicator
+        tabs[tab.Name] = tab
+        settingsTab = tab
+
+        -- Gestion du clic
+        tabButton.MouseButton1Click:Connect(function()
+            if currentTab ~= tab then
+                if currentTab then
+                    currentTab.Content.Visible = false
+                    currentTab.Indicator.Visible = false
+                    currentTab.Button.BackgroundColor3 = currentTheme.TabBackground
+                end
+                tabButton.BackgroundColor3 = currentTheme.SelectedTabBackground
+                tabIndicator.Visible = true
+                tabContent.Visible = true
+                currentTab = tab
+                updateContainerPositions()
+            end
+        end)
+
+        -- Créer une section pour les paramètres
+        local sectionCount = 0
+        local function createSection(name)
+            if sectionCount >= 6 then
+                warn("Maximum de 6 sections atteint pour cet onglet.")
+                return nil
+            end
+            local section = {}
+            section.Name = name
+
+            local sectionFrame = Instance.new("Frame")
+            sectionFrame.Size = UDim2.new(0, 250, 0, 300)
+            sectionFrame.BackgroundColor3 = currentTheme.SectionBackground
+            sectionFrame.BorderSizePixel = 0
+            sectionFrame.Parent = (sectionCount < 3 and topContainer or bottomContainer)
+
+            local sectionStroke = Instance.new("UIStroke")
+            sectionStroke.Thickness = 2
+            sectionStroke.Color = currentTheme.BorderColor
+            sectionStroke.Parent = sectionFrame
+
+            local sectionLabel = Instance.new("TextLabel")
+            sectionLabel.Size = UDim2.new(1, -20, 0, 30)
+            sectionLabel.Position = UDim2.new(0, 10, 0, 10)
+            sectionLabel.BackgroundTransparency = 1
+            sectionLabel.Text = name
+            sectionLabel.TextColor3 = currentTheme.TextColor
+            sectionLabel.TextSize = 18
+            sectionLabel.Font = Enum.Font.Code
+            sectionLabel.TextXAlignment = Enum.TextXAlignment.Center
+            sectionLabel.Parent = sectionFrame
+
+            local scrollFrame = Instance.new("ScrollingFrame")
+            scrollFrame.Size = UDim2.new(1, -20, 0, 260)
+            scrollFrame.Position = UDim2.new(0, 10, 0, 40)
+            scrollFrame.BackgroundTransparency = 1
+            scrollFrame.BorderSizePixel = 0
+            scrollFrame.ScrollBarThickness = 6
+            scrollFrame.ScrollBarImageColor3 = currentTheme.BorderColor
+            scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+            scrollFrame.Parent = sectionFrame
+
+            local scrollLayout = Instance.new("UIListLayout")
+            scrollLayout.SortOrder = Enum.SortOrder.LayoutOrder
+            scrollLayout.Padding = UDim.new(0, 8)
+            scrollLayout.Parent = scrollFrame
+
+            local sectionPadding = Instance.new("UIPadding")
+            sectionPadding.PaddingLeft = UDim.new(0, 10)
+            sectionPadding.PaddingTop = UDim.new(0, 0)
+            sectionPadding.PaddingBottom = UDim.new(0, 10)
+            sectionPadding.Parent = scrollFrame
+
+            scrollLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+                scrollFrame.CanvasSize = UDim2.new(0, 0, 0, scrollLayout.AbsoluteContentSize.Y)
+                updateContainerPositions()
+            end)
+
+            sectionCount = sectionCount + 1
+            section.Frame = sectionFrame
+
+            -- Ajout du toggle Auto Safe Execute
+            function section:CreateToggle(name, default, callback)
+                local toggleFrame = Instance.new("Frame")
+                toggleFrame.Size = UDim2.new(1, -20, 0, 35)
+                toggleFrame.BackgroundTransparency = 1
+                toggleFrame.Parent = scrollFrame
+
+                local toggleLabel = Instance.new("TextLabel")
+                toggleLabel.Size = UDim2.new(0.7, 0, 1, 0)
+                toggleLabel.Position = UDim2.new(0, 5, 0, 0)
+                toggleLabel.BackgroundTransparency = 1
+                toggleLabel.Text = name
+                toggleLabel.TextColor3 = currentTheme.TextColor
+                toggleLabel.TextSize = 16
+                toggleLabel.Font = Enum.Font.Code
+                toggleLabel.TextXAlignment = Enum.TextXAlignment.Left
+                toggleLabel.Parent = toggleFrame
+
+                local toggleButton = Instance.new("TextButton")
+                toggleButton.Size = UDim2.new(0, 30, 0, 30)
+                toggleButton.Position = UDim2.new(1, -35, 0, 2)
+                toggleButton.BackgroundColor3 = default and currentTheme.TextColor or currentTheme.ButtonBackground
+                toggleButton.Text = default and "✔" or ""
+                toggleButton.TextColor3 = Color3.fromRGB(0, 200, 0)
+                toggleButton.TextSize = 18
+                toggleButton.Font = Enum.Font.Code
+                toggleButton.BorderSizePixel = 0
+                toggleButton.Parent = toggleFrame
+
+                local toggleStroke = Instance.new("UIStroke")
+                toggleStroke.Thickness = 2
+                toggleStroke.Color = currentTheme.BorderColor
+                toggleStroke.Parent = toggleButton
+
+                local state = default
+                local configKey = tab.Name .. "_" .. section.Name .. "_" .. name .. "_Toggle"
+                if config[configKey] ~= nil then
+                    state = config[configKey]
+                    toggleButton.BackgroundColor3 = state and currentTheme.TextColor or currentTheme.ButtonBackground
+                    toggleButton.Text = state and "✔" or ""
+                end
+
+                toggleButton.MouseEnter:Connect(function()
+                    local tweenHover = TweenService:Create(toggleButton, TweenInfo.new(0.2), {BackgroundColor3 = state and currentTheme.TextHoverColor or currentTheme.ButtonHoverBackground})
+                    tweenHover:Play()
+                end)
+
+                toggleButton.MouseLeave:Connect(function()
+                    local tweenLeave = TweenService:Create(toggleButton, TweenInfo.new(0.2), {BackgroundColor3 = state and currentTheme.TextColor or currentTheme.ButtonBackground})
+                    tweenLeave:Play()
+                end)
+
+                toggleButton.MouseButton1Click:Connect(function()
+                    state = not state
+                    toggleButton.BackgroundColor3 = state and currentTheme.TextColor or currentTheme.ButtonBackground
+                    toggleButton.Text = state and "✔" or ""
+                    config[configKey] = state
+                    saveConfig()
+                    callback(state)
+                end)
+            end
+
+            return section
+        end
+
+        -- Créer la section et le toggle Auto Safe Execute
+        local paramSection = createSection("Paramètres")
+        if paramSection then
+            paramSection:CreateToggle("Auto Safe Execute", false, function(state)
+                print("Auto Safe Execute : " .. tostring(state))
+                -- Insérez ici votre logique pour Auto Safe Execute
+                -- Exemple : if state then queue_on_teleport("print('Script exécuté en toute sécurité')") end
+            end)
+        end
+
+        return tab
+    end
+
+    -- Créer l'onglet Paramètres dès l'initialisation
+    createSettingsTab()
+
+    -- Lier le bouton Paramètres au changement d'onglet
+    settingsButton.MouseEnter:Connect(function()
+        settingsButton.BackgroundColor3 = currentTheme.ButtonHoverBackground
+    end)
+
+    settingsButton.MouseLeave:Connect(function()
+        settingsButton.BackgroundColor3 = currentTheme.ButtonBackground
+    end)
+
+    settingsButton.MouseButton1Click:Connect(function()
+        if settingsTab and currentTab ~= settingsTab then
+            if currentTab then
+                currentTab.Content.Visible = false
+                currentTab.Indicator.Visible = false
+                currentTab.Button.BackgroundColor3 = currentTheme.TabBackground
+            end
+            settingsTab.Button.BackgroundColor3 = currentTheme.SelectedTabBackground
+            settingsTab.Indicator.Visible = true
+            settingsTab.Content.Visible = true
+            currentTab = settingsTab
+        end
+    end)
 
     -- Création d'un onglet
     function XyloKitUIWindow:CreateTab(name)
@@ -341,14 +572,15 @@ function XyloKitUI:CreateWindow(title)
             end
         end)
 
-        -- Contenu de l'onglet avec deux conteneurs
+        -- Contenu de l'onglet
         local tabContent = Instance.new("Frame")
         tabContent.Size = UDim2.new(1, -20, 1, -110)
         tabContent.Position = UDim2.new(0, 10, 0, 10)
         tabContent.BackgroundTransparency = 1
         tabContent.Parent = contentFrame
+        tabContent.Visible = false
 
-        -- Conteneur principal pour les 3 premières sections
+        -- Conteneur principal
         local topContainer = Instance.new("Frame")
         topContainer.Size = UDim2.new(1, 0, 0, 0)
         topContainer.Position = UDim2.new(0, 0, 0, 0)
@@ -362,7 +594,7 @@ function XyloKitUI:CreateWindow(title)
         topContainerLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
         topContainerLayout.Parent = topContainer
 
-        -- Conteneur inférieur pour les sections 4 à 6
+        -- Conteneur inférieur
         local bottomContainer = Instance.new("Frame")
         bottomContainer.Size = UDim2.new(1, 0, 0, 0)
         bottomContainer.Position = UDim2.new(0, 0, 0, 0)
@@ -376,7 +608,7 @@ function XyloKitUI:CreateWindow(title)
         bottomContainerLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
         bottomContainerLayout.Parent = bottomContainer
 
-        -- Ajustement dynamique de la position du bottomContainer
+        -- Ajustement dynamique
         local function updateContainerPositions()
             local maxTopHeight = 0
             for _, child in pairs(topContainer:GetChildren()) do
@@ -411,7 +643,7 @@ function XyloKitUI:CreateWindow(title)
             end
         end)
 
-        -- Création d'une section (limité à 6 sections) avec barre de défilement
+        -- Création d'une section
         local sectionCount = 0
         function tab:CreateSection(name)
             if sectionCount >= 6 then
@@ -706,7 +938,7 @@ function XyloKitUI:CreateWindow(title)
 
                     optionButton.MouseEnter:Connect(function()
                         optionButton.BackgroundColor3 = currentTheme.ButtonHoverBackground
-                end)
+                    end)
 
                     optionButton.MouseLeave:Connect(function()
                         optionButton.BackgroundColor3 = currentTheme.ButtonBackground
@@ -732,49 +964,49 @@ function XyloKitUI:CreateWindow(title)
             return section
         end
 
-        -- Profil du joueur (ajusté en bas à gauche)
-        local playerInfoFrame = Instance.new("Frame")
-        playerInfoFrame.Size = UDim2.new(0, 250, 0, 60)
-        playerInfoFrame.Position = UDim2.new(0, 5, 1, -65)
-        playerInfoFrame.AnchorPoint = Vector2.new(0, 1)
-        playerInfoFrame.BackgroundColor3 = currentTheme.TabBackground
-        playerInfoFrame.BorderSizePixel = 0
-        playerInfoFrame.Parent = mainFrame
-
-        local playerInfoStroke = Instance.new("UIStroke")
-        playerInfoStroke.Thickness = 2
-        playerInfoStroke.Color = currentTheme.BorderColor
-        playerInfoStroke.Parent = playerInfoFrame
-
-        local playerIcon = Instance.new("ImageLabel")
-        playerIcon.Size = UDim2.new(0, 40, 0, 40)
-        playerIcon.Position = UDim2.new(0, 10, 0, 10)
-        playerIcon.BackgroundTransparency = 1
-        playerIcon.Image = player and "rbxthumb://id=" .. player.UserId .. "?width=420&height=420" or ""
-        playerIcon.Parent = playerInfoFrame
-
-        -- Effet de cercle pour l'icône
-        local iconCircleMask = Instance.new("ImageLabel")
-        iconCircleMask.Size = UDim2.new(1, 0, 1, 0)
-        iconCircleMask.BackgroundTransparency = 1
-        iconCircleMask.Image = "rbxassetid://266543268"
-        iconCircleMask.ImageColor3 = Color3.new(1, 1, 1)
-        iconCircleMask.Parent = playerIcon
-
-        local playerName = Instance.new("TextLabel")
-        playerName.Size = UDim2.new(0, 180, 0, 40)
-        playerName.Position = UDim2.new(0, 60, 0, 10)
-        playerName.BackgroundTransparency = 1
-        playerName.Text = player and player.Name or "Loading..."
-        playerName.TextColor3 = currentTheme.TextColor
-        playerName.TextSize = 16
-        playerName.Font = Enum.Font.Code
-        playerName.TextXAlignment = Enum.TextXAlignment.Left
-        playerName.TextTruncate = Enum.TextTruncate.AtEnd
-        playerName.Parent = playerInfoFrame
-
         return tab
     end
+
+    -- Profil du joueur
+    local playerInfoFrame = Instance.new("Frame")
+    playerInfoFrame.Size = UDim2.new(0, 250, 0, 60)
+    playerInfoFrame.Position = UDim2.new(0, 5, 1, -65)
+    playerInfoFrame.AnchorPoint = Vector2.new(0, 1)
+    playerInfoFrame.BackgroundColor3 = currentTheme.TabBackground
+    playerInfoFrame.BorderSizePixel = 0
+    playerInfoFrame.Parent = mainFrame
+
+    local playerInfoStroke = Instance.new("UIStroke")
+    playerInfoStroke.Thickness = 2
+    playerInfoStroke.Color = currentTheme.BorderColor
+    playerInfoStroke.Parent = playerInfoFrame
+
+    local playerIcon = Instance.new("ImageLabel")
+    playerIcon.Size = UDim2.new(0, 40, 0, 40)
+    playerIcon.Position = UDim2.new(0, 10, 0, 10)
+    playerIcon.BackgroundTransparency = 1
+    playerIcon.Image = player and "rbxthumb://id=" .. player.UserId .. "?width=420&height=420" or ""
+    playerIcon.Parent = playerInfoFrame
+
+    -- Effet de cercle
+    local iconCircleMask = Instance.new("ImageLabel")
+    iconCircleMask.Size = UDim2.new(1, 0, 1, 0)
+    iconCircleMask.BackgroundTransparency = 1
+    iconCircleMask.Image = "rbxassetid://266543268"
+    iconCircleMask.ImageColor3 = Color3.new(1, 1, 1)
+    iconCircleMask.Parent = playerIcon
+
+    local playerName = Instance.new("TextLabel")
+    playerName.Size = UDim2.new(0, 180, 0, 40)
+    playerName.Position = UDim2.new(0, 60, 0, 10)
+    playerName.BackgroundTransparency = 1
+    playerName.Text = player and player.Name or "Loading..."
+    playerName.TextColor3 = currentTheme.TextColor
+    playerName.TextSize = 16
+    playerName.Font = Enum.Font.Code
+    playerName.TextXAlignment = Enum.TextXAlignment.Left
+    playerName.TextTruncate = Enum.TextTruncate.AtEnd
+    playerName.Parent = playerInfoFrame
 
     return XyloKitUIWindow
 end
