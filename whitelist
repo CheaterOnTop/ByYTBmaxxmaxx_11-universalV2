@@ -1,4 +1,4 @@
--- Table principale de la bibliothèque
+-- Table principale de la bibliothèquedddddddddd
 local XyloKitUI = {}
 
 -- Services Roblox nécessaires
@@ -247,6 +247,7 @@ function XyloKitUI:CreateWindow(title)
         tabButton.TextSize = 16 -- Revenu à 16
         tabButton.Font = Enum.Font.Code
         tabButton.TextXAlignment = Enum.TextXAlignment.Center -- Alignement centré
+        tabButton.TextStrokeTransparency = 1
         tabButton.BorderSizePixel = 0
         tabButton.Parent = tabBar
 
