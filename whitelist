@@ -233,120 +233,124 @@ function XyloKitUI:CreateWindow(title)
     local currentTab = nil
 
     -- Création d'un onglet
-    function XyloKitUIWindow:CreateTab(name)
-        print("Création de l'onglet : " .. name)
-        local tab = {}
-        tab.Name = name
+function XyloKitUIWindow:CreateTab(name)
+    print("Création de l'onglet : " .. name)
+    local tab = {}
+    tab.Name = name
 
-        -- Bouton de l'onglet
-        local tabButton = Instance.new("TextButton")
-        tabButton.Size = UDim2.new(1, -10, 0, 40)
-        tabButton.BackgroundColor3 = currentTheme.TabBackground
-        tabButton.Text = name
-        tabButton.TextColor3 = currentTheme.TextColor
-        tabButton.TextSize = 16 -- Revenu à 16
-        tabButton.Font = Enum.Font.Gotham
-        tabButton.TextXAlignment = Enum.TextXAlignment.Center -- Alignement centré
-        tabButton.TextStrokeTransparency = 1
-        tabButton.BorderSizePixel = 0
-        tabButton.Parent = tabBar
+    -- Bouton de l'onglet
+    local tabButton = Instance.new("TextButton")
+    tabButton.Size = UDim2.new(1, -10, 0, 50) -- Hauteur augmentée
+    tabButton.BackgroundColor3 = currentTheme.TabBackground
+    tabButton.Text = name
+    tabButton.TextColor3 = currentTheme.TextColor
+    tabButton.TextSize = 20 -- Taille augmentée
+    tabButton.Font = Enum.Font.GothamBold -- Police plus lisible
+    tabButton.TextXAlignment = Enum.TextXAlignment.Center
+    tabButton.TextStrokeTransparency = 1 -- Désactive les contours
+    tabButton.TextScaled = false -- Évite les flous
+    tabButton.BorderSizePixel = 0
+    tabButton.Parent = tabBar
 
-        local tabStroke = Instance.new("UIStroke")
-        tabStroke.Thickness = 2
-        tabStroke.Color = currentTheme.BorderColor
-        tabStroke.Parent = tabButton
+    -- ⚠️ Tu peux commenter ce bloc pour tester sans UIStroke (contour)
+    local tabStroke = Instance.new("UIStroke")
+    tabStroke.Thickness = 2
+    tabStroke.Color = currentTheme.BorderColor
+    tabStroke.Parent = tabButton
 
-        -- Indicateur de sélection
-        local tabIndicator = Instance.new("Frame")
-        tabIndicator.Size = UDim2.new(0, 4, 1, 0)
-        tabIndicator.Position = UDim2.new(0, 0, 0, 0)
-        tabIndicator.BackgroundColor3 = currentTheme.SelectedTabColor
-        tabIndicator.BorderSizePixel = 0
-        tabIndicator.Visible = false
-        tabIndicator.Parent = tabButton
+    -- Indicateur de sélection
+    local tabIndicator = Instance.new("Frame")
+    tabIndicator.Size = UDim2.new(0, 4, 1, 0)
+    tabIndicator.Position = UDim2.new(0, 0, 0, 0)
+    tabIndicator.BackgroundColor3 = currentTheme.SelectedTabColor
+    tabIndicator.BorderSizePixel = 0
+    tabIndicator.Visible = false
+    tabIndicator.Parent = tabButton
 
-        -- Effet de survol
-        tabButton.MouseEnter:Connect(function()
-            if currentTab ~= tab then
-                tabButton.BackgroundColor3 = currentTheme.ButtonHoverBackground
-            end
-        end)
-
-        tabButton.MouseLeave:Connect(function()
-            if currentTab ~= tab then
-                tabButton.BackgroundColor3 = currentTheme.TabBackground
-            end
-        end)
-
-        -- Contenu de l'onglet avec deux conteneurs
-        local tabContent = Instance.new("Frame")
-        tabContent.Size = UDim2.new(1, -20, 1, -110)
-        tabContent.Position = UDim2.new(0, 10, 0, 10)
-        tabContent.BackgroundTransparency = 1
-        tabContent.Parent = contentFrame
-
-        -- Conteneur principal pour les 3 premières sections
-        local topContainer = Instance.new("Frame")
-        topContainer.Size = UDim2.new(1, 0, 0, 0)
-        topContainer.Position = UDim2.new(0, 0, 0, 0)
-        topContainer.BackgroundTransparency = 1
-        topContainer.Parent = tabContent
-
-        local topContainerLayout = Instance.new("UIListLayout")
-        topContainerLayout.FillDirection = Enum.FillDirection.Horizontal
-        topContainerLayout.SortOrder = Enum.SortOrder.LayoutOrder
-        topContainerLayout.Padding = UDim.new(0, 15)
-        topContainerLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
-        topContainerLayout.Parent = topContainer
-
-                -- Conteneur inférieur
-        local bottomContainer = Instance.new("Frame")
-        bottomContainer.Size = UDim2.new(1, 0, 0, 0)
-        bottomContainer.Position = UDim2.new(0, 0, 0, 0)
-        bottomContainer.BackgroundTransparency = 1
-        bottomContainer.Parent = tabContent
-
-        local bottomContainerLayout = Instance.new("UIListLayout")
-        bottomContainerLayout.FillDirection = Enum.FillDirection.Horizontal
-        bottomContainerLayout.SortOrder = Enum.SortOrder.LayoutOrder
-        bottomContainerLayout.Padding = UDim.new(0, 15)
-        bottomContainerLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
-        bottomContainerLayout.Parent = bottomContainer
-
-        -- Ajustement dynamique de la position du bottomContainer
-        local function updateContainerPositions()
-            local maxTopHeight = 0
-            for _, child in pairs(topContainer:GetChildren()) do
-                if child:IsA("Frame") and child ~= topContainerLayout then
-                    maxTopHeight = math.max(maxTopHeight, child.AbsoluteSize.Y)
-                end
-            end
-            topContainer.Size = UDim2.new(1, 0, 0, maxTopHeight)
-            bottomContainer.Position = UDim2.new(0, 0, 0, maxTopHeight + 10)
+    -- Effet de survol
+    tabButton.MouseEnter:Connect(function()
+        if currentTab ~= tab then
+            tabButton.BackgroundColor3 = currentTheme.ButtonHoverBackground
         end
+    end)
 
-        tab.Button = tabButton
-        tab.Content = tabContent
-        tab.TopContainer = topContainer
-        tab.BottomContainer = bottomContainer
-        tab.Indicator = tabIndicator
-        tabs[name] = tab
+    tabButton.MouseLeave:Connect(function()
+        if currentTab ~= tab then
+            tabButton.BackgroundColor3 = currentTheme.TabBackground
+        end
+    end)
 
-        -- Gestion du clic
-        tabButton.MouseButton1Click:Connect(function()
-            if currentTab ~= tab then
-                if currentTab then
-                    currentTab.Content.Visible = false
-                    currentTab.Indicator.Visible = false
-                    currentTab.Button.BackgroundColor3 = currentTheme.TabBackground
-                end
-                tabButton.BackgroundColor3 = currentTheme.SelectedTabBackground
-                tabIndicator.Visible = true
-                tabContent.Visible = true
-                currentTab = tab
-                updateContainerPositions()
+    -- Contenu de l'onglet avec deux conteneurs
+    local tabContent = Instance.new("Frame")
+    tabContent.Size = UDim2.new(1, -20, 1, -110)
+    tabContent.Position = UDim2.new(0, 10, 0, 10)
+    tabContent.BackgroundTransparency = 1
+    tabContent.Parent = contentFrame
+
+    -- Conteneur principal (haut)
+    local topContainer = Instance.new("Frame")
+    topContainer.Size = UDim2.new(1, 0, 0, 0)
+    topContainer.Position = UDim2.new(0, 0, 0, 0)
+    topContainer.BackgroundTransparency = 1
+    topContainer.Parent = tabContent
+
+    local topContainerLayout = Instance.new("UIListLayout")
+    topContainerLayout.FillDirection = Enum.FillDirection.Horizontal
+    topContainerLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    topContainerLayout.Padding = UDim.new(0, 15)
+    topContainerLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+    topContainerLayout.Parent = topContainer
+
+    -- Conteneur inférieur
+    local bottomContainer = Instance.new("Frame")
+    bottomContainer.Size = UDim2.new(1, 0, 0, 0)
+    bottomContainer.Position = UDim2.new(0, 0, 0, 0)
+    bottomContainer.BackgroundTransparency = 1
+    bottomContainer.Parent = tabContent
+
+    local bottomContainerLayout = Instance.new("UIListLayout")
+    bottomContainerLayout.FillDirection = Enum.FillDirection.Horizontal
+    bottomContainerLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    bottomContainerLayout.Padding = UDim.new(0, 15)
+    bottomContainerLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+    bottomContainerLayout.Parent = bottomContainer
+
+    -- Fonction de repositionnement dynamique
+    local function updateContainerPositions()
+        local maxTopHeight = 0
+        for _, child in pairs(topContainer:GetChildren()) do
+            if child:IsA("Frame") and child ~= topContainerLayout then
+                maxTopHeight = math.max(maxTopHeight, child.AbsoluteSize.Y)
             end
-        end)
+        end
+        topContainer.Size = UDim2.new(1, 0, 0, maxTopHeight)
+        bottomContainer.Position = UDim2.new(0, 0, 0, maxTopHeight + 10)
+    end
+
+    -- Stockage des références
+    tab.Button = tabButton
+    tab.Content = tabContent
+    tab.TopContainer = topContainer
+    tab.BottomContainer = bottomContainer
+    tab.Indicator = tabIndicator
+    tabs[name] = tab
+
+    -- Gestion du clic sur l'onglet
+    tabButton.MouseButton1Click:Connect(function()
+        if currentTab ~= tab then
+            if currentTab then
+                currentTab.Content.Visible = false
+                currentTab.Indicator.Visible = false
+                currentTab.Button.BackgroundColor3 = currentTheme.TabBackground
+            end
+            tabButton.BackgroundColor3 = currentTheme.SelectedTabBackground
+            tabIndicator.Visible = true
+            tabContent.Visible = true
+            currentTab = tab
+            updateContainerPositions()
+        end
+    end)
+end
 
         -- Création d'une section (limité à 6 sections) avec barre de défilement
         local sectionCount = 0
