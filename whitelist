@@ -1,6 +1,6 @@
 local XyloKitUI = {}
 
--- Services test
+-- Services Roblox nécessaires
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
@@ -18,6 +18,14 @@ local function waitForGameLoaded()
     end
     return player
 end
+
+-- Détection de l'exécuteur
+local executor = identifyexecutor and identifyexecutor() or "Unknown"
+if executor == "Unknown" then
+    game.Players.LocalPlayer:Kick("#UNKNOWN_EXECUTOR_404")
+    return
+end
+print("Exécuteur détecté : " .. executor)
 
 -- Configuration initiale
 local player = waitForGameLoaded()
@@ -67,19 +75,6 @@ local function loadConfig()
 end
 
 loadConfig()
-
--- Détection de l'exécuteur
-local function detectExecutor()
-    if isSolara then return "Solara" end
-    if xeno or _G_Xeno then return "Xeno" end
-    if wearedevs or jjsploit then return "JJSploit" end
-    if syn then return "Synapse X" end
-    if Krnl then return "Krnl" end
-    if http and queue_on_teleport then return "Swift" end
-    return "Unknown Executor"
-end
-
-print("Exécuteur détecté : " .. detectExecutor())
 
 -- Création de la fenêtre principale
 function XyloKitUI:CreateWindow(title)
@@ -846,8 +841,8 @@ function XyloKitUI:CreateWindow(title)
                 end)
 
                 local dropdownList = Instance.new("ScrollingFrame")
-                dropdownList.Size = UDim2.new(0.6, 0, 0, 0) -- Élargi en largeur
-                dropdownList.Position = UDim2.new(0.4, 0, 1, 5) -- Ajusté pour centrer
+                dropdownList.Size = UDim2.new(0.6, 3, 0, 0) -- Élargi de 3 pixels
+                dropdownList.Position = UDim2.new(0.4, -1, 1, 5) -- Ajusté pour centrer
                 dropdownList.BackgroundColor3 = currentTheme.ButtonBackground
                 dropdownList.Visible = false
                 dropdownList.ScrollBarThickness = 4
