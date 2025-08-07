@@ -1,6 +1,6 @@
 local XyloKitUI = {}
 
--- Services Roblox nécessairessssssssssssssssss
+-- Services Roblox nécessairesoooooooooooo
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
@@ -846,13 +846,13 @@ function XyloKitUI:CreateWindow(title)
                 end)
 
                 local dropdownList = Instance.new("ScrollingFrame")
-                dropdownList.Size = UDim2.new(0.3, 0, 0, 0)
-                dropdownList.Position = UDim2.new(0.7, 0, 1, 5)
+                dropdownList.Size = UDim2.new(0.5, 0, 0, 0) -- Élargi en largeur
+                dropdownList.Position = UDim2.new(0.5, 0, 1, 5)
                 dropdownList.BackgroundColor3 = currentTheme.ButtonBackground
                 dropdownList.Visible = false
                 dropdownList.ScrollBarThickness = 4
                 dropdownList.ScrollBarImageColor3 = currentTheme.BorderColor
-                dropdownList.CanvasSize = UDim2.new(0, 0, 0, #options * 30)
+                dropdownList.CanvasSize = UDim2.new(0, 0, 0, #options * 25)
                 dropdownList.Parent = dropdownFrame
 
                 local dropdownListStroke = Instance.new("UIStroke")
@@ -892,7 +892,7 @@ function XyloKitUI:CreateWindow(title)
 
                     optionButton.MouseButton1Click:Connect(function()
                         dropdownLabel.Text = name .. ": " .. option
-                        dropdownList.Size = UDim2.new(0.3, 0, 0, 0)
+                        dropdownList.Size = UDim2.new(0.5, 0, 0, 0)
                         dropdownList.Visible = false
                         config[configKey] = option
                         saveConfig()
@@ -902,7 +902,7 @@ function XyloKitUI:CreateWindow(title)
 
                 dropdownButton.MouseButton1Click:Connect(function()
                     dropdownList.Visible = not dropdownList.Visible
-                    local targetSize = dropdownList.Visible and UDim2.new(0.3, 0, 0, math.min(#options * 30, 120)) or UDim2.new(0.3, 0, 0, 0)
+                    local targetSize = dropdownList.Visible and UDim2.new(0.5, 0, 0, math.min(#options * 25, 120)) or UDim2.new(0.5, 0, 0, 0)
                     dropdownList.Size = targetSize
                 end)
             end
@@ -931,7 +931,7 @@ function XyloKitUI:CreateWindow(title)
     playerIcon.Size = UDim2.new(0, 40, 0, 40)
     playerIcon.Position = UDim2.new(0, 10, 0, 10)
     playerIcon.BackgroundTransparency = 1
-    playerIcon.Image = player and "rbxthumb://id=" .. player.UserId .. "?width=420&height=420" or ""
+    playerIcon.Image = player and "rbxthumb://type=AvatarHeadShot&id=" .. player.UserId .. "&w=420&h=420" or ""
     playerIcon.Parent = playerInfoFrame
 
     -- Effet de cercle
@@ -946,7 +946,7 @@ function XyloKitUI:CreateWindow(title)
     playerName.Size = UDim2.new(0, 180, 0, 40)
     playerName.Position = UDim2.new(0, 60, 0, 10)
     playerName.BackgroundTransparency = 1
-    playerName.Text = player and player.Name or "Loading..."
+    playerName.Text = player and player.Name or "#ERROR_UNKNOW_404"
     playerName.TextColor3 = currentTheme.TextColor
     playerName.TextSize = 16
     playerName.Font = Enum.Font.Code
