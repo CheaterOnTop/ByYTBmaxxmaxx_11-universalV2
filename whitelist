@@ -1,6 +1,6 @@
 local XyloKitUI = {}
 
--- Services Roblox nécessairesoooooooooooo
+-- Services test
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
@@ -846,13 +846,13 @@ function XyloKitUI:CreateWindow(title)
                 end)
 
                 local dropdownList = Instance.new("ScrollingFrame")
-                dropdownList.Size = UDim2.new(0.5, 0, 0, 0) -- Élargi en largeur
-                dropdownList.Position = UDim2.new(0.5, 0, 1, 5)
+                dropdownList.Size = UDim2.new(0.6, 0, 0, 0) -- Élargi en largeur
+                dropdownList.Position = UDim2.new(0.4, 0, 1, 5) -- Ajusté pour centrer
                 dropdownList.BackgroundColor3 = currentTheme.ButtonBackground
                 dropdownList.Visible = false
                 dropdownList.ScrollBarThickness = 4
                 dropdownList.ScrollBarImageColor3 = currentTheme.BorderColor
-                dropdownList.CanvasSize = UDim2.new(0, 0, 0, #options * 25)
+                dropdownList.CanvasSize = UDim2.new(0, 0, 0, #options * 30)
                 dropdownList.Parent = dropdownFrame
 
                 local dropdownListStroke = Instance.new("UIStroke")
@@ -873,7 +873,7 @@ function XyloKitUI:CreateWindow(title)
 
                 for _, option in pairs(options) do
                     local optionButton = Instance.new("TextButton")
-                    optionButton.Size = UDim2.new(1, -10, 0, 25)
+                    optionButton.Size = UDim2.new(1, -10, 0, 30)
                     optionButton.BackgroundColor3 = currentTheme.ButtonBackground
                     optionButton.Text = option
                     optionButton.TextColor3 = currentTheme.TextColor
@@ -932,15 +932,13 @@ function XyloKitUI:CreateWindow(title)
     playerIcon.Position = UDim2.new(0, 10, 0, 10)
     playerIcon.BackgroundTransparency = 1
     playerIcon.Image = player and "rbxthumb://type=AvatarHeadShot&id=" .. player.UserId .. "&w=420&h=420" or ""
+    playerIcon.ClipsDescendants = true
     playerIcon.Parent = playerInfoFrame
 
     -- Effet de cercle
-    local iconCircleMask = Instance.new("ImageLabel")
-    iconCircleMask.Size = UDim2.new(1, 0, 1, 0)
-    iconCircleMask.BackgroundTransparency = 1
-    iconCircleMask.Image = "rbxassetid://266543268"
-    iconCircleMask.ImageColor3 = Color3.new(1, 1, 1)
-    iconCircleMask.Parent = playerIcon
+    local iconCircle = Instance.new("UICorner")
+    iconCircle.CornerRadius = UDim.new(0.5, 0)
+    iconCircle.Parent = playerIcon
 
     local playerName = Instance.new("TextLabel")
     playerName.Size = UDim2.new(0, 180, 0, 40)
