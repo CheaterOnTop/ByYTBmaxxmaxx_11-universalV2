@@ -1,6 +1,6 @@
 local XyloKitUI = {}
 
--- Services Roblox nécessaires
+-- Services Roblox nécessairesdddddd
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
@@ -706,7 +706,7 @@ function XyloKitUI:CreateWindow(title)
 
                     optionButton.MouseEnter:Connect(function()
                         optionButton.BackgroundColor3 = currentTheme.ButtonHoverBackground
-                    Fifteen)
+                end)
 
                     optionButton.MouseLeave:Connect(function()
                         optionButton.BackgroundColor3 = currentTheme.ButtonBackground
