@@ -1,14 +1,17 @@
 local CustomGuiLib = {}
 
--- Services nécessairesfefe
+-- Services nécessaires
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
 
--- Configuration du thème
+-- Configuration du thème (inspiré de Rayfield)
 local THEME = {
     PrimaryColor = Color3.fromRGB(50, 50, 50), -- Gris foncé
     SecondaryColor = Color3.fromRGB(200, 0, 0), -- Rouge pour les bandes
     TextColor = Color3.fromRGB(255, 255, 255), -- Blanc pour le texte
+    ButtonHover = Color3.fromRGB(70, 70, 70), -- Gris clair pour survol
+    BorderColor = Color3.fromRGB(30, 30, 30), -- Bordure sombre
     Font = Enum.Font.Code,
     CornerRadius = UDim.new(0, 8)
 }
@@ -17,15 +20,16 @@ local THEME = {
 function CustomGuiLib:CreateWindow(title, size, position)
     local screenGui = Instance.new("ScreenGui")
     screenGui.Name = title or "ExploitGui"
-    screenGui.Parent = game:GetService("Players").LocalPlayer.PlayerGui
+    screenGui.Parent = Players.LocalPlayer.PlayerGui
     screenGui.ResetOnSpawn = false
 
-    -- Frame principale
+    -- Frame principale (taille agrandie)
     local frame = Instance.new("Frame")
-    frame.Size = size or UDim2.new(0, 400, 0, 300)
-    frame.Position = position or UDim2.new(0.5, -200, 0.5, -150)
+    frame.Size = size or UDim2.new(0, 600, 0, 450) -- Taille agrandie
+    frame.Position = position or UDim2.new(0.5, -300, 0.5, -225) -- Centré
     frame.BackgroundColor3 = THEME.PrimaryColor
     frame.BorderSizePixel = 0
+    frame.Visible = false -- Caché par défaut
     frame.Parent = screenGui
 
     -- Coins arrondis
@@ -87,42 +91,67 @@ function CustomGuiLib:CreateWindow(title, size, position)
         end
     end)
 
-    -- Container pour les boutons
-    local buttonContainer = Instance.new("Frame")
-    buttonContainer.Size = UDim2.new(1, -20, 1, -50)
-    buttonContainer.Position = UDim2.new(0, 10, 0, 40)
-    buttonContainer.BackgroundTransparency = 1
-    buttonContainer.Parent = frame
+    -- Container pour les éléments (avec scrolling)
+    local scrollFrame = Instance.new("ScrollingFrame")
+    scrollFrame.Size = UDim2.new(1, -20, 1, -50)
+    scrollFrame.Position = UDim2.new(0, 10, 0, 40)
+    scrollFrame.BackgroundTransparency = 1
+    scrollFrame.ScrollBarThickness = 5
+    scrollFrame.ScrollBarImageColor3 = THEME.SecondaryColor
+    scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0) -- Auto-ajusté
+    scrollFrame.Parent = frame
 
     local listLayout = Instance.new("UIListLayout")
     listLayout.Padding = UDim.new(0, 5)
     listLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    listLayout.Parent = buttonContainer
+    listLayout.Parent = scrollFrame
+
+    -- Ajuster automatiquement la taille du canvas
+    listLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        scrollFrame.CanvasSize = UDim2.new(0, 0, 0, listLayout.AbsoluteContentSize.Y)
+    end)
+
+    -- Toggle avec RightShift
+    local isVisible = false
+    UserInputService.InputBegan:Connect(function(input)
+        if input.KeyCode == Enum.KeyCode.RightShift then
+            isVisible = not isVisible
+            frame.Visible = isVisible
+            local tween = TweenService:Create(frame, TweenInfo.new(0.3), {BackgroundTransparency = isVisible and 0 or 1})
+            tween:Play()
+        end
+    end)
 
     -- Objet fenêtre
     local window = {
         Frame = frame,
-        ButtonContainer = buttonContainer,
-        Buttons = {}
+        ScrollFrame = scrollFrame,
+        Buttons = {},
+        Sliders = {}
     }
 
-    -- Fonction pour ajouter un bouton
+    -- Fonction pour ajouter un bouton (style Rayfield)
     function window:AddButton(text, callback)
         local button = Instance.new("TextButton")
-        button.Size = UDim2.new(1, 0, 0, 40)
+        button.Size = UDim2.new(1, -10, 0, 40)
         button.BackgroundColor3 = THEME.PrimaryColor
         button.BorderSizePixel = 0
         button.Text = text or "Button"
         button.TextColor3 = THEME.TextColor
         button.Font = THEME.Font
         button.TextSize = 16
-        button.Parent = buttonContainer
+        button.Parent = scrollFrame
 
         local buttonCorner = Instance.new("UICorner")
         buttonCorner.CornerRadius = THEME.CornerRadius
         buttonCorner.Parent = button
 
-        -- Bande rouge sur le bouton
+        local buttonStroke = Instance.new("UIStroke")
+        buttonStroke.Thickness = 1
+        buttonStroke.Color = THEME.BorderColor
+        buttonStroke.Parent = button
+
+        -- Bande rouge
         local buttonBand = Instance.new("Frame")
         buttonBand.Size = UDim2.new(0, 5, 1, 0)
         buttonBand.Position = UDim2.new(0, 0, 0, 0)
@@ -130,9 +159,9 @@ function CustomGuiLib:CreateWindow(title, size, position)
         buttonBand.BorderSizePixel = 0
         buttonBand.Parent = button
 
-        -- Effet de survol
+        -- Effet de survol (style Rayfield)
         button.MouseEnter:Connect(function()
-            local tween = TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(70, 70, 70)})
+            local tween = TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = THEME.ButtonHover})
             tween:Play()
         end)
 
@@ -141,7 +170,6 @@ function CustomGuiLib:CreateWindow(title, size, position)
             tween:Play()
         end)
 
-        -- Callback
         button.MouseButton1Click:Connect(function()
             if callback then
                 callback()
@@ -150,6 +178,94 @@ function CustomGuiLib:CreateWindow(title, size, position)
 
         table.insert(window.Buttons, button)
         return button
+    end
+
+    -- Fonction pour ajouter un slider (adapté de ton code)
+    function window:AddSlider(name, min, max, default, callback)
+        local sliderFrame = Instance.new("Frame")
+        sliderFrame.Size = UDim2.new(1, -20, 0, 50)
+        sliderFrame.BackgroundTransparency = 1
+        sliderFrame.Parent = scrollFrame
+
+        local sliderLabel = Instance.new("TextLabel")
+        sliderLabel.Size = UDim2.new(0.6, 0, 0, 20)
+        sliderLabel.Position = UDim2.new(0, 5, 0, 0)
+        sliderLabel.BackgroundTransparency = 1
+        sliderLabel.Text = name .. ": " .. default
+        sliderLabel.TextColor3 = THEME.TextColor
+        sliderLabel.TextSize = 16
+        sliderLabel.Font = THEME.Font -- Police Enum.Font.Code
+        sliderLabel.TextXAlignment = Enum.TextXAlignment.Left
+        sliderLabel.Parent = sliderFrame
+
+        local sliderBar = Instance.new("Frame")
+        sliderBar.Size = UDim2.new(1, -10, 0, 6)
+        sliderBar.Position = UDim2.new(0, 5, 0, 30)
+        sliderBar.BackgroundColor3 = THEME.PrimaryColor
+        sliderBar.Parent = sliderFrame
+
+        local sliderBarStroke = Instance.new("UIStroke")
+        sliderBarStroke.Thickness = 2
+        sliderBarStroke.Color = THEME.BorderColor
+        sliderBarStroke.Parent = sliderBar
+
+        local sliderFill = Instance.new("Frame")
+        sliderFill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
+        sliderFill.BackgroundColor3 = THEME.SecondaryColor -- Rouge pour la barre remplie
+        sliderFill.BorderSizePixel = 0
+        sliderFill.Parent = sliderBar
+
+        local sliderFillStroke = Instance.new("UIStroke")
+        sliderFillStroke.Thickness = 2
+        sliderFillStroke.Color = THEME.BorderColor
+        sliderFillStroke.Parent = sliderFill
+
+        local sliderButton = Instance.new("TextButton")
+        sliderButton.Size = UDim2.new(0, 16, 0, 16)
+        sliderButton.Position = UDim2.new((default - min) / (max - min), -8, 0, -5)
+        sliderButton.BackgroundColor3 = THEME.TextColor
+        sliderButton.Text = ""
+        sliderButton.Parent = sliderBar
+
+        local sliderButtonStroke = Instance.new("UIStroke")
+        sliderButtonStroke.Thickness = 2
+        sliderButtonStroke.Color = THEME.BorderColor
+        sliderButtonStroke.Parent = sliderButton
+
+        local sliderButtonCorner = Instance.new("UICorner")
+        sliderButtonCorner.CornerRadius = UDim.new(0, 8)
+        sliderButtonCorner.Parent = sliderButton
+
+        local dragging = false
+        sliderButton.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = true
+            end
+        end)
+
+        sliderButton.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = false
+            end
+        end)
+
+        UserInputService.InputChanged:Connect(function(input)
+            if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+                local mousePos = UserInputService:GetMouseLocation()
+                local relativePos = (mousePos.X - sliderBar.AbsolutePosition.X) / sliderBar.AbsoluteSize.X
+                relativePos = math.clamp(relativePos, 0, 1)
+                local value = math.floor(min + (max - min) * relativePos)
+                sliderFill.Size = UDim2.new(relativePos, 0, 1, 0)
+                sliderButton.Position = UDim2.new(relativePos, -8, 0, -5)
+                sliderLabel.Text = name .. ": " .. value
+                if callback then
+                    callback(value)
+                end
+            end
+        end)
+
+        table.insert(window.Sliders, sliderFrame)
+        return sliderFrame
     end
 
     return window
