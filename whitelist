@@ -1,6 +1,6 @@
 local XyloKitUI = {}
 
--- Servicssssssssssssssssssssss
+-- Servic
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
@@ -246,7 +246,7 @@ function XyloKitUI:CreateWindow(title)
     -- Création de l'onglet Paramètres (caché)
     local function createSettingsTab()
         local tab = {}
-        tab.Name = "Paramètres"
+        tab.Name = "Setting & Visual"
 
         -- Contenu de l'onglet (pas de bouton dans tabBar)
         local tabContent = Instance.new("Frame")
@@ -429,14 +429,27 @@ function XyloKitUI:CreateWindow(title)
         end
 
         -- Créer la section et le toggle Auto Safe Execute
-        local paramSection = createSection("Paramètres")
-        if paramSection then
-            paramSection:CreateToggle("Auto Safe Execute", false, function(state)
-                print("Auto Safe Execute : " .. tostring(state))
-                -- Insérez ici votre logique pour Auto Safe Execute
-                -- Exemple : if state then queue_on_teleport("print('Script exécuté en toute sécurité')") end
+local paramSection = createSection("Setting & Visual")
+if paramSection then
+    paramSection:CreateToggle("FPS boost", config["FPS_Boost"] or false, function(state)
+        config["FPS_Boost"] = state
+        saveConfig()
+
+        if state then
+            -- Exécute le script FPS boost
+            pcall(function()
+                loadstring(game:HttpGet("https://pastebin.com/raw/UJ0nXJQZ"))()
             end)
         end
+    end)
+
+    -- Vérifie au lancement si le FPS boost est activé
+    if config["FPS_Boost"] then
+        pcall(function()
+            loadstring(game:HttpGet("https://pastebin.com/raw/UJ0nXJQZ"))()
+        end)
+    end
+end
 
         return tab
     end
@@ -911,7 +924,7 @@ function XyloKitUI:CreateWindow(title)
     -- Profil du joueur
     local playerInfoFrame = Instance.new("Frame")
     playerInfoFrame.Size = UDim2.new(0, 198, 0, 60)
-    playerInfoFrame.Position = UDim2.new(0, 0, 1, 5)
+    playerInfoFrame.Position = UDim2.new(0, 0, 1, 190)
     playerInfoFrame.AnchorPoint = Vector2.new(0, 1)
     playerInfoFrame.BackgroundColor3 = currentTheme.TabBackground
     playerInfoFrame.BorderSizePixel = 0
