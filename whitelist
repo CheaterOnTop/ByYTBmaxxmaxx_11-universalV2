@@ -1,6 +1,6 @@
 local XyloKitUI = {}
 
--- Servicxxxxxxxxxxxxxxefefefef
+-- Servicssssssssssssssssssssss
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
@@ -911,7 +911,7 @@ function XyloKitUI:CreateWindow(title)
     -- Profil du joueur
     local playerInfoFrame = Instance.new("Frame")
     playerInfoFrame.Size = UDim2.new(0, 198, 0, 60)
-    playerInfoFrame.Position = UDim2.new(0, 0, 1, -310)
+    playerInfoFrame.Position = UDim2.new(0, 0, 1, 190)
     playerInfoFrame.AnchorPoint = Vector2.new(0, 1)
     playerInfoFrame.BackgroundColor3 = currentTheme.TabBackground
     playerInfoFrame.BorderSizePixel = 0
