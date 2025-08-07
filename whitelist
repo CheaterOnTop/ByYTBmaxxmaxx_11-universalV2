@@ -1,4 +1,4 @@
--- Test
+-- Test 22
 local XyloKitUI = {}
 
 -- Services Roblox nécessaires
@@ -244,14 +244,14 @@ function XyloKitUI:CreateWindow(title)
     tabButton.BackgroundColor3 = currentTheme.TabBackground
     tabButton.Text = name
     tabButton.TextColor3 = currentTheme.TextColor
-    tabButton.TextSize = 14 -- Taille réduite
+    tabButton.TextSize = 16 -- Taille réduite
     tabButton.TextScaled = false -- Désactiver TextScaled
-    tabButton.Font = Enum.Font.SourceSans -- Police alternative
+    tabButton.Font = Enum.Font.Code -- Police alternative
     tabButton.BorderSizePixel = 0
     tabButton.Parent = tabBar
 
         local tabStroke = Instance.new("UIStroke")
-        tabStroke.Thickness = 1
+        tabStroke.Thickness = 0.5
         tabStroke.Color = Color3.fromRGB(200, 60, 60)
         tabStroke.Parent = tabButton
 
