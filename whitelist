@@ -1,11 +1,11 @@
--- Nom de la bibliothèque : CustomGuiLib
+-- CustomGuiLibff
 local CustomGuiLib = {}
 
 -- Services nécessaires
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 
--- Configuration des styles par défaut
+-- Configuration des styles
 local THEME = {
     PrimaryColor = Color3.fromRGB(50, 50, 50), -- Gris foncé
     SecondaryColor = Color3.fromRGB(200, 0, 0), -- Rouge pour les bandes
@@ -17,7 +17,7 @@ local THEME = {
 -- Fonction pour créer une fenêtre
 function CustomGuiLib:CreateWindow(title, size, position)
     local screenGui = Instance.new("ScreenGui")
-    screenGui.Name = title
+    screenGui.Name = title or "CustomGui"
     screenGui.Parent = game.Players.LocalPlayer.PlayerGui
     screenGui.ResetOnSpawn = false
 
@@ -29,7 +29,7 @@ function CustomGuiLib:CreateWindow(title, size, position)
     frame.BorderSizePixel = 0
     frame.Parent = screenGui
 
-    -- Coin arrondis
+    -- Coins arrondis
     local corner = Instance.new("UICorner")
     corner.CornerRadius = THEME.CornerRadius
     corner.Parent = frame
@@ -54,7 +54,7 @@ function CustomGuiLib:CreateWindow(title, size, position)
     titleLabel.TextXAlignment = Enum.TextXAlignment.Left
     titleLabel.Parent = frame
 
-    -- Permet de déplacer la fenêtre
+    -- Déplacement de la fenêtre
     local dragging, dragInput, dragStart, startPos
 
     local function updateInput(input)
@@ -100,7 +100,7 @@ function CustomGuiLib:CreateWindow(title, size, position)
     listLayout.SortOrder = Enum.SortOrder.LayoutOrder
     listLayout.Parent = buttonContainer
 
-    -- Retourne un objet fenêtre avec des méthodes
+    -- Objet fenêtre
     local window = {
         Frame = frame,
         ButtonContainer = buttonContainer,
@@ -123,7 +123,7 @@ function CustomGuiLib:CreateWindow(title, size, position)
         buttonCorner.CornerRadius = THEME.CornerRadius
         buttonCorner.Parent = button
 
-        -- Bande rouge décorative sur le bouton
+        -- Bande rouge sur le bouton
         local buttonBand = Instance.new("Frame")
         buttonBand.Size = UDim2.new(0, 5, 1, 0)
         buttonBand.Position = UDim2.new(0, 0, 0, 0)
@@ -142,7 +142,7 @@ function CustomGuiLib:CreateWindow(title, size, position)
             tween:Play()
         end)
 
-        -- Callback du bouton
+        -- Callback
         button.MouseButton1Click:Connect(function()
             if callback then
                 callback()
