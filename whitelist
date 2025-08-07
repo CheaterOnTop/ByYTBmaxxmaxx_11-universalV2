@@ -1,4 +1,4 @@
--- Test 22
+-- Table principale de la bibliothèque
 local XyloKitUI = {}
 
 -- Services Roblox nécessaires
@@ -240,26 +240,25 @@ function XyloKitUI:CreateWindow(title)
 
         -- Bouton de l'onglet
         local tabButton = Instance.new("TextButton")
-    tabButton.Size = UDim2.new(1, -5, 0, 40) -- Plus d'espace
-    tabButton.BackgroundColor3 = currentTheme.TabBackground
-    tabButton.Text = name
-    tabButton.TextColor3 = currentTheme.TextColor
-    tabButton.TextSize = 16 -- Taille réduite
-    tabButton.TextScaled = false -- Désactiver TextScaled
-    tabButton.Font = Enum.Font.Code -- Police alternative
-    tabButton.BorderSizePixel = 0
-    tabButton.Parent = tabBar
+        tabButton.Size = UDim2.new(1, -10, 0, 40)
+        tabButton.BackgroundColor3 = currentTheme.TabBackground
+        tabButton.Text = name
+        tabButton.TextColor3 = currentTheme.TextColor
+        tabButton.TextSize = 16
+        tabButton.Font = Enum.Font.Code -- Police modifiée
+        tabButton.BorderSizePixel = 0
+        tabButton.Parent = tabBar
 
         local tabStroke = Instance.new("UIStroke")
-        tabStroke.Thickness = 0.5
-        tabStroke.Color = Color3.fromRGB(200, 60, 60)
+        tabStroke.Thickness = 2
+        tabStroke.Color = currentTheme.BorderColor
         tabStroke.Parent = tabButton
 
         -- Indicateur de sélection
         local tabIndicator = Instance.new("Frame")
         tabIndicator.Size = UDim2.new(0, 4, 1, 0)
         tabIndicator.Position = UDim2.new(0, 0, 0, 0)
-        tabIndicator.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
+        tabIndicator.BackgroundColor3 = currentTheme.SelectedTabColor
         tabIndicator.BorderSizePixel = 0
         tabIndicator.Visible = false
         tabIndicator.Parent = tabButton
@@ -273,7 +272,7 @@ function XyloKitUI:CreateWindow(title)
 
         tabButton.MouseLeave:Connect(function()
             if currentTab ~= tab then
-                tabButton.BackgroundColor3 = cColor3.fromRGB(200, 60, 60)
+                tabButton.BackgroundColor3 = currentTheme.TabBackground
             end
         end)
 
