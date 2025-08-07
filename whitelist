@@ -1,6 +1,6 @@
 local XyloKitUI = {}
 
--- Services Roblox nécessaires
+-- Services Roblox nécessairessssssssssssssssssssssssssssss
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
@@ -841,7 +841,7 @@ function XyloKitUI:CreateWindow(title)
                 end)
 
                 local dropdownList = Instance.new("ScrollingFrame")
-                dropdownList.Size = UDim2.new(0.6, 3, 0, 0) -- Élargi de 3 pixels
+                dropdownList.Size = UDim2.new(0.6, 9, 0, 0) -- Élargi de 3 pixels
                 dropdownList.Position = UDim2.new(0.4, -1, 1, 5) -- Ajusté pour centrer
                 dropdownList.BackgroundColor3 = currentTheme.ButtonBackground
                 dropdownList.Visible = false
