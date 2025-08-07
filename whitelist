@@ -1,4 +1,4 @@
--- Table principale de la bibliothèque
+-- test pls
 local XyloKitUI = {}
 
 -- Services Roblox nécessaires
@@ -250,7 +250,7 @@ function XyloKitUI:CreateWindow(title)
         tabButton.Parent = tabBar
 
         local tabStroke = Instance.new("UIStroke")
-        tabStroke.Thickness = 2
+        tabStroke.Thickness = 0.5
         tabStroke.Color = currentTheme.BorderColor
         tabStroke.Parent = tabButton
 
