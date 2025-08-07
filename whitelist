@@ -1,6 +1,6 @@
 local XyloKitUI = {}
 
--- Services Roblox nécessaires
+-- Services Roblox nécessairessssssssssssssssss
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
@@ -246,58 +246,20 @@ function XyloKitUI:CreateWindow(title)
     -- Gestion des onglets
     local tabs = {}
     local currentTab = nil
+    local settingsTab = nil
 
-    -- Création de l'onglet Paramètres
-    local settingsTab = nil -- Déclaration pour référence ultérieure
+    -- Création de l'onglet Paramètres (caché)
     local function createSettingsTab()
         local tab = {}
         tab.Name = "Paramètres"
 
-        -- Bouton de l'onglet
-        local tabButton = Instance.new("TextButton")
-        tabButton.Size = UDim2.new(1, -10, 0, 40)
-        tabButton.BackgroundColor3 = currentTheme.TabBackground
-        tabButton.Text = "Paramètres"
-        tabButton.TextColor3 = currentTheme.TextColor
-        tabButton.TextSize = 16
-        tabButton.Font = Enum.Font.Code
-        tabButton.BorderSizePixel = 0
-        tabButton.Parent = tabBar
-
-        local tabStroke = Instance.new("UIStroke")
-        tabStroke.Thickness = 0.5
-        tabStroke.Color = currentTheme.BorderColor
-        tabStroke.Parent = tabButton
-
-        -- Indicateur de sélection
-        local tabIndicator = Instance.new("Frame")
-        tabIndicator.Size = UDim2.new(0, 4, 1, 0)
-        tabIndicator.Position = UDim2.new(0, 0, 0, 0)
-        tabIndicator.BackgroundColor3 = currentTheme.SelectedTabColor
-        tabIndicator.BorderSizePixel = 0
-        tabIndicator.Visible = false
-        tabIndicator.Parent = tabButton
-
-        -- Effet de survol
-        tabButton.MouseEnter:Connect(function()
-            if currentTab ~= tab then
-                tabButton.BackgroundColor3 = currentTheme.ButtonHoverBackground
-            end
-        end)
-
-        tabButton.MouseLeave:Connect(function()
-            if currentTab ~= tab then
-                tabButton.BackgroundColor3 = currentTheme.TabBackground
-            end
-        end)
-
-        -- Contenu de l'onglet
+        -- Contenu de l'onglet (pas de bouton dans tabBar)
         local tabContent = Instance.new("Frame")
         tabContent.Size = UDim2.new(1, -20, 1, -110)
         tabContent.Position = UDim2.new(0, 10, 0, 10)
         tabContent.BackgroundTransparency = 1
         tabContent.Parent = contentFrame
-        tabContent.Visible = false -- Caché par défaut
+        tabContent.Visible = false
 
         -- Conteneur principal
         local topContainer = Instance.new("Frame")
@@ -339,29 +301,11 @@ function XyloKitUI:CreateWindow(title)
             bottomContainer.Position = UDim2.new(0, 0, 0, maxTopHeight + 10)
         end
 
-        tab.Button = tabButton
         tab.Content = tabContent
         tab.TopContainer = topContainer
         tab.BottomContainer = bottomContainer
-        tab.Indicator = tabIndicator
         tabs[tab.Name] = tab
         settingsTab = tab
-
-        -- Gestion du clic
-        tabButton.MouseButton1Click:Connect(function()
-            if currentTab ~= tab then
-                if currentTab then
-                    currentTab.Content.Visible = false
-                    currentTab.Indicator.Visible = false
-                    currentTab.Button.BackgroundColor3 = currentTheme.TabBackground
-                end
-                tabButton.BackgroundColor3 = currentTheme.SelectedTabBackground
-                tabIndicator.Visible = true
-                tabContent.Visible = true
-                currentTab = tab
-                updateContainerPositions()
-            end
-        end)
 
         -- Créer une section pour les paramètres
         local sectionCount = 0
@@ -424,7 +368,7 @@ function XyloKitUI:CreateWindow(title)
             sectionCount = sectionCount + 1
             section.Frame = sectionFrame
 
-            -- Ajout du toggle Auto Safe Execute
+            -- Ajout du toggle
             function section:CreateToggle(name, default, callback)
                 local toggleFrame = Instance.new("Frame")
                 toggleFrame.Size = UDim2.new(1, -20, 0, 35)
@@ -518,11 +462,11 @@ function XyloKitUI:CreateWindow(title)
         if settingsTab and currentTab ~= settingsTab then
             if currentTab then
                 currentTab.Content.Visible = false
-                currentTab.Indicator.Visible = false
-                currentTab.Button.BackgroundColor3 = currentTheme.TabBackground
+                if currentTab.Indicator then
+                    currentTab.Indicator.Visible = false
+                    currentTab.Button.BackgroundColor3 = currentTheme.TabBackground
+                end
             end
-            settingsTab.Button.BackgroundColor3 = currentTheme.SelectedTabBackground
-            settingsTab.Indicator.Visible = true
             settingsTab.Content.Visible = true
             currentTab = settingsTab
         end
@@ -632,8 +576,10 @@ function XyloKitUI:CreateWindow(title)
             if currentTab ~= tab then
                 if currentTab then
                     currentTab.Content.Visible = false
-                    currentTab.Indicator.Visible = false
-                    currentTab.Button.BackgroundColor3 = currentTheme.TabBackground
+                    if currentTab.Indicator then
+                        currentTab.Indicator.Visible = false
+                        currentTab.Button.BackgroundColor3 = currentTheme.TabBackground
+                    end
                 end
                 tabButton.BackgroundColor3 = currentTheme.SelectedTabBackground
                 tabIndicator.Visible = true
