@@ -897,7 +897,7 @@ function XyloKitUI:CreateWindow(title)
 
                 dropdownButton.MouseButton1Click:Connect(function()
                     dropdownList.Visible = not dropdownList.Visible
-                    local targetSize = dropdownList.Visible and UDim2.new(0.6, 10, 0, math.min(#options * 25, 120)) or UDim2.new(0.5, 0, 0, 0)
+                    local targetSize = dropdownList.Visible and UDim2.new(0.6, 15, 0, math.min(#options * 25, 120)) or UDim2.new(0.5, 0, 0, 0)
                     dropdownList.Size = targetSize
                 end)
             end
