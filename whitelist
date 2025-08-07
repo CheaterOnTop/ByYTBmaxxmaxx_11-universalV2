@@ -1,4 +1,4 @@
--- Table principale
+-- Table principale de la bibliothèque
 local XyloKitUI = {}
 
 -- Services Roblox nécessaires
@@ -34,7 +34,7 @@ local Themes = {
         MainBackground = Color3.fromRGB(18, 18, 18),
         TabBackground = Color3.fromRGB(24, 24, 24),
         SectionBackground = Color3.fromRGB(30, 30, 30),
-        TextColor = Color3.fromRGB(200, 50, 50), -- Rouge atténué (modifiable si illisible)
+        TextColor = Color3.fromRGB(200, 50, 50), -- Rouge atténué
         TextHoverColor = Color3.fromRGB(220, 80, 80), -- Rouge atténué au survol
         BorderColor = Color3.fromRGB(200, 50, 50), -- Rouge atténué pour les bordures
         SelectedTabColor = Color3.fromRGB(200, 50, 50), -- Rouge atténué pour l'indicateur
@@ -90,8 +90,8 @@ function XyloKitUI:CreateWindow(title)
 
     -- Fond principal
     local mainFrame = Instance.new("Frame")
-    mainFrame.Size = UDim2.new(0, 1000, 0, 700)
-    mainFrame.Position = UDim2.new(0.5, -500, 0.5, -350)
+    mainFrame.Size = UDim2.new(0, 1000, 0, 700) -- Hauteur augmentée à 700
+    mainFrame.Position = UDim2.new(0.5, -500, 0.5, -350) -- Ajusté pour centrer avec la nouvelle hauteur
     mainFrame.BackgroundColor3 = currentTheme.MainBackground
     mainFrame.BorderSizePixel = 0
     mainFrame.ClipsDescendants = true
@@ -149,7 +149,7 @@ function XyloKitUI:CreateWindow(title)
     titleLabel.Text = title
     titleLabel.TextColor3 = currentTheme.TextColor
     titleLabel.TextSize = 24
-    titleLabel.Font = Enum.Font.Code
+    titleLabel.Font = Enum.Font.Code -- Police modifiée
     titleLabel.TextXAlignment = Enum.TextXAlignment.Left
     titleLabel.Parent = mainFrame
 
@@ -193,7 +193,7 @@ function XyloKitUI:CreateWindow(title)
     closeButton.Text = "✕"
     closeButton.TextColor3 = currentTheme.TextColor
     closeButton.TextSize = 20
-    closeButton.Font = Enum.Font.Code
+    closeButton.Font = Enum.Font.Code -- Police modifiée
     closeButton.Parent = mainFrame
 
     local closeStroke = Instance.new("UIStroke")
@@ -233,124 +233,118 @@ function XyloKitUI:CreateWindow(title)
     local currentTab = nil
 
     -- Création d'un onglet
-function XyloKitUIWindow:CreateTab(name)
-    print("Création de l'onglet : " .. name)
-    local tab = {}
-    tab.Name = name
+    function XyloKitUIWindow:CreateTab(name)
+        print("Création de l'onglet : " .. name)
+        local tab = {}
+        tab.Name = name
 
-    -- Bouton de l'onglet
-    local tabButton = Instance.new("TextButton")
-    tabButton.Size = UDim2.new(1, -10, 0, 50) -- Hauteur augmentée
-    tabButton.BackgroundColor3 = currentTheme.TabBackground
-    tabButton.Text = name
-    tabButton.TextColor3 = currentTheme.TextColor
-    tabButton.TextSize = 20 -- Taille augmentée
-    tabButton.Font = Enum.Font.GothamBold -- Police plus lisible
-    tabButton.TextXAlignment = Enum.TextXAlignment.Center
-    tabButton.TextStrokeTransparency = 1 -- Désactive les contours
-    tabButton.TextScaled = false -- Évite les flous
-    tabButton.BorderSizePixel = 0
-    tabButton.Parent = tabBar
+        -- Bouton de l'onglet
+        local tabButton = Instance.new("TextButton")
+        tabButton.Size = UDim2.new(1, -10, 0, 40)
+        tabButton.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
+        tabButton.Text = name
+        tabButton.TextColor3 = Color3.fromRGB(200, 60, 60)
+        tabButton.TextSize = 16
+        tabButton.Font = Enum.Font.Code -- Police modifiée
+        tabButton.BorderSizePixel = 0
+        tabButton.Parent = tabBar
 
-    -- ⚠️ Tu peux commenter ce bloc pour tester sans UIStroke (contour)
-    local tabStroke = Instance.new("UIStroke")
-    tabStroke.Thickness = 2
-    tabStroke.Color = currentTheme.BorderColor
-    tabStroke.Parent = tabButton
+        local tabStroke = Instance.new("UIStroke")
+        tabStroke.Thickness = 2
+        tabStroke.Color = Color3.fromRGB(200, 60, 60)
+        tabStroke.Parent = tabButton
 
-    -- Indicateur de sélection
-    local tabIndicator = Instance.new("Frame")
-    tabIndicator.Size = UDim2.new(0, 4, 1, 0)
-    tabIndicator.Position = UDim2.new(0, 0, 0, 0)
-    tabIndicator.BackgroundColor3 = currentTheme.SelectedTabColor
-    tabIndicator.BorderSizePixel = 0
-    tabIndicator.Visible = false
-    tabIndicator.Parent = tabButton
+        -- Indicateur de sélection
+        local tabIndicator = Instance.new("Frame")
+        tabIndicator.Size = UDim2.new(0, 4, 1, 0)
+        tabIndicator.Position = UDim2.new(0, 0, 0, 0)
+        tabIndicator.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
+        tabIndicator.BorderSizePixel = 0
+        tabIndicator.Visible = false
+        tabIndicator.Parent = tabButton
 
-    -- Effet de survol
-    tabButton.MouseEnter:Connect(function()
-        if currentTab ~= tab then
-            tabButton.BackgroundColor3 = currentTheme.ButtonHoverBackground
-        end
-    end)
-
-    tabButton.MouseLeave:Connect(function()
-        if currentTab ~= tab then
-            tabButton.BackgroundColor3 = currentTheme.TabBackground
-        end
-    end)
-
-    -- Contenu de l'onglet avec deux conteneurs
-    local tabContent = Instance.new("Frame")
-    tabContent.Size = UDim2.new(1, -20, 1, -110)
-    tabContent.Position = UDim2.new(0, 10, 0, 10)
-    tabContent.BackgroundTransparency = 1
-    tabContent.Parent = contentFrame
-
-    -- Conteneur principal (haut)
-    local topContainer = Instance.new("Frame")
-    topContainer.Size = UDim2.new(1, 0, 0, 0)
-    topContainer.Position = UDim2.new(0, 0, 0, 0)
-    topContainer.BackgroundTransparency = 1
-    topContainer.Parent = tabContent
-
-    local topContainerLayout = Instance.new("UIListLayout")
-    topContainerLayout.FillDirection = Enum.FillDirection.Horizontal
-    topContainerLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    topContainerLayout.Padding = UDim.new(0, 15)
-    topContainerLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
-    topContainerLayout.Parent = topContainer
-
-    -- Conteneur inférieur
-    local bottomContainer = Instance.new("Frame")
-    bottomContainer.Size = UDim2.new(1, 0, 0, 0)
-    bottomContainer.Position = UDim2.new(0, 0, 0, 0)
-    bottomContainer.BackgroundTransparency = 1
-    bottomContainer.Parent = tabContent
-
-    local bottomContainerLayout = Instance.new("UIListLayout")
-    bottomContainerLayout.FillDirection = Enum.FillDirection.Horizontal
-    bottomContainerLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    bottomContainerLayout.Padding = UDim.new(0, 15)
-    bottomContainerLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
-    bottomContainerLayout.Parent = bottomContainer
-
-    -- Fonction de repositionnement dynamique
-    local function updateContainerPositions()
-        local maxTopHeight = 0
-        for _, child in pairs(topContainer:GetChildren()) do
-            if child:IsA("Frame") and child ~= topContainerLayout then
-                maxTopHeight = math.max(maxTopHeight, child.AbsoluteSize.Y)
+        -- Effet de survol
+        tabButton.MouseEnter:Connect(function()
+            if currentTab ~= tab then
+                tabButton.BackgroundColor3 = currentTheme.ButtonHoverBackground
             end
-        end
-        topContainer.Size = UDim2.new(1, 0, 0, maxTopHeight)
-        bottomContainer.Position = UDim2.new(0, 0, 0, maxTopHeight + 10)
-    end
+        end)
 
-    -- Stockage des références
-    tab.Button = tabButton
-    tab.Content = tabContent
-    tab.TopContainer = topContainer
-    tab.BottomContainer = bottomContainer
-    tab.Indicator = tabIndicator
-    tabs[name] = tab
-
-    -- Gestion du clic sur l'onglet
-    tabButton.MouseButton1Click:Connect(function()
-        if currentTab ~= tab then
-            if currentTab then
-                currentTab.Content.Visible = false
-                currentTab.Indicator.Visible = false
-                currentTab.Button.BackgroundColor3 = currentTheme.TabBackground
+        tabButton.MouseLeave:Connect(function()
+            if currentTab ~= tab then
+                tabButton.BackgroundColor3 = cColor3.fromRGB(200, 60, 60)
             end
-            tabButton.BackgroundColor3 = currentTheme.SelectedTabBackground
-            tabIndicator.Visible = true
-            tabContent.Visible = true
-            currentTab = tab
-            updateContainerPositions()
+        end)
+
+        -- Contenu de l'onglet avec deux conteneurs
+        local tabContent = Instance.new("Frame")
+        tabContent.Size = UDim2.new(1, -20, 1, -110) -- Ajusté pour inclure le profil
+        tabContent.Position = UDim2.new(0, 10, 0, 10)
+        tabContent.BackgroundTransparency = 1
+        tabContent.Parent = contentFrame
+
+        -- Conteneur principal pour les 3 premières sections
+        local topContainer = Instance.new("Frame")
+        topContainer.Size = UDim2.new(1, 0, 0, 0) -- Hauteur dynamique
+        topContainer.Position = UDim2.new(0, 0, 0, 0)
+        topContainer.BackgroundTransparency = 1
+        topContainer.Parent = tabContent
+
+        local topContainerLayout = Instance.new("UIListLayout")
+        topContainerLayout.FillDirection = Enum.FillDirection.Horizontal
+        topContainerLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        topContainerLayout.Padding = UDim.new(0, 15)
+        topContainerLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+        topContainerLayout.Parent = topContainer
+
+        -- Conteneur inférieur pour les sections 4 à 6
+        local bottomContainer = Instance.new("Frame")
+        bottomContainer.Size = UDim2.new(1, 0, 0, 0) -- Hauteur dynamique
+        bottomContainer.Position = UDim2.new(0, 0, 0, 0) -- Position ajustée dynamiquement
+        bottomContainer.BackgroundTransparency = 1
+        bottomContainer.Parent = tabContent
+
+        local bottomContainerLayout = Instance.new("UIListLayout")
+        bottomContainerLayout.FillDirection = Enum.FillDirection.Horizontal
+        bottomContainerLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        bottomContainerLayout.Padding = UDim.new(0, 15)
+        bottomContainerLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+        bottomContainerLayout.Parent = bottomContainer
+
+        -- Ajustement dynamique de la position du bottomContainer
+        local function updateContainerPositions()
+            local maxTopHeight = 0
+            for _, child in pairs(topContainer:GetChildren()) do
+                if child:IsA("Frame") and child ~= topContainerLayout then
+                    maxTopHeight = math.max(maxTopHeight, child.AbsoluteSize.Y)
+                end
+            end
+            topContainer.Size = UDim2.new(1, 0, 0, maxTopHeight)
+            bottomContainer.Position = UDim2.new(0, 0, 0, maxTopHeight + 10) -- 10 pixels de padding
         end
-    end)
-end
+
+        tab.Button = tabButton
+        tab.Content = tabContent
+        tab.TopContainer = topContainer
+        tab.BottomContainer = bottomContainer
+        tab.Indicator = tabIndicator
+        tabs[name] = tab
+
+        -- Gestion du clic
+        tabButton.MouseButton1Click:Connect(function()
+            if currentTab ~= tab then
+                if currentTab then
+                    currentTab.Content.Visible = false
+                    currentTab.Indicator.Visible = false
+                    currentTab.Button.BackgroundColor3 = currentTheme.TabBackground
+                end
+                tabButton.BackgroundColor3 = currentTheme.SelectedTabBackground
+                tabIndicator.Visible = true
+                tabContent.Visible = true
+                currentTab = tab
+                updateContainerPositions() -- Mettre à jour les positions au changement d'onglet
+            end
+        end)
 
         -- Création d'une section (limité à 6 sections) avec barre de défilement
         local sectionCount = 0
@@ -364,7 +358,7 @@ end
             section.Name = name
 
             local sectionFrame = Instance.new("Frame")
-            sectionFrame.Size = UDim2.new(0, 250, 0, 300)
+            sectionFrame.Size = UDim2.new(0, 250, 0, 300) -- Hauteur fixe avec défilement
             sectionFrame.BackgroundColor3 = currentTheme.SectionBackground
             sectionFrame.BorderSizePixel = 0
             sectionFrame.Parent = (sectionCount < 3 and topContainer or bottomContainer)
@@ -381,13 +375,13 @@ end
             sectionLabel.Text = name
             sectionLabel.TextColor3 = currentTheme.TextColor
             sectionLabel.TextSize = 18
-            sectionLabel.Font = Enum.Font.Code
+            sectionLabel.Font = Enum.Font.Code -- Police modifiée
             sectionLabel.TextXAlignment = Enum.TextXAlignment.Center
             sectionLabel.Parent = sectionFrame
 
             local scrollFrame = Instance.new("ScrollingFrame")
-            scrollFrame.Size = UDim2.new(1, -20, 0, 260)
-            scrollFrame.Position = UDim2.new(0, 10, 0, 40)
+            scrollFrame.Size = UDim2.new(1, -20, 0, 260) -- Hauteur ajustée pour laisser de la place au titre
+            scrollFrame.Position = UDim2.new(0, 10, 0, 40) -- Sous le titre
             scrollFrame.BackgroundTransparency = 1
             scrollFrame.BorderSizePixel = 0
             scrollFrame.ScrollBarThickness = 6
@@ -408,9 +402,10 @@ end
 
             scrollLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
                 scrollFrame.CanvasSize = UDim2.new(0, 0, 0, scrollLayout.AbsoluteContentSize.Y)
-                updateContainerPositions()
+                updateContainerPositions() -- Mettre à jour les positions quand le contenu change
             end)
 
+            section.Frame = sectionFrame
             sectionCount = sectionCount + 1
 
             -- Création d'un toggle
@@ -427,7 +422,7 @@ end
                 toggleLabel.Text = name
                 toggleLabel.TextColor3 = currentTheme.TextColor
                 toggleLabel.TextSize = 16
-                toggleLabel.Font = Enum.Font.Code
+                toggleLabel.Font = Enum.Font.Code -- Police modifiée
                 toggleLabel.TextXAlignment = Enum.TextXAlignment.Left
                 toggleLabel.Parent = toggleFrame
 
@@ -438,7 +433,7 @@ end
                 toggleButton.Text = default and "✔" or ""
                 toggleButton.TextColor3 = Color3.fromRGB(0, 200, 0)
                 toggleButton.TextSize = 18
-                toggleButton.Font = Enum.Font.Code
+                toggleButton.Font = Enum.Font.Code -- Police modifiée
                 toggleButton.BorderSizePixel = 0
                 toggleButton.Parent = toggleFrame
 
@@ -489,7 +484,7 @@ end
                 sliderLabel.Text = name .. ": " .. default
                 sliderLabel.TextColor3 = currentTheme.TextColor
                 sliderLabel.TextSize = 16
-                sliderLabel.Font = Enum.Font.Code
+                sliderLabel.Font = Enum.Font.Code -- Police modifiée
                 sliderLabel.TextXAlignment = Enum.TextXAlignment.Left
                 sliderLabel.Parent = sliderFrame
 
@@ -520,7 +515,7 @@ end
                 sliderButton.Position = UDim2.new((default - min) / (max - min), -8, 0, -5)
                 sliderButton.BackgroundColor3 = currentTheme.TextColor
                 sliderButton.Text = ""
-                sliderButton.Font = Enum.Font.Code
+                sliderButton.Font = Enum.Font.Code -- Police modifiée (bien que texte vide)
                 sliderButton.Parent = sliderBar
 
                 local sliderButtonStroke = Instance.new("UIStroke")
@@ -579,7 +574,7 @@ end
                 dropdownLabel.Text = name .. ": " .. default
                 dropdownLabel.TextColor3 = currentTheme.TextColor
                 dropdownLabel.TextSize = 16
-                dropdownLabel.Font = Enum.Font.Code
+                dropdownLabel.Font = Enum.Font.Code -- Police modifiée
                 dropdownLabel.TextXAlignment = Enum.TextXAlignment.Left
                 dropdownLabel.Parent = dropdownFrame
 
@@ -590,7 +585,7 @@ end
                 dropdownButton.Text = "▼"
                 dropdownButton.TextColor3 = currentTheme.TextColor
                 dropdownButton.TextSize = 14
-                dropdownButton.Font = Enum.Font.Code
+                dropdownButton.Font = Enum.Font.Code -- Police modifiée
                 dropdownButton.BorderSizePixel = 0
                 dropdownButton.Parent = dropdownFrame
 
@@ -640,7 +635,7 @@ end
                     optionButton.Text = option
                     optionButton.TextColor3 = currentTheme.TextColor
                     optionButton.TextSize = 14
-                    optionButton.Font = Enum.Font.Code
+                    optionButton.Font = Enum.Font.Code -- Police modifiée
                     optionButton.BorderSizePixel = 0
                     optionButton.Parent = dropdownList
 
@@ -674,8 +669,8 @@ end
 
         -- Ajout du profil joueur avec un profil rond à droite
         local playerInfoFrame = Instance.new("Frame")
-        playerInfoFrame.Size = UDim2.new(0, 250, 0, 60)
-        playerInfoFrame.Position = UDim2.new(0, 5, 1, -5)
+        playerInfoFrame.Size = UDim2.new(0, 250, 0, 60) -- Ajusté pour inclure le profil rond
+        playerInfoFrame.Position = UDim2.new(0, 5, 1, -5) -- Légèrement décalé à droite et vers le haut
         playerInfoFrame.AnchorPoint = Vector2.new(0, 1)
         playerInfoFrame.BackgroundColor3 = currentTheme.TabBackground
         playerInfoFrame.BorderSizePixel = 0
@@ -700,14 +695,14 @@ end
         playerName.Text = player and player.Name or "Loading..."
         playerName.TextColor3 = currentTheme.TextColor
         playerName.TextSize = 16
-        playerName.Font = Enum.Font.Code
+        playerName.Font = Enum.Font.Code -- Police modifiée
         playerName.TextXAlignment = Enum.TextXAlignment.Left
-                playerName.Parent = playerInfoFrame
+        playerName.Parent = playerInfoFrame
 
         -- Profil rond à droite du nom
         local playerProfileImage = Instance.new("ImageLabel")
-        playerProfileImage.Size = UDim2.new(0, 40, 0, 40)
-        playerProfileImage.Position = UDim2.new(1, -50, 0.5, -20)
+        playerProfileImage.Size = UDim2.new(0, 40, 0, 40) -- Taille du cercle
+        playerProfileImage.Position = UDim2.new(1, -50, 0.5, -20) -- À droite du nom, centré verticalement
         playerProfileImage.BackgroundTransparency = 1
         playerProfileImage.Image = player and "rbxthumb://id=" .. player.UserId .. "?width=420&height=420" or "rbxassetid://0"
         playerProfileImage.Parent = playerInfoFrame
