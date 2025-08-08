@@ -1,6 +1,5 @@
--- Vérifie si getgenv est dispo 
+-- Vérifie si getgenv est disponible
 if typeof(getgenv) == "function" then
-
     if not memorystats then
         memorystats = {}
         memorystats.cache = function(_) end
@@ -8,10 +7,10 @@ if typeof(getgenv) == "function" then
     end
 
     local cacheCategories = {
-        "Internal","HttpCache","Instances","Signals","Script",
-        "PhysicsCollision","PhysicsParts","GraphicsSolidModels","GraphicsMeshParts","GraphicsParticles",
-        "GraphicsParts","GraphicsSpatialHash","GraphicsTerrain","GraphicsTexture","GraphicsTextureCharacter",
-        "Sounds","StreamingSounds","TerrainVoxels","Gui","Animation","Navigation","GeometryCSG"
+        "Internal", "HttpCache", "Instances", "Signals", "Script",
+        "PhysicsCollision", "PhysicsParts", "GraphicsSolidModels", "GraphicsMeshParts", "GraphicsParticles",
+        "GraphicsParts", "GraphicsSpatialHash", "GraphicsTerrain", "GraphicsTexture", "GraphicsTextureCharacter",
+        "Sounds", "StreamingSounds", "TerrainVoxels", "Gui", "Animation", "Navigation", "GeometryCSG"
     }
 
     local function cacheAll()
@@ -43,16 +42,19 @@ if typeof(getgenv) == "function" then
     -- Restauration manuelle via console
     getgenv().RestoreMemoryCache = restoreAll
 else
+    -- Affiche un warning si getgenv n'est pas supporté
+    warn("#ERROR_GETGENV()_MISMATCH")
+
     if not memorystats then
         memorystats = {}
         memorystats.cache = function(a) end
         memorystats.restore = function(a) end
     end
     for _, v in pairs({
-        "Internal","HttpCache","Instances","Signals","Script",
-        "PhysicsCollision","PhysicsParts","GraphicsSolidModels","GraphicsMeshParts","GraphicsParticles",
-        "GraphicsParts","GraphicsSpatialHash","GraphicsTerrain","GraphicsTexture","GraphicsTextureCharacter",
-        "Sounds","StreamingSounds","TerrainVoxels","Gui","Animation","Navigation","GeometryCSG"
+        "Internal", "HttpCache", "Instances", "Signals", "Script",
+        "PhysicsCollision", "PhysicsParts", "GraphicsSolidModels", "GraphicsMeshParts", "GraphicsParticles",
+        "GraphicsParts", "GraphicsSpatialHash", "GraphicsTerrain", "GraphicsTexture", "GraphicsTextureCharacter",
+        "Sounds", "StreamingSounds", "TerrainVoxels", "Gui", "Animation", "Navigation", "GeometryCSG"
     }) do
         memorystats.cache(v)
     end
@@ -60,7 +62,7 @@ end
 
 local XyloKitUI = {}
 
--- Servic
+-- Services
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
@@ -486,24 +488,228 @@ function XyloKitUI:CreateWindow(title)
                 end)
             end
 
+            -- Ajout du ColorPicker
+            function section:CreateColorPicker(name, default, callback)
+                local colorPickerFrame = Instance.new("Frame")
+                colorPickerFrame.Size = UDim2.new(1, -20, 0, 35)
+                colorPickerFrame.BackgroundTransparency = 1
+                colorPickerFrame.Parent = scrollFrame
+
+                local colorPickerLabel = Instance.new("TextLabel")
+                colorPickerLabel.Size = UDim2.new(0.7, 0, 1, 0)
+                colorPickerLabel.Position = UDim2.new(0, 5, 0, 0)
+                colorPickerLabel.BackgroundTransparency = 1
+                colorPickerLabel.Text = name
+                colorPickerLabel.TextColor3 = currentTheme.TextColor
+                colorPickerLabel.TextSize = 16
+                colorPickerLabel.Font = Enum.Font.Code
+                colorPickerLabel.TextXAlignment = Enum.TextXAlignment.Left
+                colorPickerLabel.Parent = colorPickerFrame
+
+                local colorPreview = Instance.new("Frame")
+                colorPreview.Size = UDim2.new(0, 30, 0, 30)
+                colorPreview.Position = UDim2.new(1, -35, 0, 2)
+                colorPreview.BackgroundColor3 = default
+                colorPreview.BorderSizePixel = 0
+                colorPreview.Parent = colorPickerFrame
+
+                local colorPreviewStroke = Instance.new("UIStroke")
+                colorPreviewStroke.Thickness = 2
+                colorPreviewStroke.Color = currentTheme.BorderColor
+                colorPreviewStroke.Parent = colorPreview
+
+                local colorPickerButton = Instance.new("TextButton")
+                colorPickerButton.Size = UDim2.new(0, 30, 0, 30)
+                colorPickerButton.Position = UDim2.new(1, -35, 0, 2)
+                colorPickerButton.BackgroundTransparency = 1
+                colorPickerButton.Text = ""
+                colorPickerButton.Parent = colorPickerFrame
+
+                local colorPickerWindow = Instance.new("Frame")
+                colorPickerWindow.Size = UDim2.new(0, 200, 0, 150)
+                colorPickerWindow.Position = UDim2.new(1, -235, 0, 35)
+                colorPickerWindow.BackgroundColor3 = currentTheme.ButtonBackground
+                colorPickerWindow.Visible = false
+                colorPickerWindow.Parent = colorPickerFrame
+
+                local colorPickerStroke = Instance.new("UIStroke")
+                colorPickerStroke.Thickness = 2
+                colorPickerStroke.Color = currentTheme.BorderColor
+                colorPickerStroke.Parent = colorPickerWindow
+
+                -- Palette de couleur (simplifiée)
+                local hueBar = Instance.new("Frame")
+                hueBar.Size = UDim2.new(0, 20, 1, -40)
+                hueBar.Position = UDim2.new(0, 10, 0, 10)
+                hueBar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                hueBar.Parent = colorPickerWindow
+
+                local hueGradient = Instance.new("UIGradient")
+                hueGradient.Color = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
+                    ColorSequenceKeypoint.new(0.17, Color3.fromRGB(255, 255, 0)),
+                    ColorSequenceKeypoint.new(0.33, Color3.fromRGB(0, 255, 0)),
+                    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 255)),
+                    ColorSequenceKeypoint.new(0.67, Color3.fromRGB(0, 0, 255)),
+                    ColorSequenceKeypoint.new(0.83, Color3.fromRGB(255, 0, 255)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
+                })
+                hueGradient.Parent = hueBar
+
+                local saturationBrightness = Instance.new("Frame")
+                saturationBrightness.Size = UDim2.new(0, 150, 1, -40)
+                saturationBrightness.Position = UDim2.new(0, 40, 0, 10)
+                saturationBrightness.BackgroundColor3 = default
+                saturationBrightness.Parent = colorPickerWindow
+
+                local saturationGradient = Instance.new("UIGradient")
+                saturationGradient.Color = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+                    ColorSequenceKeypoint.new(1, default)
+                })
+                saturationGradient.Rotation = 0
+                saturationGradient.Parent = saturationBrightness
+
+                local brightnessGradient = Instance.new("UIGradient")
+                brightnessGradient.Color = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0, 0)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))
+                })
+                brightnessGradient.Rotation = 90
+                brightnessGradient.Parent = saturationBrightness
+
+                local saturationBrightnessStroke = Instance.new("UIStroke")
+                saturationBrightnessStroke.Thickness = 2
+                saturationBrightnessStroke.Color = currentTheme.BorderColor
+                saturationBrightnessStroke.Parent = saturationBrightness
+
+                local configKey = tab.Name .. "_" .. section.Name .. "_" .. name .. "_ColorPicker"
+                local currentColor = default
+                if config[configKey] then
+                    currentColor = Color3.new(config[configKey].R, config[configKey].G, config[configKey].B)
+                    colorPreview.BackgroundColor3 = currentColor
+                end
+
+                local function updateColor(hue, sat, val)
+                    local color = Color3.fromHSV(hue, sat, val)
+                    colorPreview.BackgroundColor3 = color
+                    saturationBrightness.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
+                    saturationGradient.Color = ColorSequence.new({
+                        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+                        ColorSequenceKeypoint.new(1, Color3.fromHSV(hue, 1, 1))
+                    })
+                    config[configKey] = {R = color.R, G = color.G, B = color.B}
+                    saveConfig()
+                    callback(color)
+                end
+
+                local draggingHue = false
+                local draggingSB = false
+
+                hueBar.InputBegan:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        draggingHue = true
+                    end
+                end)
+
+                hueBar.InputEnded:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        draggingHue = false
+                    end
+                end)
+
+                saturationBrightness.InputBegan:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        draggingSB = true
+                    end
+                end)
+
+                saturationBrightness.InputEnded:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        draggingSB = false
+                    end
+                end)
+
+                UserInputService.InputChanged:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseMovement then
+                        if draggingHue then
+                            local mousePos = UserInputService:GetMouseLocation()
+                            local relativePos = (mousePos.Y - hueBar.AbsolutePosition.Y) / hueBar.AbsoluteSize.Y
+                            relativePos = math.clamp(relativePos, 0, 1)
+                            local hue = relativePos
+                            local h, s, v = currentColor:ToHSV()
+                            updateColor(hue, s, v)
+                            currentColor = Color3.fromHSV(hue, s, v)
+                        elseif draggingSB then
+                            local mousePos = UserInputService:GetMouseLocation()
+                            local relativeX = (mousePos.X - saturationBrightness.AbsolutePosition.X) / saturationBrightness.AbsoluteSize.X
+                            local relativeY = (mousePos.Y - saturationBrightness.AbsolutePosition.Y) / saturationBrightness.AbsoluteSize.Y
+                            relativeX = math.clamp(relativeX, 0, 1)
+                            relativeY = math.clamp(relativeY, 0, 1)
+                            local h, _, _ = currentColor:ToHSV()
+                            local sat = relativeX
+                            local val = 1 - relativeY
+                            updateColor(h, sat, val)
+                            currentColor = Color3.fromHSV(h, sat, val)
+                        end
+                    end
+                end)
+
+                colorPickerButton.MouseButton1Click:Connect(function()
+                    colorPickerWindow.Visible = not colorPickerWindow.Visible
+                end)
+
+                colorPickerButton.MouseEnter:Connect(function()
+                    local tweenHover = TweenService:Create(colorPreview, TweenInfo.new(0.2), {BackgroundColor3 = currentColor:Lerp(currentTheme.TextHoverColor, 0.2)})
+                    tweenHover:Play()
+                end)
+
+                colorPickerButton.MouseLeave:Connect(function()
+                    local tweenLeave = TweenService:Create(colorPreview, TweenInfo.new(0.2), {BackgroundColor3 = currentColor})
+                    tweenLeave:Play()
+                end)
+            end
+
             return section
         end
 
         -- Créer la section et le toggle Auto Safe Execute
-local paramSection = createSection("Setting & Visual")
-if paramSection then
-    paramSection:CreateToggle("FPS boost", false, function(state)
-        config["FPS_Boost"] = state
-        saveConfig()
+        local paramSection = createSection("Setting & Visual")
+        if paramSection then
+            paramSection:CreateToggle("FPS boost", false, function(state)
+                config["FPS_Boost"] = state
+                saveConfig()
+                if state then
+                    pcall(function()
+                        loadstring(game:HttpGet("https://pastebin.com/raw/UJ0nXJQZ"))()
+                    end)
+                end
+            end)
 
-        if state then
-            -- Exécute le script FPS boost
-            pcall(function()
-                loadstring(game:HttpGet("https://pastebin.com/raw/UJ0nXJQZ"))()
+            -- Ajout du ColorPicker pour changer la couleur du texte
+            paramSection:CreateColorPicker("Text Color", currentTheme.TextColor, function(color)
+                currentTheme.TextColor = color
+                currentTheme.TextHoverColor = color:Lerp(Color3.new(1, 1, 1), 0.2) -- Ajuste la couleur de survol
+                -- Mettre à jour dynamiquement les éléments de l'interface
+                for _, tab in pairs(tabs) do
+                    if tab.Button then
+                        tab.Button.TextColor3 = color
+                    end
+                    if tab.Content then
+                        for _, child in pairs(tab.Content:GetDescendants()) do
+                            if child:IsA("TextLabel") or child:IsA("TextButton") then
+                                child.TextColor3 = color
+                            end
+                        end
+                    end
+                end
+                titleLabel.TextColor3 = color
+                closeButton.TextColor3 = color
+                settingsButton.TextColor3 = color
+                playerName.TextColor3 = color
+                saveConfig()
             end)
         end
-    end)
-end
 
         return tab
     end
@@ -735,7 +941,7 @@ end
                 toggleButton.Size = UDim2.new(0, 30, 0, 30)
                 toggleButton.Position = UDim2.new(1, -35, 0, 2)
                 toggleButton.BackgroundColor3 = default and currentTheme.TextColor or currentTheme.ButtonBackground
-                toggleButton.Text = default and "✔" or ""
+                toggleButton.Text = default and " ✔" or ""
                 toggleButton.TextColor3 = Color3.fromRGB(0, 200, 0)
                 toggleButton.TextSize = 18
                 toggleButton.Font = Enum.Font.Code
@@ -908,8 +1114,8 @@ end
                 end)
 
                 local dropdownList = Instance.new("ScrollingFrame")
-                dropdownList.Size = UDim2.new(0.6, 20, 0, 0) -- Élargi de 3 pixels
-                dropdownList.Position = UDim2.new(0.4, -1, 1, 5) -- Ajusté pour centrer
+                dropdownList.Size = UDim2.new(0.6, 20, 0, 0)
+                dropdownList.Position = UDim2.new(0.4, -1, 1, 5)
                 dropdownList.BackgroundColor3 = currentTheme.ButtonBackground
                 dropdownList.Visible = false
                 dropdownList.ScrollBarThickness = 4
@@ -969,6 +1175,188 @@ end
                 end)
             end
 
+            -- Création d'un ColorPicker
+            function section:CreateColorPicker(name, default, callback)
+                local colorPickerFrame = Instance.new("Frame")
+                colorPickerFrame.Size = UDim2.new(1, -20, 0, 35)
+                colorPickerFrame.BackgroundTransparency = 1
+                colorPickerFrame.Parent = scrollFrame
+
+                local colorPickerLabel = Instance.new("TextLabel")
+                colorPickerLabel.Size = UDim2.new(0.7, 0, 1, 0)
+                colorPickerLabel.Position = UDim2.new(0, 5, 0, 0)
+                colorPickerLabel.BackgroundTransparency = 1
+                colorPickerLabel.Text = name
+                colorPickerLabel.TextColor3 = currentTheme.TextColor
+                colorPickerLabel.TextSize = 16
+                colorPickerLabel.Font = Enum.Font.Code
+                colorPickerLabel.TextXAlignment = Enum.TextXAlignment.Left
+                colorPickerLabel.Parent = colorPickerFrame
+
+                local colorPreview = Instance.new("Frame")
+                colorPreview.Size = UDim2.new(0, 30, 0, 30)
+                colorPreview.Position = UDim2.new(1, -35, 0, 2)
+                colorPreview.BackgroundColor3 = default
+                colorPreview.BorderSizePixel = 0
+                colorPreview.Parent = colorPickerFrame
+
+                local colorPreviewStroke = Instance.new("UIStroke")
+                colorPreviewStroke.Thickness = 2
+                colorPreviewStroke.Color = currentTheme.BorderColor
+                colorPreviewStroke.Parent = colorPreview
+
+                local colorPickerButton = Instance.new("TextButton")
+                colorPickerButton.Size = UDim2.new(0, 30, 0, 30)
+                colorPickerButton.Position = UDim2.new(1, -35, 0, 2)
+                colorPickerButton.BackgroundTransparency = 1
+                colorPickerButton.Text = ""
+                colorPickerButton.Parent = colorPickerFrame
+
+                local colorPickerWindow = Instance.new("Frame")
+                colorPickerWindow.Size = UDim2.new(0, 200, 0, 150)
+                colorPickerWindow.Position = UDim2.new(1, -235, 0, 35)
+                colorPickerWindow.BackgroundColor3 = currentTheme.ButtonBackground
+                colorPickerWindow.Visible = false
+                colorPickerWindow.Parent = colorPickerFrame
+
+                local colorPickerStroke = Instance.new("UIStroke")
+                colorPickerStroke.Thickness = 2
+                colorPickerStroke.Color = currentTheme.BorderColor
+                colorPickerStroke.Parent = colorPickerWindow
+
+                -- Palette de couleur (simplifiée)
+                local hueBar = Instance.new("Frame")
+                hueBar.Size = UDim2.new(0, 20, 1, -40)
+                hueBar.Position = UDim2.new(0, 10, 0, 10)
+                hueBar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                hueBar.Parent = colorPickerWindow
+
+                local hueGradient = Instance.new("UIGradient")
+                hueGradient.Color = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
+                    ColorSequenceKeypoint.new(0.17, Color3.fromRGB(255, 255, 0)),
+                    ColorSequenceKeypoint.new(0.33, Color3.fromRGB(0, 255, 0)),
+                    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 255)),
+                    ColorSequenceKeypoint.new(0.67, Color3.fromRGB(0, 0, 255)),
+                    ColorSequenceKeypoint.new(0.83, Color3.fromRGB(255, 0, 255)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
+                })
+                hueGradient.Parent = hueBar
+
+                local saturationBrightness = Instance.new("Frame")
+                saturationBrightness.Size = UDim2.new(0, 150, 1, -40)
+                saturationBrightness.Position = UDim2.new(0, 40, 0, 10)
+                saturationBrightness.BackgroundColor3 = default
+                saturationBrightness.Parent = colorPickerWindow
+
+                local saturationGradient = Instance.new("UIGradient")
+                saturationGradient.Color = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+                    ColorSequenceKeypoint.new(1, default)
+                })
+                saturationGradient.Rotation = 0
+                saturationGradient.Parent = saturationBrightness
+
+                local brightnessGradient = Instance.new("UIGradient")
+                brightnessGradient.Color = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0, 0)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))
+                })
+                brightnessGradient.Rotation = 90
+                brightnessGradient.Parent = saturationBrightness
+
+                local saturationBrightnessStroke = Instance.new("UIStroke")
+                saturationBrightnessStroke.Thickness = 2
+                saturationBrightnessStroke.Color = currentTheme.BorderColor
+                saturationBrightnessStroke.Parent = saturationBrightness
+
+                local configKey = tab.Name .. "_" .. section.Name .. "_" .. name .. "_ColorPicker"
+                local currentColor = default
+                if config[configKey] then
+                    currentColor = Color3.new(config[configKey].R, config[configKey].G, config[configKey].B)
+                    colorPreview.BackgroundColor3 = currentColor
+                end
+
+                local function updateColor(hue, sat, val)
+                    local color = Color3.fromHSV(hue, sat, val)
+                    colorPreview.BackgroundColor3 = color
+                    saturationBrightness.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
+                    saturationGradient.Color = ColorSequence.new({
+                        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+                        ColorSequenceKeypoint.new(1, Color3.fromHSV(hue, 1, 1))
+                    })
+                    config[configKey] = {R = color.R, G = color.G, B = color.B}
+                    saveConfig()
+                    callback(color)
+                end
+
+                local draggingHue = false
+                local draggingSB = false
+
+                hueBar.InputBegan:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        draggingHue = true
+                    end
+                end)
+
+                hueBar.InputEnded:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        draggingHue = false
+                    end
+                end)
+
+                saturationBrightness.InputBegan:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        draggingSB = true
+                    end
+                end)
+
+                saturationBrightness.InputEnded:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        draggingSB = false
+                    end
+                end)
+
+                UserInputService.InputChanged:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseMovement then
+                        if draggingHue then
+                            local mousePos = UserInputService:GetMouseLocation()
+                            local relativePos = (mousePos.Y - hueBar.AbsolutePosition.Y) / hueBar.AbsoluteSize.Y
+                            relativePos = math.clamp(relativePos, 0, 1)
+                            local hue = relativePos
+                            local h, s, v = currentColor:ToHSV()
+                            updateColor(hue, s, v)
+                            currentColor = Color3.fromHSV(hue, s, v)
+                        elseif draggingSB then
+                            local mousePos = UserInputService:GetMouseLocation()
+                            local relativeX = (mousePos.X - saturationBrightness.AbsolutePosition.X) / saturationBrightness.AbsoluteSize.X
+                            local relativeY = (mousePos.Y - saturationBrightness.AbsolutePosition.Y) / saturationBrightness.AbsoluteSize.Y
+                            relativeX = math.clamp(relativeX, 0, 1)
+                            relativeY = math.clamp(relativeY, 0, 1)
+                            local h, _, _ = currentColor:ToHSV()
+                            local sat = relativeX
+                            local val = 1 - relativeY
+                            updateColor(h, sat, val)
+                            currentColor = Color3.fromHSV(h, sat, val)
+                        end
+                    end
+                end)
+
+                colorPickerButton.MouseButton1Click:Connect(function()
+                    colorPickerWindow.Visible = not colorPickerWindow.Visible
+                end)
+
+                colorPickerButton.MouseEnter:Connect(function()
+                    local tweenHover = TweenService:Create(colorPreview, TweenInfo.new(0.2), {BackgroundColor3 = currentColor:Lerp(currentTheme.TextHoverColor, 0.2)})
+                    tweenHover:Play()
+                end)
+
+                colorPickerButton.MouseLeave:Connect(function()
+                    local tweenLeave = TweenService:Create(colorPreview, TweenInfo.new(0.2), {BackgroundColor3 = currentColor})
+                    tweenLeave:Play()
+                end)
+            end
+
             return section
         end
 
@@ -976,43 +1364,43 @@ end
     end
 
     -- Profil du joueur
-local playerInfoFrame = Instance.new("Frame")
-playerInfoFrame.Size = UDim2.new(0, 198, 0, 60)
-playerInfoFrame.Position = UDim2.new(0, 0, 1, 0) -- En bas à gauche
-playerInfoFrame.AnchorPoint = Vector2.new(0, 1)
-playerInfoFrame.BackgroundColor3 = currentTheme.TabBackground
-playerInfoFrame.BorderSizePixel = 0
-playerInfoFrame.Parent = mainFrame
+    local playerInfoFrame = Instance.new("Frame")
+    playerInfoFrame.Size = UDim2.new(0, 198, 0, 60)
+    playerInfoFrame.Position = UDim2.new(0, 0, 1, 0)
+    playerInfoFrame.AnchorPoint = Vector2.new(0, 1)
+    playerInfoFrame.BackgroundColor3 = currentTheme.TabBackground
+    playerInfoFrame.BorderSizePixel = 0
+    playerInfoFrame.Parent = mainFrame
 
-local playerInfoStroke = Instance.new("UIStroke")
-playerInfoStroke.Thickness = 2
-playerInfoStroke.Color = currentTheme.BorderColor
-playerInfoStroke.Parent = playerInfoFrame
+    local playerInfoStroke = Instance.new("UIStroke")
+    playerInfoStroke.Thickness = 2
+    playerInfoStroke.Color = currentTheme.BorderColor
+    playerInfoStroke.Parent = playerInfoFrame
 
-local playerIcon = Instance.new("ImageLabel")
-playerIcon.Size = UDim2.new(0, 40, 0, 40)
-playerIcon.Position = UDim2.new(0, 10, 0, 10)
-playerIcon.BackgroundTransparency = 1
-playerIcon.Image = player and "rbxthumb://type=AvatarHeadShot&id=" .. player.UserId .. "&w=420&h=420" or ""
-playerIcon.ClipsDescendants = true
-playerIcon.Parent = playerInfoFrame
+    local playerIcon = Instance.new("ImageLabel")
+    playerIcon.Size = UDim2.new(0, 40, 0, 40)
+    playerIcon.Position = UDim2.new(0, 10, 0, 10)
+    playerIcon.BackgroundTransparency = 1
+    playerIcon.Image = player and "rbxthumb://type=AvatarHeadShot&id=" .. player.UserId .. "&w=420&h=420" or ""
+    playerIcon.ClipsDescendants = true
+    playerIcon.Parent = playerInfoFrame
 
--- Effet de cercle
-local iconCircle = Instance.new("UICorner")
-iconCircle.CornerRadius = UDim.new(0.5, 0)
-iconCircle.Parent = playerIcon
+    -- Effet de cercle
+    local iconCircle = Instance.new("UICorner")
+    iconCircle.CornerRadius = UDim.new(0.5, 0)
+    iconCircle.Parent = playerIcon
 
-local playerName = Instance.new("TextLabel")
-playerName.Size = UDim2.new(0, 180, 0, 40)
-playerName.Position = UDim2.new(0, 55, 0, 10) -- Corrigé pour aligner à droite de l'icône et centrer verticalement
-playerName.BackgroundTransparency = 1
-playerName.Text = player and player.Name or "#ERROR_UNKNOW_404"
-playerName.TextColor3 = currentTheme.TextColor
-playerName.TextSize = 16
-playerName.Font = Enum.Font.Code
-playerName.TextXAlignment = Enum.TextXAlignment.Left
-playerName.TextTruncate = Enum.TextTruncate.AtEnd
-playerName.Parent = playerInfoFrame
+    local playerName = Instance.new("TextLabel")
+    playerName.Size = UDim2.new(0, 180, 0, 40)
+    playerName.Position = UDim2.new(0, 55, 0, 10)
+    playerName.BackgroundTransparency = 1
+    playerName.Text = player and player.Name or "#ERROR_UNKNOW_404"
+    playerName.TextColor3 = currentTheme.TextColor
+    playerName.TextSize = 16
+    playerName.Font = Enum.Font.Code
+    playerName.TextXAlignment = Enum.TextXAlignment.Left
+    playerName.TextTruncate = Enum.TextTruncate.AtEnd
+    playerName.Parent = playerInfoFrame
 
     return XyloKitUIWindow
 end
