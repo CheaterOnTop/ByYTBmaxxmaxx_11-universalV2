@@ -1179,15 +1179,16 @@ function XyloKitUI:CreateWindow(title)
 function section:CreateColorPicker(name, default, callback)
     local TweenService = game:GetService("TweenService")
     local UserInputService = game:GetService("UserInputService")
+    local GuiService = game:GetService("GuiService")
 
     -- Cadre principal du ColorPicker
     local colorPickerFrame = Instance.new("Frame")
-    colorPickerFrame.Size = UDim2.new(1, -20, 0, 60)
+    colorPickerFrame.Size = UDim2.new(1, -20, 0, 50)
     colorPickerFrame.BackgroundTransparency = 1
     colorPickerFrame.Parent = scrollFrame
 
     local colorPickerLabel = Instance.new("TextLabel")
-    colorPickerLabel.Size = UDim2.new(0.6, 0, 0, 20)
+    colorPickerLabel.Size = UDim2.new(0.7, 0, 0, 20)
     colorPickerLabel.Position = UDim2.new(0, 10, 0, 5)
     colorPickerLabel.BackgroundTransparency = 1
     colorPickerLabel.Text = name
@@ -1198,13 +1199,13 @@ function section:CreateColorPicker(name, default, callback)
     colorPickerLabel.Parent = colorPickerFrame
 
     local colorPreview = Instance.new("Frame")
-    colorPreview.Size = UDim2.new(0, 50, 0, 50)
-    colorPreview.Position = UDim2.new(1, -60, 0, 5)
+    colorPreview.Size = UDim2.new(0, 30, 0, 30) -- Même taille que les toggles
+    colorPreview.Position = UDim2.new(1, -40, 0, 10)
     colorPreview.BackgroundColor3 = default
     colorPreview.BorderSizePixel = 0
     colorPreview.Parent = colorPickerFrame
     local colorPreviewCorner = Instance.new("UICorner")
-    colorPreviewCorner.CornerRadius = UDim.new(0, 8)
+    colorPreviewCorner.CornerRadius = UDim.new(0, 6)
     colorPreviewCorner.Parent = colorPreview
     local colorPreviewStroke = Instance.new("UIStroke")
     colorPreviewStroke.Thickness = 2
@@ -1212,22 +1213,22 @@ function section:CreateColorPicker(name, default, callback)
     colorPreviewStroke.Parent = colorPreview
 
     local colorPickerButton = Instance.new("TextButton")
-    colorPickerButton.Size = UDim2.new(0, 50, 0, 50)
-    colorPickerButton.Position = UDim2.new(1, -60, 0, 5)
+    colorPickerButton.Size = UDim2.new(0, 30, 0, 30)
+    colorPickerButton.Position = UDim2.new(1, -40, 0, 10)
     colorPickerButton.BackgroundTransparency = 1
     colorPickerButton.Text = ""
     colorPickerButton.Parent = colorPickerFrame
 
     -- Fenêtre du ColorPicker
     local colorPickerWindow = Instance.new("Frame")
-    colorPickerWindow.Size = UDim2.new(0, 250, 0, 250)
-    colorPickerWindow.Position = UDim2.new(1, -255, 0, 60)
+    colorPickerWindow.Size = UDim2.new(0, 245, 0, 245) -- Réduit de 5 pixels
+    colorPickerWindow.Position = UDim2.new(1, -235, 0, 50) -- Décalé de 10 pixels à droite
     colorPickerWindow.BackgroundColor3 = currentTheme and currentTheme.SectionBackground or Color3.fromRGB(30, 30, 30)
     colorPickerWindow.Visible = false
     colorPickerWindow.ClipsDescendants = true
     colorPickerWindow.Parent = colorPickerFrame
     local colorPickerCorner = Instance.new("UICorner")
-    colorPickerCorner.CornerRadius = UDim.new(0, 10)
+    colorPickerCorner.CornerRadius = UDim.new(0, 12)
     colorPickerCorner.Parent = colorPickerWindow
     local colorPickerStroke = Instance.new("UIStroke")
     colorPickerStroke.Thickness = 2
@@ -1236,17 +1237,17 @@ function section:CreateColorPicker(name, default, callback)
     local colorPickerShadow = Instance.new("UIStroke")
     colorPickerShadow.Thickness = 4
     colorPickerShadow.Color = Color3.fromRGB(0, 0, 0)
-    colorPickerShadow.Transparency = 0.5
+    colorPickerShadow.Transparency = 0.7
     colorPickerShadow.Parent = colorPickerWindow
 
     -- Zone de saturation/luminosité
     local svPicker = Instance.new("Frame")
-    svPicker.Size = UDim2.new(0, 160, 0, 160)
+    svPicker.Size = UDim2.new(0, 150, 0, 150)
     svPicker.Position = UDim2.new(0, 10, 0, 10)
     svPicker.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
     svPicker.Parent = colorPickerWindow
     local svCorner = Instance.new("UICorner")
-    svCorner.CornerRadius = UDim.new(0, 8)
+    svCorner.CornerRadius = UDim.new(0, 10)
     svCorner.Parent = svPicker
     local svGradient = Instance.new("UIGradient")
     svGradient.Color = ColorSequence.new({
@@ -1269,7 +1270,7 @@ function section:CreateColorPicker(name, default, callback)
 
     -- Curseur pour saturation/luminosité
     local svCursor = Instance.new("Frame")
-    svCursor.Size = UDim2.new(0, 12, 0, 12)
+    svCursor.Size = UDim2.new(0, 10, 0, 10)
     svCursor.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     svCursor.BorderSizePixel = 0
     svCursor.Parent = svPicker
@@ -1283,8 +1284,8 @@ function section:CreateColorPicker(name, default, callback)
 
     -- Barre de teinte
     local hueBar = Instance.new("Frame")
-    hueBar.Size = UDim2.new(0, 40, 0, 160)
-    hueBar.Position = UDim2.new(0, 180, 0, 10)
+    hueBar.Size = UDim2.new(0, 35, 0, 150)
+    hueBar.Position = UDim2.new(0, 170, 0, 10)
     hueBar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     hueBar.Parent = colorPickerWindow
     local hueCorner = Instance.new("UICorner")
@@ -1309,7 +1310,7 @@ function section:CreateColorPicker(name, default, callback)
 
     -- Curseur pour la teinte
     local hueCursor = Instance.new("Frame")
-    hueCursor.Size = UDim2.new(1, 0, 0, 8)
+    hueCursor.Size = UDim2.new(1, 0, 0, 6)
     hueCursor.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     hueCursor.BorderSizePixel = 0
     hueCursor.Parent = hueBar
@@ -1320,15 +1321,15 @@ function section:CreateColorPicker(name, default, callback)
 
     -- Champs RGB
     local rgbFrame = Instance.new("Frame")
-    rgbFrame.Size = UDim2.new(1, -20, 0, 40)
-    rgbFrame.Position = UDim2.new(0, 10, 0, 180)
+    rgbFrame.Size = UDim2.new(1, -20, 0, 35)
+    rgbFrame.Position = UDim2.new(0, 10, 0, 170)
     rgbFrame.BackgroundTransparency = 1
     rgbFrame.Parent = colorPickerWindow
 
     local function createRGBInput(label, posX, key)
         local inputFrame = Instance.new("Frame")
-        inputFrame.Size = UDim2.new(0, 70, 0, 30)
-        inputFrame.Position = UDim2.new(0, posX, 0, 5)
+        inputFrame.Size = UDim2.new(0, 65, 0, 30)
+        inputFrame.Position = UDim2.new(0, posX, 0, 0)
         inputFrame.BackgroundTransparency = 1
         inputFrame.Parent = rgbFrame
 
@@ -1342,8 +1343,8 @@ function section:CreateColorPicker(name, default, callback)
         inputLabel.Parent = inputFrame
 
         local inputBox = Instance.new("TextBox")
-        inputBox.Size = UDim2.new(0, 40, 0, 24)
-        inputBox.Position = UDim2.new(0, 25, 0, 3)
+        inputBox.Size = UDim2.new(0, 35, 0, 20)
+        inputBox.Position = UDim2.new(0, 25, 0, 5)
         inputBox.BackgroundColor3 = currentTheme and currentTheme.ButtonBackground or Color3.fromRGB(28, 28, 28)
         inputBox.TextColor3 = currentTheme and currentTheme.TextColor or Color3.fromRGB(200, 50, 50)
         inputBox.TextSize = 14
@@ -1362,8 +1363,8 @@ function section:CreateColorPicker(name, default, callback)
     end
 
     local rInput = createRGBInput("R", 0, "R")
-    local gInput = createRGBInput("G", 80, "G")
-    local bInput = createRGBInput("B", 160, "B")
+    local gInput = createRGBInput("G", 75, "G")
+    local bInput = createRGBInput("B", 150, "B")
 
     -- Initialisation de la couleur
     local configKey = tab.Name .. "_" .. section.Name .. "_" .. name .. "_ColorPicker"
@@ -1379,8 +1380,8 @@ function section:CreateColorPicker(name, default, callback)
         ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
         ColorSequenceKeypoint.new(1, Color3.fromHSV(h, 1, 1))
     })
-    svCursor.Position = UDim2.new(s, -6, 1 - v, -6)
-    hueCursor.Position = UDim2.new(0, 0, h, -4)
+    svCursor.Position = UDim2.new(s, -5, 1 - v, -5)
+    hueCursor.Position = UDim2.new(0, 0, h, -3)
     rInput.Text = tostring(math.floor(currentColor.R * 255))
     gInput.Text = tostring(math.floor(currentColor.G * 255))
     bInput.Text = tostring(math.floor(currentColor.B * 255))
@@ -1394,8 +1395,8 @@ function section:CreateColorPicker(name, default, callback)
             ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
             ColorSequenceKeypoint.new(1, Color3.fromHSV(hue, 1, 1))
         })
-        svCursor.Position = UDim2.new(sat, -6, 1 - val, -6)
-        hueCursor.Position = UDim2.new(0, 0, hue, -4)
+        svCursor.Position = UDim2.new(sat, -5, 1 - val, -5)
+        hueCursor.Position = UDim2.new(0, 0, hue, -3)
         if not fromRGB then
             rInput.Text = tostring(math.floor(color.R * 255))
             gInput.Text = tostring(math.floor(color.G * 255))
@@ -1441,7 +1442,7 @@ function section:CreateColorPicker(name, default, callback)
         if handleInput(input) then
             draggingSV = true
             local mousePos = UserInputService:GetMouseLocation()
-            local guiInset = game:GetService("GuiService"):GetGuiInset()
+            local guiInset = GuiService:GetGuiInset()
             local relativeX = (mousePos.X - svPicker.AbsolutePosition.X) / svPicker.AbsoluteSize.X
             local relativeY = (mousePos.Y - svPicker.AbsolutePosition.Y - guiInset.Y) / svPicker.AbsoluteSize.Y
             relativeX = math.clamp(relativeX, 0, 1)
@@ -1461,7 +1462,7 @@ function section:CreateColorPicker(name, default, callback)
         if handleInput(input) then
             draggingHue = true
             local mousePos = UserInputService:GetMouseLocation()
-            local guiInset = game:GetService("GuiService"):GetGuiInset()
+            local guiInset = GuiService:GetGuiInset()
             local relativeY = (mousePos.Y - hueBar.AbsolutePosition.Y - guiInset.Y) / hueBar.AbsoluteSize.Y
             relativeY = math.clamp(relativeY, 0, 1)
             h = relativeY
@@ -1478,7 +1479,7 @@ function section:CreateColorPicker(name, default, callback)
     UserInputService.InputChanged:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
             local mousePos = UserInputService:GetMouseLocation()
-            local guiInset = game:GetService("GuiService"):GetGuiInset()
+            local guiInset = GuiService:GetGuiInset()
             if draggingSV then
                 local relativeX = (mousePos.X - svPicker.AbsolutePosition.X) / svPicker.AbsoluteSize.X
                 local relativeY = (mousePos.Y - svPicker.AbsolutePosition.Y - guiInset.Y) / svPicker.AbsoluteSize.Y
@@ -1498,8 +1499,8 @@ function section:CreateColorPicker(name, default, callback)
     -- Animation d'ouverture/fermeture
     colorPickerButton.MouseButton1Click:Connect(function()
         colorPickerWindow.Visible = not colorPickerWindow.Visible
-        local tweenInfo = TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
-        local targetSize = colorPickerWindow.Visible and UDim2.new(0, 250, 0, 250) or UDim2.new(0, 250, 0, 0)
+        local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+        local targetSize = colorPickerWindow.Visible and UDim2.new(0, 245, 0, 245) or UDim2.new(0, 245, 0, 0)
         local tween = TweenService:Create(colorPickerWindow, tweenInfo, {Size = targetSize})
         tween:Play()
     end)
