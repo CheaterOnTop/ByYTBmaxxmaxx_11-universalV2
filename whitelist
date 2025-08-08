@@ -1,4 +1,4 @@
--- Vérifie si g
+-- Vérifie si gsssssszdzdzd
 if typeof(getgenv) == "function" then
     if not memorystats then
         memorystats = {}
