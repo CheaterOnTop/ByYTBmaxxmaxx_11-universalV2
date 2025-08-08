@@ -1176,19 +1176,19 @@ function XyloKitUI:CreateWindow(title)
             end
 
             -- Création d'un ColorPicker
-            function section:CreateColorPicker(name, default, callback)
+function section:CreateColorPicker(name, default, callback)
     local TweenService = game:GetService("TweenService")
     local UserInputService = game:GetService("UserInputService")
-    
+
     -- Cadre principal du ColorPicker
     local colorPickerFrame = Instance.new("Frame")
-    colorPickerFrame.Size = UDim2.new(1, -20, 0, 50) -- Hauteur augmentée pour les champs RGB
+    colorPickerFrame.Size = UDim2.new(1, -20, 0, 60)
     colorPickerFrame.BackgroundTransparency = 1
     colorPickerFrame.Parent = scrollFrame
 
     local colorPickerLabel = Instance.new("TextLabel")
     colorPickerLabel.Size = UDim2.new(0.6, 0, 0, 20)
-    colorPickerLabel.Position = UDim2.new(0, 5, 0, 5)
+    colorPickerLabel.Position = UDim2.new(0, 10, 0, 5)
     colorPickerLabel.BackgroundTransparency = 1
     colorPickerLabel.Text = name
     colorPickerLabel.TextColor3 = currentTheme and currentTheme.TextColor or Color3.fromRGB(200, 50, 50)
@@ -1198,45 +1198,56 @@ function XyloKitUI:CreateWindow(title)
     colorPickerLabel.Parent = colorPickerFrame
 
     local colorPreview = Instance.new("Frame")
-    colorPreview.Size = UDim2.new(0, 40, 0, 40)
-    colorPreview.Position = UDim2.new(1, -45, 0, 5)
+    colorPreview.Size = UDim2.new(0, 50, 0, 50)
+    colorPreview.Position = UDim2.new(1, -60, 0, 5)
     colorPreview.BackgroundColor3 = default
     colorPreview.BorderSizePixel = 0
     colorPreview.Parent = colorPickerFrame
-
+    local colorPreviewCorner = Instance.new("UICorner")
+    colorPreviewCorner.CornerRadius = UDim.new(0, 8)
+    colorPreviewCorner.Parent = colorPreview
     local colorPreviewStroke = Instance.new("UIStroke")
     colorPreviewStroke.Thickness = 2
     colorPreviewStroke.Color = currentTheme and currentTheme.BorderColor or Color3.fromRGB(200, 50, 50)
     colorPreviewStroke.Parent = colorPreview
 
     local colorPickerButton = Instance.new("TextButton")
-    colorPickerButton.Size = UDim2.new(0, 40, 0, 40)
-    colorPickerButton.Position = UDim2.new(1, -45, 0, 5)
+    colorPickerButton.Size = UDim2.new(0, 50, 0, 50)
+    colorPickerButton.Position = UDim2.new(1, -60, 0, 5)
     colorPickerButton.BackgroundTransparency = 1
     colorPickerButton.Text = ""
     colorPickerButton.Parent = colorPickerFrame
 
     -- Fenêtre du ColorPicker
     local colorPickerWindow = Instance.new("Frame")
-    colorPickerWindow.Size = UDim2.new(0, 220, 0, 220) -- Fenêtre plus grande pour plus de précision
-    colorPickerWindow.Position = UDim2.new(1, -225, 0, 50)
+    colorPickerWindow.Size = UDim2.new(0, 250, 0, 250)
+    colorPickerWindow.Position = UDim2.new(1, -255, 0, 60)
     colorPickerWindow.BackgroundColor3 = currentTheme and currentTheme.SectionBackground or Color3.fromRGB(30, 30, 30)
     colorPickerWindow.Visible = false
     colorPickerWindow.ClipsDescendants = true
     colorPickerWindow.Parent = colorPickerFrame
-
+    local colorPickerCorner = Instance.new("UICorner")
+    colorPickerCorner.CornerRadius = UDim.new(0, 10)
+    colorPickerCorner.Parent = colorPickerWindow
     local colorPickerStroke = Instance.new("UIStroke")
     colorPickerStroke.Thickness = 2
     colorPickerStroke.Color = currentTheme and currentTheme.BorderColor or Color3.fromRGB(200, 50, 50)
     colorPickerStroke.Parent = colorPickerWindow
+    local colorPickerShadow = Instance.new("UIStroke")
+    colorPickerShadow.Thickness = 4
+    colorPickerShadow.Color = Color3.fromRGB(0, 0, 0)
+    colorPickerShadow.Transparency = 0.5
+    colorPickerShadow.Parent = colorPickerWindow
 
-    -- Zone de saturation/luminosité (carré 140x140)
+    -- Zone de saturation/luminosité
     local svPicker = Instance.new("Frame")
-    svPicker.Size = UDim2.new(0, 140, 0, 140)
+    svPicker.Size = UDim2.new(0, 160, 0, 160)
     svPicker.Position = UDim2.new(0, 10, 0, 10)
     svPicker.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
     svPicker.Parent = colorPickerWindow
-
+    local svCorner = Instance.new("UICorner")
+    svCorner.CornerRadius = UDim.new(0, 8)
+    svCorner.Parent = svPicker
     local svGradient = Instance.new("UIGradient")
     svGradient.Color = ColorSequence.new({
         ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
@@ -1244,7 +1255,6 @@ function XyloKitUI:CreateWindow(title)
     })
     svGradient.Rotation = 0
     svGradient.Parent = svPicker
-
     local brightnessGradient = Instance.new("UIGradient")
     brightnessGradient.Color = ColorSequence.new({
         ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0, 0)),
@@ -1252,7 +1262,6 @@ function XyloKitUI:CreateWindow(title)
     })
     brightnessGradient.Rotation = 90
     brightnessGradient.Parent = svPicker
-
     local svStroke = Instance.new("UIStroke")
     svStroke.Thickness = 2
     svStroke.Color = currentTheme and currentTheme.BorderColor or Color3.fromRGB(200, 50, 50)
@@ -1260,7 +1269,7 @@ function XyloKitUI:CreateWindow(title)
 
     -- Curseur pour saturation/luminosité
     local svCursor = Instance.new("Frame")
-    svCursor.Size = UDim2.new(0, 10, 0, 10)
+    svCursor.Size = UDim2.new(0, 12, 0, 12)
     svCursor.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     svCursor.BorderSizePixel = 0
     svCursor.Parent = svPicker
@@ -1268,17 +1277,19 @@ function XyloKitUI:CreateWindow(title)
     svCursorCorner.CornerRadius = UDim.new(0.5, 0)
     svCursorCorner.Parent = svCursor
     local svCursorStroke = Instance.new("UIStroke")
-    svCursorStroke.Thickness = 1
+    svCursorStroke.Thickness = 2
     svCursorStroke.Color = Color3.fromRGB(0, 0, 0)
     svCursorStroke.Parent = svCursor
 
-    -- Barre de teinte (30x140)
+    -- Barre de teinte
     local hueBar = Instance.new("Frame")
-    hueBar.Size = UDim2.new(0, 30, 0, 140)
-    hueBar.Position = UDim2.new(0, 160, 0, 10)
+    hueBar.Size = UDim2.new(0, 40, 0, 160)
+    hueBar.Position = UDim2.new(0, 180, 0, 10)
     hueBar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     hueBar.Parent = colorPickerWindow
-
+    local hueCorner = Instance.new("UICorner")
+    hueCorner.CornerRadius = UDim.new(0, 8)
+    hueCorner.Parent = hueBar
     local hueGradient = Instance.new("UIGradient")
     hueGradient.Color = ColorSequence.new({
         ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
@@ -1291,7 +1302,6 @@ function XyloKitUI:CreateWindow(title)
     })
     hueGradient.Rotation = 90
     hueGradient.Parent = hueBar
-
     local hueStroke = Instance.new("UIStroke")
     hueStroke.Thickness = 2
     hueStroke.Color = currentTheme and currentTheme.BorderColor or Color3.fromRGB(200, 50, 50)
@@ -1299,26 +1309,26 @@ function XyloKitUI:CreateWindow(title)
 
     -- Curseur pour la teinte
     local hueCursor = Instance.new("Frame")
-    hueCursor.Size = UDim2.new(1, 0, 0, 6)
+    hueCursor.Size = UDim2.new(1, 0, 0, 8)
     hueCursor.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     hueCursor.BorderSizePixel = 0
     hueCursor.Parent = hueBar
     local hueCursorStroke = Instance.new("UIStroke")
-    hueCursorStroke.Thickness = 1
+    hueCursorStroke.Thickness = 2
     hueCursorStroke.Color = Color3.fromRGB(0, 0, 0)
     hueCursorStroke.Parent = hueCursor
 
     -- Champs RGB
     local rgbFrame = Instance.new("Frame")
-    rgbFrame.Size = UDim2.new(1, -20, 0, 30)
-    rgbFrame.Position = UDim2.new(0, 10, 0, 160)
+    rgbFrame.Size = UDim2.new(1, -20, 0, 40)
+    rgbFrame.Position = UDim2.new(0, 10, 0, 180)
     rgbFrame.BackgroundTransparency = 1
     rgbFrame.Parent = colorPickerWindow
 
     local function createRGBInput(label, posX, key)
         local inputFrame = Instance.new("Frame")
-        inputFrame.Size = UDim2.new(0, 60, 0, 30)
-        inputFrame.Position = UDim2.new(0, posX, 0, 0)
+        inputFrame.Size = UDim2.new(0, 70, 0, 30)
+        inputFrame.Position = UDim2.new(0, posX, 0, 5)
         inputFrame.BackgroundTransparency = 1
         inputFrame.Parent = rgbFrame
 
@@ -1332,15 +1342,17 @@ function XyloKitUI:CreateWindow(title)
         inputLabel.Parent = inputFrame
 
         local inputBox = Instance.new("TextBox")
-        inputBox.Size = UDim2.new(0, 30, 0, 20)
-        inputBox.Position = UDim2.new(0, 25, 0, 5)
+        inputBox.Size = UDim2.new(0, 40, 0, 24)
+        inputBox.Position = UDim2.new(0, 25, 0, 3)
         inputBox.BackgroundColor3 = currentTheme and currentTheme.ButtonBackground or Color3.fromRGB(28, 28, 28)
         inputBox.TextColor3 = currentTheme and currentTheme.TextColor or Color3.fromRGB(200, 50, 50)
         inputBox.TextSize = 14
         inputBox.Font = Enum.Font.Code
-        inputBox.Text = math.floor(default[key] * 255)
+        inputBox.Text = tostring(math.floor(default[key] * 255))
         inputBox.Parent = inputFrame
-
+        local inputCorner = Instance.new("UICorner")
+        inputCorner.CornerRadius = UDim.new(0, 6)
+        inputCorner.Parent = inputBox
         local inputStroke = Instance.new("UIStroke")
         inputStroke.Thickness = 1
         inputStroke.Color = currentTheme and currentTheme.BorderColor or Color3.fromRGB(200, 50, 50)
@@ -1350,8 +1362,8 @@ function XyloKitUI:CreateWindow(title)
     end
 
     local rInput = createRGBInput("R", 0, "R")
-    local gInput = createRGBInput("G", 70, "G")
-    local bInput = createRGBInput("B", 140, "B")
+    local gInput = createRGBInput("G", 80, "G")
+    local bInput = createRGBInput("B", 160, "B")
 
     -- Initialisation de la couleur
     local configKey = tab.Name .. "_" .. section.Name .. "_" .. name .. "_ColorPicker"
@@ -1367,29 +1379,32 @@ function XyloKitUI:CreateWindow(title)
         ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
         ColorSequenceKeypoint.new(1, Color3.fromHSV(h, 1, 1))
     })
-    svCursor.Position = UDim2.new(s, -5, 1 - v, -5)
-    hueCursor.Position = UDim2.new(0, 0, h, -3)
+    svCursor.Position = UDim2.new(s, -6, 1 - v, -6)
+    hueCursor.Position = UDim2.new(0, 0, h, -4)
     rInput.Text = tostring(math.floor(currentColor.R * 255))
     gInput.Text = tostring(math.floor(currentColor.G * 255))
     bInput.Text = tostring(math.floor(currentColor.B * 255))
 
     local function updateColor(hue, sat, val, fromRGB)
         local color = Color3.fromHSV(hue, sat, val)
+        currentColor = color
         colorPreview.BackgroundColor3 = color
         svPicker.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
         svGradient.Color = ColorSequence.new({
             ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
             ColorSequenceKeypoint.new(1, Color3.fromHSV(hue, 1, 1))
         })
-        svCursor.Position = UDim2.new(sat, -5, 1 - val, -5)
-        hueCursor.Position = UDim2.new(0, 0, hue, -3)
+        svCursor.Position = UDim2.new(sat, -6, 1 - val, -6)
+        hueCursor.Position = UDim2.new(0, 0, hue, -4)
         if not fromRGB then
             rInput.Text = tostring(math.floor(color.R * 255))
             gInput.Text = tostring(math.floor(color.G * 255))
             bInput.Text = tostring(math.floor(color.B * 255))
         end
         config[configKey] = {R = color.R, G = color.G, B = color.B}
-        saveConfig()
+        if saveConfig then
+            saveConfig()
+        end
         callback(color)
     end
 
@@ -1426,8 +1441,9 @@ function XyloKitUI:CreateWindow(title)
         if handleInput(input) then
             draggingSV = true
             local mousePos = UserInputService:GetMouseLocation()
+            local guiInset = game:GetService("GuiService"):GetGuiInset()
             local relativeX = (mousePos.X - svPicker.AbsolutePosition.X) / svPicker.AbsoluteSize.X
-            local relativeY = (mousePos.Y - svPicker.AbsolutePosition.Y) / svPicker.AbsoluteSize.Y
+            local relativeY = (mousePos.Y - svPicker.AbsolutePosition.Y - guiInset.Y) / svPicker.AbsoluteSize.Y
             relativeX = math.clamp(relativeX, 0, 1)
             relativeY = math.clamp(relativeY, 0, 1)
             s, v = relativeX, 1 - relativeY
@@ -1445,7 +1461,8 @@ function XyloKitUI:CreateWindow(title)
         if handleInput(input) then
             draggingHue = true
             local mousePos = UserInputService:GetMouseLocation()
-            local relativeY = (mousePos.Y - hueBar.AbsolutePosition.Y) / hueBar.AbsoluteSize.Y
+            local guiInset = game:GetService("GuiService"):GetGuiInset()
+            local relativeY = (mousePos.Y - hueBar.AbsolutePosition.Y - guiInset.Y) / hueBar.AbsoluteSize.Y
             relativeY = math.clamp(relativeY, 0, 1)
             h = relativeY
             updateColor(h, s, v)
@@ -1461,15 +1478,16 @@ function XyloKitUI:CreateWindow(title)
     UserInputService.InputChanged:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
             local mousePos = UserInputService:GetMouseLocation()
+            local guiInset = game:GetService("GuiService"):GetGuiInset()
             if draggingSV then
                 local relativeX = (mousePos.X - svPicker.AbsolutePosition.X) / svPicker.AbsoluteSize.X
-                local relativeY = (mousePos.Y - svPicker.AbsolutePosition.Y) / svPicker.AbsoluteSize.Y
+                local relativeY = (mousePos.Y - svPicker.AbsolutePosition.Y - guiInset.Y) / svPicker.AbsoluteSize.Y
                 relativeX = math.clamp(relativeX, 0, 1)
                 relativeY = math.clamp(relativeY, 0, 1)
                 s, v = relativeX, 1 - relativeY
                 updateColor(h, s, v)
             elseif draggingHue then
-                local relativeY = (mousePos.Y - hueBar.AbsolutePosition.Y) / hueBar.AbsoluteSize.Y
+                local relativeY = (mousePos.Y - hueBar.AbsolutePosition.Y - guiInset.Y) / hueBar.AbsoluteSize.Y
                 relativeY = math.clamp(relativeY, 0, 1)
                 h = relativeY
                 updateColor(h, s, v)
@@ -1477,11 +1495,12 @@ function XyloKitUI:CreateWindow(title)
         end
     end)
 
-    -- Toggle la fenêtre du ColorPicker
+    -- Animation d'ouverture/fermeture
     colorPickerButton.MouseButton1Click:Connect(function()
         colorPickerWindow.Visible = not colorPickerWindow.Visible
-        local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
-        local tween = TweenService:Create(colorPickerWindow, tweenInfo, {Size = colorPickerWindow.Visible and UDim2.new(0, 220, 0, 220) or UDim2.new(0, 220, 0, 0)})
+        local tweenInfo = TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+        local targetSize = colorPickerWindow.Visible and UDim2.new(0, 250, 0, 250) or UDim2.new(0, 250, 0, 0)
+        local tween = TweenService:Create(colorPickerWindow, tweenInfo, {Size = targetSize})
         tween:Play()
     end)
 
@@ -1497,6 +1516,7 @@ function XyloKitUI:CreateWindow(title)
         tweenLeave:Play()
     end)
 end
+
 
             return section
         end
