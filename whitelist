@@ -1,4 +1,4 @@
--- Vérifie si gsssssszdzdzd
+-- Véri
 if typeof(getgenv) == "function" then
     if not memorystats then
         memorystats = {}
@@ -1199,7 +1199,7 @@ function section:CreateColorPicker(name, default, callback)
     colorPickerLabel.Parent = colorPickerFrame
 
     local colorPreview = Instance.new("Frame")
-    colorPreview.Size = UDim2.new(0, 30, 0, 30) -- Même taille que les toggles
+    colorPreview.Size = UDim2.new(0, 30, 0, 30) -- Taille alignée avec les toggles
     colorPreview.Position = UDim2.new(1, -40, 0, 10)
     colorPreview.BackgroundColor3 = default
     colorPreview.BorderSizePixel = 0
@@ -1221,8 +1221,8 @@ function section:CreateColorPicker(name, default, callback)
 
     -- Fenêtre du ColorPicker
     local colorPickerWindow = Instance.new("Frame")
-    colorPickerWindow.Size = UDim2.new(0, 245, 0, 245) -- Réduit de 5 pixels
-    colorPickerWindow.Position = UDim2.new(1, -235, 0, 50) -- Décalé de 10 pixels à droite
+    colorPickerWindow.Size = UDim2.new(0, 245, 0, 245)
+    colorPickerWindow.Position = UDim2.new(1, -230, 0, 50) -- Décalé de 15 pixels à droite (10 + 5)
     colorPickerWindow.BackgroundColor3 = currentTheme and currentTheme.SectionBackground or Color3.fromRGB(30, 30, 30)
     colorPickerWindow.Visible = false
     colorPickerWindow.ClipsDescendants = true
@@ -1390,6 +1390,7 @@ function section:CreateColorPicker(name, default, callback)
         local color = Color3.fromHSV(hue, sat, val)
         currentColor = color
         colorPreview.BackgroundColor3 = color
+        -- Mettre à jour la palette avec la nouvelle teinte
         svPicker.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
         svGradient.Color = ColorSequence.new({
             ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
