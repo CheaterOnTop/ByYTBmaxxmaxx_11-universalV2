@@ -1,4 +1,4 @@
--- Vérifie si getgenv est dispo (certains exécutors ne l'ont pas)
+-- Vérifie si getgenv est dispo (certains exécutors ne l'ont pas)  dfee
 if typeof(getgenv) == "function" then
 
     if not memorystats then
@@ -976,43 +976,43 @@ end
     end
 
     -- Profil du joueur
-    local playerInfoFrame = Instance.new("Frame")
-    playerInfoFrame.Size = UDim2.new(0, 198, 0, 60)
-    playerInfoFrame.Position = UDim2.new(0, 0, 1, 190)
-    playerInfoFrame.AnchorPoint = Vector2.new(0, 1)
-    playerInfoFrame.BackgroundColor3 = currentTheme.TabBackground
-    playerInfoFrame.BorderSizePixel = 0
-    playerInfoFrame.Parent = mainFrame
+local playerInfoFrame = Instance.new("Frame")
+playerInfoFrame.Size = UDim2.new(0, 198, 0, 60)
+playerInfoFrame.Position = UDim2.new(0, 0, 1, 0) -- En bas à gauche
+playerInfoFrame.AnchorPoint = Vector2.new(0, 1)
+playerInfoFrame.BackgroundColor3 = currentTheme.TabBackground
+playerInfoFrame.BorderSizePixel = 0
+playerInfoFrame.Parent = mainFrame
 
-    local playerInfoStroke = Instance.new("UIStroke")
-    playerInfoStroke.Thickness = 2
-    playerInfoStroke.Color = currentTheme.BorderColor
-    playerInfoStroke.Parent = playerInfoFrame
+local playerInfoStroke = Instance.new("UIStroke")
+playerInfoStroke.Thickness = 2
+playerInfoStroke.Color = currentTheme.BorderColor
+playerInfoStroke.Parent = playerInfoFrame
 
-    local playerIcon = Instance.new("ImageLabel")
-    playerIcon.Size = UDim2.new(0, 40, 0, 40)
-    playerIcon.Position = UDim2.new(0, 10, 0, 10)
-    playerIcon.BackgroundTransparency = 1
-    playerIcon.Image = player and "rbxthumb://type=AvatarHeadShot&id=" .. player.UserId .. "&w=420&h=420" or ""
-    playerIcon.ClipsDescendants = true
-    playerIcon.Parent = playerInfoFrame
+local playerIcon = Instance.new("ImageLabel")
+playerIcon.Size = UDim2.new(0, 40, 0, 40)
+playerIcon.Position = UDim2.new(0, 10, 0, 10)
+playerIcon.BackgroundTransparency = 1
+playerIcon.Image = player and "rbxthumb://type=AvatarHeadShot&id=" .. player.UserId .. "&w=420&h=420" or ""
+playerIcon.ClipsDescendants = true
+playerIcon.Parent = playerInfoFrame
 
-    -- Effet de cercle
-    local iconCircle = Instance.new("UICorner")
-    iconCircle.CornerRadius = UDim.new(0.5, 0)
-    iconCircle.Parent = playerIcon
+-- Effet de cercle
+local iconCircle = Instance.new("UICorner")
+iconCircle.CornerRadius = UDim.new(0.5, 0)
+iconCircle.Parent = playerIcon
 
-    local playerName = Instance.new("TextLabel")
-    playerName.Size = UDim2.new(0, 180, 0, 40)
-    playerInfoFrame.Position = UDim2.new(0, 0, 1, 0)
-    playerName.BackgroundTransparency = 1
-    playerName.Text = player and player.Name or "#ERROR_UNKNOW_404"
-    playerName.TextColor3 = currentTheme.TextColor
-    playerName.TextSize = 16
-    playerName.Font = Enum.Font.Code
-    playerName.TextXAlignment = Enum.TextXAlignment.Left
-    playerName.TextTruncate = Enum.TextTruncate.AtEnd
-    playerName.Parent = playerInfoFrame
+local playerName = Instance.new("TextLabel")
+playerName.Size = UDim2.new(0, 180, 0, 40)
+playerName.Position = UDim2.new(0, 55, 0, 10) -- Corrigé pour aligner à droite de l'icône et centrer verticalement
+playerName.BackgroundTransparency = 1
+playerName.Text = player and player.Name or "#ERROR_UNKNOW_404"
+playerName.TextColor3 = currentTheme.TextColor
+playerName.TextSize = 16
+playerName.Font = Enum.Font.Code
+playerName.TextXAlignment = Enum.TextXAlignment.Left
+playerName.TextTruncate = Enum.TextTruncate.AtEnd
+playerName.Parent = playerInfoFrame
 
     return XyloKitUIWindow
 end
