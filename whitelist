@@ -1222,7 +1222,7 @@ function section:CreateColorPicker(name, default, callback)
     -- Fenêtre du ColorPicker
     local colorPickerWindow = Instance.new("Frame")
     colorPickerWindow.Size = UDim2.new(0, 245, 0, 245)
-    colorPickerWindow.Position = UDim2.new(1, -230, 0, 50) -- Décalé de 15 pixels à droite (10 + 5)
+    colorPickerWindow.Position = UDim2.new(1, -226, 0, 50) -- Décalé de 19 pixels à droite (15 + 4)
     colorPickerWindow.BackgroundColor3 = currentTheme and currentTheme.SectionBackground or Color3.fromRGB(30, 30, 30)
     colorPickerWindow.Visible = false
     colorPickerWindow.ClipsDescendants = true
@@ -1252,7 +1252,7 @@ function section:CreateColorPicker(name, default, callback)
     local svGradient = Instance.new("UIGradient")
     svGradient.Color = ColorSequence.new({
         ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
+        ColorSequenceKeypoint.new(1, Color3.fromHSV(0, 1, 1)) -- Initialisé avec teinte 0 (rouge)
     })
     svGradient.Rotation = 0
     svGradient.Parent = svPicker
@@ -1390,7 +1390,7 @@ function section:CreateColorPicker(name, default, callback)
         local color = Color3.fromHSV(hue, sat, val)
         currentColor = color
         colorPreview.BackgroundColor3 = color
-        -- Mettre à jour la palette avec la nouvelle teinte
+        -- Mettre à jour la palette avec la teinte actuelle
         svPicker.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
         svGradient.Color = ColorSequence.new({
             ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
