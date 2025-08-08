@@ -1,4 +1,4 @@
--- Véri
+-- Véridddddd
 if typeof(getgenv) == "function" then
     if not memorystats then
         memorystats = {}
@@ -1222,7 +1222,7 @@ function section:CreateColorPicker(name, default, callback)
     -- Fenêtre du ColorPicker
     local colorPickerWindow = Instance.new("Frame")
     colorPickerWindow.Size = UDim2.new(0, 245, 0, 245)
-    colorPickerWindow.Position = UDim2.new(1, -226, 0, 50) -- Décalé de 19 pixels à droite (15 + 4)
+    colorPickerWindow.Position = UDim2.new(1, -226, 0, 50) -- Décalé de 19 pixels à droite
     colorPickerWindow.BackgroundColor3 = currentTheme and currentTheme.SectionBackground or Color3.fromRGB(30, 30, 30)
     colorPickerWindow.Visible = false
     colorPickerWindow.ClipsDescendants = true
@@ -1252,14 +1252,14 @@ function section:CreateColorPicker(name, default, callback)
     local svGradient = Instance.new("UIGradient")
     svGradient.Color = ColorSequence.new({
         ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
-        ColorSequenceKeypoint.new(1, Color3.fromHSV(0, 1, 1)) -- Initialisé avec teinte 0 (rouge)
+        ColorSequenceKeypoint.new(1, Color3.fromHSV(0, 1, 1)) -- Teinte initiale (rouge)
     })
     svGradient.Rotation = 0
     svGradient.Parent = svPicker
     local brightnessGradient = Instance.new("UIGradient")
     brightnessGradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0, 0)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255, 0)), -- Transparent au sommet
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0)) -- Noir au bas
     })
     brightnessGradient.Rotation = 90
     brightnessGradient.Parent = svPicker
@@ -1390,11 +1390,15 @@ function section:CreateColorPicker(name, default, callback)
         local color = Color3.fromHSV(hue, sat, val)
         currentColor = color
         colorPreview.BackgroundColor3 = color
-        -- Mettre à jour la palette avec la teinte actuelle
+        -- Mettre à jour la palette avec un dégradé correct
         svPicker.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
         svGradient.Color = ColorSequence.new({
             ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
             ColorSequenceKeypoint.new(1, Color3.fromHSV(hue, 1, 1))
+        })
+        brightnessGradient.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255, 0)), -- Transparent au sommet
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0)) -- Noir au bas
         })
         svCursor.Position = UDim2.new(sat, -5, 1 - val, -5)
         hueCursor.Position = UDim2.new(0, 0, hue, -3)
