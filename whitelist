@@ -1,4 +1,4 @@
--- Vérifie si getgenv est dispo (certains exécutors ne l'ont pas)  dfee
+-- Vérifie si getgenv est dispo 
 if typeof(getgenv) == "function" then
 
     if not memorystats then
