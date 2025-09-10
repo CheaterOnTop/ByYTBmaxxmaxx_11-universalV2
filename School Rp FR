@@ -95,7 +95,7 @@ local Themes = {
 local Fonts = {
     Gotham = Enum.Font.Gotham,
     Roboto = Enum.Font.Roboto,
-    SourceSans = Enum.Font.SourceSansPro
+    SourceSans = Enum.Font.SourceSans
 }
 
 local currentTheme = Themes.Dark
