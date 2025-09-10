@@ -1,5 +1,6 @@
+```lua
 -- XyloKitUI: Bibliothèque UI Roblox avancée
--- Version: 3.0
+-- Version: 3.1
 -- Fonctionnalités: Thème moderne, animations fluides, redimensionnement, système de keybind, notifications, effet de flou
 
 local XyloKitUI = {}
@@ -100,12 +101,22 @@ local Fonts = {
 
 local currentTheme = Themes.Dark
 local currentFont = Fonts.Gotham
+local currentToggleKey = Enum.KeyCode.RightShift
+
+-- Liste des touches valides pour les keybinds
+local validKeys = {
+    "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P",
+    "A", "S", "D", "F", "G", "H", "J", "K", "L",
+    "Z", "X", "C", "V", "B", "N", "M",
+    "LeftShift", "RightShift", "LeftControl", "RightControl",
+    "LeftAlt", "RightAlt", "Space", "Return", "Backspace"
+}
 
 -- Gestion de la configuration
 local config = {
     Theme = "Dark",
     Font = "Gotham",
-    ToggleKey = Enum.KeyCode.RightShift.Name
+    ToggleKey = "RightShift"
 }
 local configFileName = "XyloKitUI_Config.json"
 
@@ -118,8 +129,14 @@ end
 local function loadConfig()
     if isfile(configFileName) then
         pcall(function()
-            config = HttpService:JSONDecode(readfile(configFileName))
-            currentFont = Fonts[config.Font] or Fonts.Gotham
+            local fileContent = readfile(configFileName)
+            if fileContent then
+                config = HttpService:JSONDecode(fileContent)
+                currentFont = Fonts[config.Font] or Fonts.Gotham
+                currentToggleKey = Enum.KeyCode[config.ToggleKey] or Enum.KeyCode.RightShift
+            else
+                warn("Échec de la lecture du fichier de configuration")
+            end
         end)
     end
 end
@@ -251,20 +268,22 @@ function XyloKitUI:CreateWindow(title)
 
     mainFrame.InputChanged:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseMovement then
-            local delta = input.Position - (dragging and dragStart or resizeStart)
-            if dragging then
-                mainFrame.Position = UDim2.new(
-                    startPos.X.Scale, startPos.X.Offset + delta.X,
-                    startPos.Y.Scale, startPos.Y.Offset + delta.Y
-                )
-                config.WindowPosition = {X = mainFrame.Position.X.Offset, Y = mainFrame.Position.Y.Offset}
-                saveConfig()
-            elseif resizing then
-                local newWidth = math.clamp(startSize.X.Offset + delta.X, minSize.X, maxSize.X)
-                local newHeight = math.clamp(startSize.Y.Offset + delta.Y, minSize.Y, maxSize.Y)
-                mainFrame.Size = UDim2.new(0, newWidth, 0, newHeight)
-                config.WindowSize = {Width = newWidth, Height = newHeight}
-                saveConfig()
+            if dragging and dragStart or resizing and resizeStart then
+                local delta = input.Position - (dragging and dragStart or resizeStart)
+                if dragging then
+                    mainFrame.Position = UDim2.new(
+                        startPos.X.Scale, startPos.X.Offset + delta.X,
+                        startPos.Y.Scale, startPos.Y.Offset + delta.Y
+                    )
+                    config.WindowPosition = {X = mainFrame.Position.X.Offset, Y = mainFrame.Position.Y.Offset}
+                    saveConfig()
+                elseif resizing then
+                    local newWidth = math.clamp(startSize.X.Offset + delta.X, minSize.X, maxSize.X)
+                    local newHeight = math.clamp(startSize.Y.Offset + delta.Y, minSize.Y, maxSize.Y)
+                    mainFrame.Size = UDim2.new(0, newWidth, 0, newHeight)
+                    config.WindowSize = {Width = newWidth, Height = newHeight}
+                    saveConfig()
+                end
             end
         end
     end)
@@ -372,7 +391,6 @@ function XyloKitUI:CreateWindow(title)
     minimizeButton.MouseButton1Click:Connect(toggleMenu)
 
     -- Gestion du keybind pour toggle
-    local currentToggleKey = Enum.KeyCode[config.ToggleKey] or Enum.KeyCode.RightShift
     UserInputService.InputBegan:Connect(function(input, gameProcessed)
         if gameProcessed then return end
         if input.KeyCode == currentToggleKey then
@@ -447,7 +465,6 @@ function XyloKitUI:CreateWindow(title)
             currentFont = Fonts[value]
             saveConfig()
             NotificationManager:Create("Police changée à " .. value, 3)
-            -- Mettre à jour la police de tous les éléments
             for _, tab in pairs(tabs) do
                 for _, child in pairs(tab.Content:GetDescendants()) do
                     if child:IsA("TextLabel") or child:IsA("TextButton") then
@@ -775,7 +792,7 @@ function XyloKitUI:CreateWindow(title)
                 buttonCorner.CornerRadius = UDim.new(0.5, 0)
                 buttonCorner.Parent = sliderButton
 
-                addTooltip(sliderButton, "Ajuster " .. name .. " (" .. min .. "-" .. max .. ")")
+                addTooltip(sliderButton, "Aontol pour " .. name .. " (" .. min .. "-" .. max .. ")")
 
                 local configKey = tab.Name .. "_" .. section.Name .. "_" .. name .. "_Slider"
                 if config[configKey] ~= nil then
@@ -960,13 +977,16 @@ function XyloKitUI:CreateWindow(title)
                 UserInputService.InputBegan:Connect(function(input, gameProcessed)
                     if waitingForInput and not gameProcessed and input.UserInputType == Enum.UserInputType.Keyboard then
                         local key = input.KeyCode.Name
-                        if key ~= "Unknown" then
+                        if table.find(validKeys, key) then
                             keybindButton.Text = key
                             config[configKey] = key
                             saveConfig()
                             callback(key)
-                            waitingForInput = false
+                            NotificationManager:Create(name .. " défini sur " .. key, 2)
+                        else
+                            NotificationManager:Create("Touche non valide", 3, "warning")
                         end
+                        waitingForInput = false
                     end
                 end)
             end
@@ -1015,3 +1035,4 @@ function XyloKitUI:CreateWindow(title)
 end
 
 return XyloKitUI
+```
