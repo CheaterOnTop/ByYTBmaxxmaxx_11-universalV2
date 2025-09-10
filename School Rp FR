@@ -1,6 +1,6 @@
 
 -- XyloKitUI: Bibliothèque UI Roblox avancée
--- Version: 3.1
+-- Version: 3.1dzdzd
 -- Fonctionnalités: Thème moderne, animations fluides, redimensionnement, système de keybind, notifications, effet de flou
 
 local XyloKitUI = {}
@@ -1035,4 +1035,4 @@ function XyloKitUI:CreateWindow(title)
 end
 
 return XyloKitUI
-```
+
