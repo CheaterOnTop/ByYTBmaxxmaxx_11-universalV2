@@ -1,58 +1,17 @@
--- Vérifie si getgenv est dispo (certains exécutors ne l'ont pas)
+-- dede
 if typeof(getgenv) == "function" then
     if not memorystats then
         memorystats = {}
         memorystats.cache = function(_) end
         memorystats.restore = function(_) end
     end
-
-    local cacheCategories = {
-        "Internal","HttpCache","Instances","Signals","Script",
-        "PhysicsCollision","PhysicsParts","GraphicsSolidModels","GraphicsMeshParts","GraphicsParticles",
-        "GraphicsParts","GraphicsSpatialHash","GraphicsTerrain","GraphicsTexture","GraphicsTextureCharacter",
-        "Sounds","StreamingSounds","TerrainVoxels","Gui","Animation","Navigation","GeometryCSG"
-    }
-
-    local function cacheAll()
-        for _, category in ipairs(cacheCategories) do
-            pcall(function()
-                memorystats.cache(category)
-            end)
-        end
-    end
-
-    local function restoreAll()
-        for _, category in ipairs(cacheCategories) do
-            pcall(function()
-                memorystats.restore(category)
-            end)
-        end
-    end
-
-    cacheAll()
-    task.spawn(function()
-        while task.wait(120) do
-            cacheAll()
-        end
-    end)
-    getgenv().RestoreMemoryCache = restoreAll
+    getgenv().RestoreMemoryCache = function() end
 else
-    if not memorystats then
-        memorystats = {}
-        memorystats.cache = function(a) end
-        memorystats.restore = function(a) end
-    end
-    for _, v in pairs({
-        "Internal","HttpCache","Instances","Signals","Script",
-        "PhysicsCollision","PhysicsParts","GraphicsSolidModels","GraphicsMeshParts","GraphicsParticles",
-        "GraphicsParts","GraphicsSpatialHash","GraphicsTerrain","GraphicsTexture","GraphicsTextureCharacter",
-        "Sounds","StreamingSounds","TerrainVoxels","Gui","Animation","Navigation","GeometryCSG"
-    }) do
-        memorystats.cache(v)
-    end
+    memorystats = {cache = function() end, restore = function() end}
 end
 
 local XyloKitUI = {}
+_G.XyloKitUI = XyloKitUI -- Définir globalement pour les composants
 
 -- Services
 local UserInputService = game:GetService("UserInputService")
@@ -60,21 +19,20 @@ local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 
--- URLs des composants (à remplacer par les URLs réelles)
+-- URLs des composants (fournies par l'utilisateur)
 local ComponentLoaders = {
-    CreateTab = "https://raw.githubusercontent.com/CheaterOnTop/by-YTBmaxxmaxx_11-roblox-universal-V2/refs/heads/main/tab", -- Remplacer par l'URL réelle
-    CreateSection = "https://raw.githubusercontent.com/CheaterOnTop/by-YTBmaxxmaxx_11-roblox-universal-V2/refs/heads/main/section", -- Remplacer par l'URL réelle
-    CreateToggle = "https://raw.githubusercontent.com/CheaterOnTop/by-YTBmaxxmaxx_11-roblox-universal-V2/refs/heads/main/toggle", -- Remplacer par l'URL réelle
-    CreateSlider = "https://raw.githubusercontent.com/CheaterOnTop/by-YTBmaxxmaxx_11-roblox-universal-V2/refs/heads/main/slider", -- Remplacer par l'URL réelle
-    CreateDropdown = "https://raw.githubusercontent.com/CheaterOnTop/by-YTBmaxxmaxx_11-roblox-universal-V2/refs/heads/main/dropdown", -- Remplacer par l'URL réelle
-    CreateColorpicker = "https://raw.githubusercontent.com/CheaterOnTop/by-YTBmaxxmaxx_11-roblox-universal-V2/refs/heads/main/color%20picker" -- Remplacer par l'URL réelle
+    CreateTab = "https://raw.githubusercontent.com/CheaterOnTop/by-YTBmaxxmaxx_11-roblox-universal-V2/refs/heads/main/tab",
+    CreateSection = "https://raw.githubusercontent.com/CheaterOnTop/by-YTBmaxxmaxx_11-roblox-universal-V2/refs/heads/main/section",
+    CreateToggle = "https://raw.githubusercontent.com/CheaterOnTop/by-YTBmaxxmaxx_11-roblox-universal-V2/refs/heads/main/toggle",
+    CreateSlider = "https://raw.githubusercontent.com/CheaterOnTop/by-YTBmaxxmaxx_11-roblox-universal-V2/refs/heads/main/slider",
+    CreateDropdown = "https://raw.githubusercontent.com/CheaterOnTop/by-YTBmaxxmaxx_11-roblox-universal-V2/refs/heads/main/dropdown",
+    CreateColorpicker = "https://raw.githubusercontent.com/CheaterOnTop/by-YTBmaxxmaxx_11-roblox-universal-V2/refs/heads/main/color%20picker"
 }
 
 -- Attendre que le jeu et le joueur soient chargés
 local function waitForGameLoaded()
     if not game:IsLoaded() then
         game.Loaded:Wait()
-        task.wait(10)
     end
     local player = Players.LocalPlayer
     if not player then
@@ -83,14 +41,6 @@ local function waitForGameLoaded()
     end
     return player
 end
-
--- Détection de l'exécuteur
-local executor = identifyexecutor and identifyexecutor() or "Unknown"
-if executor == "Unknown" then
-    game.Players.LocalPlayer:Kick("#UNKNOWN_EXECUTOR_404")
-    return
-end
-print("Exécuteur détecté : " .. executor)
 
 -- Configuration initiale
 local player = waitForGameLoaded()
@@ -118,58 +68,64 @@ local Themes = {
 }
 
 local currentTheme = Themes.Dark
-XyloKitUI.CurrentTheme = currentTheme -- Rendre le thème accessible aux composants
-
--- Gestion de la configuration
-local config = {}
+XyloKitUI.CurrentTheme = currentTheme
+XyloKitUI.Config = {}
 local configFileName = "XyloKitUI_Config.json"
 
 local function saveConfig()
-    local success, encoded = pcall(HttpService.JSONEncode, HttpService, config)
-    if success then
-        writefile(configFileName, encoded)
+    local success, encoded = pcall(HttpService.JSONEncode, HttpService, XyloKitUI.Config)
+    if success and encoded then
+        pcall(function() writefile(configFileName, encoded) end)
     end
 end
 
 local function loadConfig()
-    if isfile(configFileName) then
+    if pcall(function() return isfile(configFileName) end) and isfile(configFileName) then
         local success, decoded = pcall(HttpService.JSONDecode, HttpService, readfile(configFileName))
-        if success then
-            config = decoded
+        if success and decoded then
+            XyloKitUI.Config = decoded
         end
     end
 end
 
 loadConfig()
-XyloKitUI.Config = config -- Rendre la config accessible aux composants
-XyloKitUI.SaveConfig = saveConfig -- Rendre la fonction saveConfig accessible
+XyloKitUI.SaveConfig = saveConfig
 
 -- Charger les composants dynamiquement
 local function loadComponent(componentName)
     local url = ComponentLoaders[componentName]
-    if url == "URL_" .. componentName then
-        warn("URL pour " .. componentName .. " non définie. Veuillez fournir une URL valide.")
+    if not url or url == "" then
+        warn("URL pour " .. componentName .. " non définie ou vide.")
         return nil
     end
     local success, result = pcall(function()
-        return loadstring(game:HttpGet(url))()
+        local response = game:HttpGet(url)
+        if response and #response > 0 then
+            local func = loadstring(response)
+            if func then
+                return func()
+            else
+                warn("Erreur lors du chargement de la fonction pour " .. componentName)
+                return nil
+            end
+        else
+            warn("Échec de la récupération du script pour " .. componentName .. " : URL invalide ou inaccessible.")
+            return nil
+        end
     end)
-    if success then
-        return result
-    else
-        warn("Échec du chargement du composant " .. componentName .. " : " .. tostring(result))
+    if not success then
+        warn("Erreur lors du chargement du composant " .. componentName .. " : " .. tostring(result))
         return nil
     end
+    return result
 end
 
 -- Création de la fenêtre principale
 function XyloKitUI:CreateWindow(title)
-    print("Création de la fenêtre : " .. title)
     local XyloKitUIWindow = {}
-    XyloKitUIWindow.Configuration = config
+    XyloKitUIWindow.Configuration = XyloKitUI.Config
     XyloKitUIWindow.MainFrame = nil
 
-    -- Fond principal
     local mainFrame = Instance.new("Frame")
     mainFrame.Size = UDim2.new(0, 1000, 0, 700)
     mainFrame.Position = UDim2.new(0.5, -500, 0.5, -350)
@@ -184,16 +140,9 @@ function XyloKitUI:CreateWindow(title)
     mainFrameStroke.Color = currentTheme.BorderColor
     mainFrameStroke.Parent = mainFrame
 
-    if config.WindowPosition then
-        mainFrame.Position = UDim2.new(0.5, config.WindowPosition.X, 0.5, config.WindowPosition.Y)
-    end
+    local mainFrameTween = TweenService:Create(mainFrame, TweenInfo.new(0.6, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Position = UDim2.new(0.5, -500, 0.5, -350)})
+    mainFrameTween:Play()
 
-    -- Animation d'ouverture
-    mainFrame.Position = UDim2.new(0.5, mainFrame.Position.X.Offset, -0.5, 0)
-    local tweenOpen = TweenService:Create(mainFrame, TweenInfo.new(0.6, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Position = UDim2.new(0.5, mainFrame.Position.X.Offset, 0.5, -350)})
-    tweenOpen:Play()
-
-    -- Titre
     local titleLabel = Instance.new("TextLabel")
     titleLabel.Size = UDim2.new(1, -180, 0, 50)
     titleLabel.Position = UDim2.new(0, 180, 0, 0)
@@ -205,7 +154,6 @@ function XyloKitUI:CreateWindow(title)
     titleLabel.TextXAlignment = Enum.TextXAlignment.Left
     titleLabel.Parent = mainFrame
 
-    -- Barre latérale pour les onglets
     local tabBar = Instance.new("Frame")
     tabBar.Size = UDim2.new(0, 200, 1, -50)
     tabBar.Position = UDim2.new(0, 0, 0, 50)
@@ -224,7 +172,6 @@ function XyloKitUI:CreateWindow(title)
     tabBarLayout.Padding = UDim.new(0, 8)
     tabBarLayout.Parent = tabBar
 
-    -- Zone de contenu
     local contentFrame = Instance.new("Frame")
     contentFrame.Size = UDim2.new(1, -200, 1, -50)
     contentFrame.Position = UDim2.new(0, 200, 0, 50)
@@ -237,7 +184,6 @@ function XyloKitUI:CreateWindow(title)
     contentFrameStroke.Color = currentTheme.BorderColor
     contentFrameStroke.Parent = contentFrame
 
-    -- Bouton de fermeture
     local closeButton = Instance.new("TextButton")
     closeButton.Size = UDim2.new(0, 40, 0, 40)
     closeButton.Position = UDim2.new(1, -50, 0, 5)
@@ -253,7 +199,6 @@ function XyloKitUI:CreateWindow(title)
     closeStroke.Color = currentTheme.BorderColor
     closeStroke.Parent = closeButton
 
-    -- Bouton Paramètres
     local settingsButton = Instance.new("TextButton")
     settingsButton.Size = UDim2.new(0, 40, 0, 40)
     settingsButton.Position = UDim2.new(1, -100, 0, 5)
@@ -270,17 +215,16 @@ function XyloKitUI:CreateWindow(title)
     settingsStroke.Parent = settingsButton
 
     closeButton.MouseButton1Click:Connect(function()
-        local tweenClose = TweenService:Create(mainFrame, TweenInfo.new(0.6, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {Position = UDim2.new(0.5, mainFrame.Position.X.Offset, -0.5, 0)})
+        local tweenClose = TweenService:Create(mainFrame, TweenInfo.new(0.6, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {Position = UDim2.new(0.5, -500, -0.5, 0)})
         tweenClose:Play()
         tweenClose.Completed:Connect(function()
             screenGui:Destroy()
         end)
     end)
 
-    -- Toggle avec RightShift
     local isMenuOpen = true
     local defaultPosition = UDim2.new(0.5, -500, 0.5, -350)
-    local hiddenPosition = UDim2.new(0.5, mainFrame.Position.X.Offset, 2, 0)
+    local hiddenPosition = UDim2.new(0.5, -500, 2, 0)
 
     local function toggleMenu()
         isMenuOpen = not isMenuOpen
@@ -301,7 +245,6 @@ function XyloKitUI:CreateWindow(title)
     local currentTab = nil
     local settingsTab = nil
 
-    -- Création de l'onglet Paramètres (caché)
     local function createSettingsTab()
         local CreateSection = loadComponent("CreateSection")
         if not CreateSection then
@@ -318,7 +261,6 @@ function XyloKitUI:CreateWindow(title)
         settingsTab = tab
         tabs[tab.Name] = tab
 
-        -- Ajouter des sections et composants dans l'onglet Paramètres
         local section = CreateSection(tab, "Paramètres")
         local CreateColorpicker = loadComponent("CreateColorpicker")
         if CreateColorpicker then
