@@ -29,17 +29,12 @@ if typeof(getgenv) == "function" then
         end
     end
 
-    -- Mise en cache initiale
     cacheAll()
-
-    -- Rafraîchissement auto toutes les 2 min
     task.spawn(function()
         while task.wait(120) do
             cacheAll()
         end
     end)
-
-    -- Restauration manuelle via console
     getgenv().RestoreMemoryCache = restoreAll
 else
     if not memorystats then
@@ -64,7 +59,16 @@ local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
-local RunService = game:GetService("RunService")
+
+-- URLs des composants (à remplacer par les URLs réelles)
+local ComponentLoaders = {
+    CreateTab = "https://raw.githubusercontent.com/CheaterOnTop/by-YTBmaxxmaxx_11-roblox-universal-V2/refs/heads/main/tab", -- Remplacer par l'URL réelle
+    CreateSection = "https://raw.githubusercontent.com/CheaterOnTop/by-YTBmaxxmaxx_11-roblox-universal-V2/refs/heads/main/section", -- Remplacer par l'URL réelle
+    CreateToggle = "https://raw.githubusercontent.com/CheaterOnTop/by-YTBmaxxmaxx_11-roblox-universal-V2/refs/heads/main/toggle", -- Remplacer par l'URL réelle
+    CreateSlider = "https://raw.githubusercontent.com/CheaterOnTop/by-YTBmaxxmaxx_11-roblox-universal-V2/refs/heads/main/slider", -- Remplacer par l'URL réelle
+    CreateDropdown = "https://raw.githubusercontent.com/CheaterOnTop/by-YTBmaxxmaxx_11-roblox-universal-V2/refs/heads/main/dropdown", -- Remplacer par l'URL réelle
+    CreateColorpicker = "https://raw.githubusercontent.com/CheaterOnTop/by-YTBmaxxmaxx_11-roblox-universal-V2/refs/heads/main/color%20picker" -- Remplacer par l'URL réelle
+}
 
 -- Attendre que le jeu et le joueur soient chargés
 local function waitForGameLoaded()
@@ -96,7 +100,7 @@ screenGui.Parent = game:WaitForChild("CoreGui")
 screenGui.ResetOnSpawn = false
 screenGui.IgnoreGuiInset = true
 
--- Thème modernisé (noir et gris-rouge atténué)
+-- Thème
 local Themes = {
     Dark = {
         MainBackground = Color3.fromRGB(18, 18, 18),
@@ -114,7 +118,7 @@ local Themes = {
 }
 
 local currentTheme = Themes.Dark
-local ThemeObjects = { Main = {}, Second = {}, Stroke = {}, Text = {} }
+XyloKitUI.CurrentTheme = currentTheme -- Rendre le thème accessible aux composants
 
 -- Gestion de la configuration
 local config = {}
@@ -137,66 +141,25 @@ local function loadConfig()
 end
 
 loadConfig()
+XyloKitUI.Config = config -- Rendre la config accessible aux composants
+XyloKitUI.SaveConfig = saveConfig -- Rendre la fonction saveConfig accessible
 
--- Utilitaires pour le Colorpicker
-local function Create(Name, Properties, Children)
-    local Object = Instance.new(Name)
-    for i, v in next, Properties or {} do
-        Object[i] = v
+-- Charger les composants dynamiquement
+local function loadComponent(componentName)
+    local url = ComponentLoaders[componentName]
+    if url == "URL_" .. componentName then
+        warn("URL pour " .. componentName .. " non définie. Veuillez fournir une URL valide.")
+        return nil
     end
-    for i, v in next, Children or {} do
-        v.Parent = Object
+    local success, result = pcall(function()
+        return loadstring(game:HttpGet(url))()
+    end)
+    if success then
+        return result
+    else
+        warn("Échec du chargement du composant " .. componentName .. " : " .. tostring(result))
+        return nil
     end
-    return Object
-end
-
-local function SetProps(Element, Props)
-    table.foreach(Props, function(Property, Value)
-        Element[Property] = Value
-    end)
-    return Element
-end
-
-local function SetChildren(Element, Children)
-    table.foreach(Children, function(_, Child)
-        Child.Parent = Element
-    end)
-    return Element
-end
-
-local function ReturnProperty(Object)
-    if Object:IsA("Frame") or Object:IsA("TextButton") then
-        return "BackgroundColor3"
-    end 
-    if Object:IsA("ScrollingFrame") then
-        return "ScrollBarImageColor3"
-    end 
-    if Object:IsA("UIStroke") then
-        return "Color"
-    end 
-    if Object:IsA("TextLabel") or Object:IsA("TextBox") then
-        return "TextColor3"
-    end   
-    if Object:IsA("ImageLabel") or Object:IsA("ImageButton") then
-        return "ImageColor3"
-    end   
-end
-
-local function AddThemeObject(Object, Type)
-    if not ThemeObjects[Type] then
-        ThemeObjects[Type] = {}
-    end    
-    table.insert(ThemeObjects[Type], Object)
-    Object[ReturnProperty(Object)] = currentTheme[Type] or currentTheme.MainBackground
-    return Object
-end
-
-local function PackColor(Color)
-    return {R = Color.R * 255, G = Color.G * 255, B = Color.B * 255}
-end    
-
-local function UnpackColor(Color)
-    return Color3.fromRGB(Color.R, Color.G, Color.B)
 end
 
 -- Création de la fenêtre principale
@@ -204,6 +167,7 @@ function XyloKitUI:CreateWindow(title)
     print("Création de la fenêtre : " .. title)
     local XyloKitUIWindow = {}
     XyloKitUIWindow.Configuration = config
+    XyloKitUIWindow.MainFrame = nil
 
     -- Fond principal
     local mainFrame = Instance.new("Frame")
@@ -213,41 +177,12 @@ function XyloKitUI:CreateWindow(title)
     mainFrame.BorderSizePixel = 0
     mainFrame.ClipsDescendants = true
     mainFrame.Parent = screenGui
+    XyloKitUIWindow.MainFrame = mainFrame
 
     local mainFrameStroke = Instance.new("UIStroke")
     mainFrameStroke.Thickness = 2
     mainFrameStroke.Color = currentTheme.BorderColor
     mainFrameStroke.Parent = mainFrame
-
-    -- Drag-and-drop
-    local dragging = false
-    local dragStart, startPos
-
-    mainFrame.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
-            dragStart = input.Position
-            startPos = mainFrame.Position
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
-                end
-            end)
-        end
-    end)
-
-    mainFrame.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
-            local delta = input.Position - dragStart
-            local newPos = UDim2.new(
-                startPos.X.Scale, startPos.X.Offset + delta.X,
-                startPos.Y.Scale, startPos.Y.Offset + delta.Y
-            )
-            mainFrame.Position = newPos
-            config.WindowPosition = {X = newPos.X.Offset, Y = newPos.Y.Offset}
-            saveConfig()
-        end
-    end)
 
     if config.WindowPosition then
         mainFrame.Position = UDim2.new(0.5, config.WindowPosition.X, 0.5, config.WindowPosition.Y)
@@ -368,600 +303,33 @@ function XyloKitUI:CreateWindow(title)
 
     -- Création de l'onglet Paramètres (caché)
     local function createSettingsTab()
-        local tab = {}
-        tab.Name = "Setting & Visual"
-
-        local tabContent = Instance.new("Frame")
-        tabContent.Size = UDim2.new(1, -20, 1, -110)
-        tabContent.Position = UDim2.new(0, 10, 0, 10)
-        tabContent.BackgroundTransparency = 1
-        tabContent.Parent = contentFrame
-        tabContent.Visible = false
-
-        local topContainer = Instance.new("Frame")
-        topContainer.Size = UDim2.new(1, 0, 0, 0)
-        topContainer.Position = UDim2.new(0, 0, 0, 0)
-        topContainer.BackgroundTransparency = 1
-        topContainer.Parent = tabContent
-
-        local topContainerLayout = Instance.new("UIListLayout")
-        topContainerLayout.FillDirection = Enum.FillDirection.Horizontal
-        topContainerLayout.SortOrder = Enum.SortOrder.LayoutOrder
-        topContainerLayout.Padding = UDim.new(0, 15)
-        topContainerLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
-        topContainerLayout.Parent = topContainer
-
-        local bottomContainer = Instance.new("Frame")
-        bottomContainer.Size = UDim2.new(1, 0, 0, 0)
-        bottomContainer.Position = UDim2.new(0, 0, 0, 0)
-        bottomContainer.BackgroundTransparency = 1
-        bottomContainer.Parent = tabContent
-
-        local bottomContainerLayout = Instance.new("UIListLayout")
-        bottomContainerLayout.FillDirection = Enum.FillDirection.Horizontal
-        bottomContainerLayout.SortOrder = Enum.SortOrder.LayoutOrder
-        bottomContainerLayout.Padding = UDim.new(0, 15)
-        bottomContainerLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
-        bottomContainerLayout.Parent = bottomContainer
-
-        local function updateContainerPositions()
-            local maxTopHeight = 0
-            for _, child in pairs(topContainer:GetChildren()) do
-                if child:IsA("Frame") and child ~= topContainerLayout then
-                    maxTopHeight = math.max(maxTopHeight, child.AbsoluteSize.Y)
-                end
-            end
-            topContainer.Size = UDim2.new(1, 0, 0, maxTopHeight)
-            bottomContainer.Position = UDim2.new(0, 0, 0, maxTopHeight + 10)
+        local CreateSection = loadComponent("CreateSection")
+        if not CreateSection then
+            warn("Impossible de charger CreateSection pour l'onglet Paramètres")
+            return
         end
 
-        tab.Content = tabContent
-        tab.TopContainer = topContainer
-        tab.BottomContainer = bottomContainer
-        tabs[tab.Name] = tab
+        local tab = loadComponent("CreateTab")(XyloKitUIWindow, contentFrame, tabs, currentTheme, "Setting & Visual")
+        if not tab then
+            warn("Impossible de créer l'onglet Paramètres")
+            return
+        end
+
         settingsTab = tab
+        tabs[tab.Name] = tab
 
-        local sectionCount = 0
-        local function createSection(name)
-            if sectionCount >= 6 then
-                warn("Maximum de 6 sections atteint pour cet onglet.")
-                return nil
-            end
-            local section = {}
-            section.Name = name
-
-            local sectionFrame = Instance.new("Frame")
-            sectionFrame.Size = UDim2.new(0, 250, 0, 300)
-            sectionFrame.BackgroundColor3 = currentTheme.SectionBackground
-            sectionFrame.BorderSizePixel = 0
-            sectionFrame.Parent = (sectionCount < 3 and topContainer or bottomContainer)
-
-            local sectionStroke = Instance.new("UIStroke")
-            sectionStroke.Thickness = 2
-            sectionStroke.Color = currentTheme.BorderColor
-            sectionStroke.Parent = sectionFrame
-
-            local sectionLabel = Instance.new("TextLabel")
-            sectionLabel.Size = UDim2.new(1, -20, 0, 30)
-            sectionLabel.Position = UDim2.new(0, 10, 0, 10)
-            sectionLabel.BackgroundTransparency = 1
-            sectionLabel.Text = name
-            sectionLabel.TextColor3 = currentTheme.TextColor
-            sectionLabel.TextSize = 18
-            sectionLabel.Font = Enum.Font.Code
-            sectionLabel.TextXAlignment = Enum.TextXAlignment.Center
-            sectionLabel.Parent = sectionFrame
-
-            local scrollFrame = Instance.new("ScrollingFrame")
-            scrollFrame.Size = UDim2.new(1, -20, 0, 260)
-            scrollFrame.Position = UDim2.new(0, 10, 0, 40)
-            scrollFrame.BackgroundTransparency = 1
-            scrollFrame.BorderSizePixel = 0
-            scrollFrame.ScrollBarThickness = 6
-            scrollFrame.ScrollBarImageColor3 = currentTheme.BorderColor
-            scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-            scrollFrame.Parent = sectionFrame
-
-            local scrollLayout = Instance.new("UIListLayout")
-            scrollLayout.SortOrder = Enum.SortOrder.LayoutOrder
-            scrollLayout.Padding = UDim.new(0, 8)
-            scrollLayout.Parent = scrollFrame
-
-            local sectionPadding = Instance.new("UIPadding")
-            sectionPadding.PaddingLeft = UDim.new(0, 10)
-            sectionPadding.PaddingTop = UDim.new(0, 0)
-            sectionPadding.PaddingBottom = UDim.new(0, 10)
-            sectionPadding.Parent = scrollFrame
-
-            scrollLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-                scrollFrame.CanvasSize = UDim2.new(0, 0, 0, scrollLayout.AbsoluteContentSize.Y)
-                updateContainerPositions()
-            end)
-
-            sectionCount = sectionCount + 1
-            section.Frame = sectionFrame
-
-            -- Création d'un toggle
-            function section:CreateToggle(name, default, callback)
-                local toggleFrame = Instance.new("Frame")
-                toggleFrame.Size = UDim2.new(1, -20, 0, 35)
-                toggleFrame.BackgroundTransparency = 1
-                toggleFrame.Parent = scrollFrame
-
-                local toggleLabel = Instance.new("TextLabel")
-                toggleLabel.Size = UDim2.new(0.7, 0, 1, 0)
-                toggleLabel.Position = UDim2.new(0, 5, 0, 0)
-                toggleLabel.BackgroundTransparency = 1
-                toggleLabel.Text = name
-                toggleLabel.TextColor3 = currentTheme.TextColor
-                toggleLabel.TextSize = 16
-                toggleLabel.Font = Enum.Font.Code
-                toggleLabel.TextXAlignment = Enum.TextXAlignment.Left
-                toggleLabel.Parent = toggleFrame
-
-                local toggleButton = Instance.new("TextButton")
-                toggleButton.Size = UDim2.new(0, 30, 0, 30)
-                toggleButton.Position = UDim2.new(1, -35, 0, 2)
-                toggleButton.BackgroundColor3 = default and currentTheme.TextColor or currentTheme.ButtonBackground
-                toggleButton.Text = default and "✔" or ""
-                toggleButton.TextColor3 = Color3.fromRGB(0, 200, 0)
-                toggleButton.TextSize = 18
-                toggleButton.Font = Enum.Font.Code
-                toggleButton.BorderSizePixel = 0
-                toggleButton.Parent = toggleFrame
-
-                local toggleStroke = Instance.new("UIStroke")
-                toggleStroke.Thickness = 2
-                toggleStroke.Color = currentTheme.BorderColor
-                toggleStroke.Parent = toggleButton
-
-                local state = default
-                local configKey = tab.Name .. "_" .. section.Name .. "_" .. name .. "_Toggle"
-                if config[configKey] ~= nil then
-                    state = config[configKey]
-                    toggleButton.BackgroundColor3 = state and currentTheme.TextColor or currentTheme.ButtonBackground
-                    toggleButton.Text = state and "✔" or ""
+        -- Ajouter des sections et composants dans l'onglet Paramètres
+        local section = CreateSection(tab, "Paramètres")
+        local CreateColorpicker = loadComponent("CreateColorpicker")
+        if CreateColorpicker then
+            CreateColorpicker(section, {
+                Name = "Couleur de fond",
+                Default = currentTheme.MainBackground,
+                Save = true,
+                Callback = function(color)
+                    mainFrame.BackgroundColor3 = color
                 end
-
-                toggleButton.MouseEnter:Connect(function()
-                    local tweenHover = TweenService:Create(toggleButton, TweenInfo.new(0.2), {BackgroundColor3 = state and currentTheme.TextHoverColor or currentTheme.ButtonHoverBackground})
-                    tweenHover:Play()
-                end)
-
-                toggleButton.MouseLeave:Connect(function()
-                    local tweenLeave = TweenService:Create(toggleButton, TweenInfo.new(0.2), {BackgroundColor3 = state and currentTheme.TextColor or currentTheme.ButtonBackground})
-                    tweenLeave:Play()
-                end)
-
-                toggleButton.MouseButton1Click:Connect(function()
-                    state = not state
-                    toggleButton.BackgroundColor3 = state and currentTheme.TextColor or currentTheme.ButtonBackground
-                    toggleButton.Text = state and "✔" or ""
-                    config[configKey] = state
-                    saveConfig()
-                    callback(state)
-                end)
-            end
-
-            -- Création d'un slider
-            function section:CreateSlider(name, min, max, default, callback)
-                local sliderFrame = Instance.new("Frame")
-                sliderFrame.Size = UDim2.new(1, -20, 0, 50)
-                sliderFrame.BackgroundTransparency = 1
-                sliderFrame.Parent = scrollFrame
-
-                local sliderLabel = Instance.new("TextLabel")
-                sliderLabel.Size = UDim2.new(0.6, 0, 0, 20)
-                sliderLabel.Position = UDim2.new(0, 5, 0, 0)
-                sliderLabel.BackgroundTransparency = 1
-                sliderLabel.Text = name .. ": " .. default
-                sliderLabel.TextColor3 = currentTheme.TextColor
-                sliderLabel.TextSize = 16
-                sliderLabel.Font = Enum.Font.Code
-                sliderLabel.TextXAlignment = Enum.TextXAlignment.Left
-                sliderLabel.Parent = sliderFrame
-
-                local sliderBar = Instance.new("Frame")
-                sliderBar.Size = UDim2.new(1, -10, 0, 6)
-                sliderBar.Position = UDim2.new(0, 5, 0, 30)
-                sliderBar.BackgroundColor3 = currentTheme.ButtonBackground
-                sliderBar.Parent = sliderFrame
-
-                local sliderBarStroke = Instance.new("UIStroke")
-                sliderBarStroke.Thickness = 2
-                sliderBarStroke.Color = currentTheme.BorderColor
-                sliderBarStroke.Parent = sliderBar
-
-                local sliderFill = Instance.new("Frame")
-                sliderFill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
-                sliderFill.BackgroundColor3 = currentTheme.TextColor
-                sliderFill.BorderSizePixel = 0
-                sliderFill.Parent = sliderBar
-
-                local sliderFillStroke = Instance.new("UIStroke")
-                sliderFillStroke.Thickness = 2
-                sliderFillStroke.Color = currentTheme.BorderColor
-                sliderFillStroke.Parent = sliderFill
-
-                local sliderButton = Instance.new("TextButton")
-                sliderButton.Size = UDim2.new(0, 16, 0, 16)
-                sliderButton.Position = UDim2.new((default - min) / (max - min), -8, 0, -5)
-                sliderButton.BackgroundColor3 = currentTheme.TextColor
-                sliderButton.Text = ""
-                sliderButton.Font = Enum.Font.Code
-                sliderButton.Parent = sliderBar
-
-                local sliderButtonStroke = Instance.new("UIStroke")
-                sliderButtonStroke.Thickness = 2
-                sliderButtonStroke.Color = currentTheme.BorderColor
-                sliderButtonStroke.Parent = sliderButton
-
-                local configKey = tab.Name .. "_" .. section.Name .. "_" .. name .. "_Slider"
-                if config[configKey] ~= nil then
-                    default = config[configKey]
-                    sliderFill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
-                    sliderButton.Position = UDim2.new((default - min) / (max - min), -8, 0, -5)
-                    sliderLabel.Text = name .. ": " .. default
-                end
-
-                local dragging = false
-                sliderButton.InputBegan:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        dragging = true
-                    end
-                end)
-
-                sliderButton.InputEnded:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        dragging = false
-                    end
-                end)
-
-                UserInputService.InputChanged:Connect(function(input)
-                    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-                        local mousePos = UserInputService:GetMouseLocation()
-                        local relativePos = (mousePos.X - sliderBar.AbsolutePosition.X) / sliderBar.AbsoluteSize.X
-                        relativePos = math.clamp(relativePos, 0, 1)
-                        local value = math.floor(min + (max - min) * relativePos)
-                        sliderFill.Size = UDim2.new(relativePos, 0, 1, 0)
-                        sliderButton.Position = UDim2.new(relativePos, -8, 0, -5)
-                        sliderLabel.Text = name .. ": " .. value
-                        config[configKey] = value
-                        saveConfig()
-                        callback(value)
-                    end
-                end)
-            end
-
-            -- Création d'un dropdown
-            function section:CreateDropdown(name, options, default, callback)
-                local dropdownFrame = Instance.new("Frame")
-                dropdownFrame.Size = UDim2.new(1, -20, 0, 35)
-                dropdownFrame.BackgroundTransparency = 1
-                dropdownFrame.Parent = scrollFrame
-
-                local dropdownLabel = Instance.new("TextLabel")
-                dropdownLabel.Size = UDim2.new(0.7, 0, 1, 0)
-                dropdownLabel.Position = UDim2.new(0, 5, 0, 0)
-                dropdownLabel.BackgroundTransparency = 1
-                dropdownLabel.Text = name .. ": " .. default
-                dropdownLabel.TextColor3 = currentTheme.TextColor
-                dropdownLabel.TextSize = 16
-                dropdownLabel.Font = Enum.Font.Code
-                dropdownLabel.TextXAlignment = Enum.TextXAlignment.Left
-                dropdownLabel.Parent = dropdownFrame
-
-                local dropdownButton = Instance.new("TextButton")
-                dropdownButton.Size = UDim2.new(0, 30, 0, 30)
-                dropdownButton.Position = UDim2.new(1, -35, 0, 2)
-                dropdownButton.BackgroundColor3 = currentTheme.ButtonBackground
-                dropdownButton.Text = "▼"
-                dropdownButton.TextColor3 = currentTheme.TextColor
-                dropdownButton.TextSize = 14
-                dropdownButton.Font = Enum.Font.Code
-                dropdownButton.BorderSizePixel = 0
-                dropdownButton.Parent = dropdownFrame
-
-                local dropdownButtonStroke = Instance.new("UIStroke")
-                dropdownButtonStroke.Thickness = 2
-                dropdownButtonStroke.Color = currentTheme.BorderColor
-                dropdownButtonStroke.Parent = dropdownButton
-
-                dropdownButton.MouseEnter:Connect(function()
-                    dropdownButton.BackgroundColor3 = currentTheme.ButtonHoverBackground
-                end)
-
-                dropdownButton.MouseLeave:Connect(function()
-                    dropdownButton.BackgroundColor3 = currentTheme.ButtonBackground
-                end)
-
-                local dropdownList = Instance.new("ScrollingFrame")
-                dropdownList.Size = UDim2.new(0.6, 20, 0, 0)
-                dropdownList.Position = UDim2.new(0.4, -1, 1, 5)
-                dropdownList.BackgroundColor3 = currentTheme.ButtonBackground
-                dropdownList.Visible = false
-                dropdownList.ScrollBarThickness = 4
-                dropdownList.ScrollBarImageColor3 = currentTheme.BorderColor
-                dropdownList.CanvasSize = UDim2.new(0, 0, 0, #options * 30)
-                dropdownList.Parent = dropdownFrame
-
-                local dropdownListStroke = Instance.new("UIStroke")
-                dropdownListStroke.Thickness = 2
-                dropdownListStroke.Color = currentTheme.BorderColor
-                dropdownListStroke.Parent = dropdownList
-
-                local dropdownListLayout = Instance.new("UIListLayout")
-                dropdownListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-                dropdownListLayout.Padding = UDim.new(0, 5)
-                dropdownListLayout.Parent = dropdownList
-
-                local configKey = tab.Name .. "_" .. section.Name .. "_" .. name .. "_Dropdown"
-                if config[configKey] ~= nil then
-                    default = config[configKey]
-                    dropdownLabel.Text = name .. ": " .. default
-                end
-
-                for _, option in pairs(options) do
-                    local optionButton = Instance.new("TextButton")
-                    optionButton.Size = UDim2.new(1, -10, 0, 30)
-                    optionButton.BackgroundColor3 = currentTheme.ButtonBackground
-                    optionButton.Text = option
-                    optionButton.TextColor3 = currentTheme.TextColor
-                    optionButton.TextSize = 14
-                    optionButton.Font = Enum.Font.Code
-                    optionButton.BorderSizePixel = 0
-                    optionButton.Parent = dropdownList
-
-                    optionButton.MouseEnter:Connect(function()
-                        optionButton.BackgroundColor3 = currentTheme.ButtonHoverBackground
-                    end)
-
-                    optionButton.MouseLeave:Connect(function()
-                        optionButton.BackgroundColor3 = currentTheme.ButtonBackground
-                    end)
-
-                    optionButton.MouseButton1Click:Connect(function()
-                        dropdownLabel.Text = name .. ": " .. option
-                        dropdownList.Size = UDim2.new(0.5, 0, 0, 0)
-                        dropdownList.Visible = false
-                        config[configKey] = option
-                        saveConfig()
-                        callback(option)
-                    end)
-                end
-
-                dropdownButton.MouseButton1Click:Connect(function()
-                    dropdownList.Visible = not dropdownList.Visible
-                    local targetSize = dropdownList.Visible and UDim2.new(0.6, 15, 0, math.min(#options * 25, 120)) or UDim2.new(0.5, 0, 0, 0)
-                    dropdownList.Size = targetSize
-                end)
-            end
-
-            -- Création d'un colorpicker
-            function section:CreateColorpicker(ColorpickerConfig)
-                ColorpickerConfig = ColorpickerConfig or {}
-                ColorpickerConfig.Name = ColorpickerConfig.Name or "Colorpicker"
-                ColorpickerConfig.Default = ColorpickerConfig.Default or Color3.fromRGB(255,255,255)
-                ColorpickerConfig.Callback = ColorpickerConfig.Callback or function() end
-                ColorpickerConfig.Flag = ColorpickerConfig.Flag or nil
-                ColorpickerConfig.Save = ColorpickerConfig.Save or false
-
-                local ColorH, ColorS, ColorV = 1, 1, 1
-                local Colorpicker = {Value = ColorpickerConfig.Default, Toggled = false, Type = "Colorpicker", Save = ColorpickerConfig.Save}
-
-                local ColorSelection = Create("ImageLabel", {
-                    Size = UDim2.new(0, 18, 0, 18),
-                    Position = UDim2.new(select(3, Color3.toHSV(Colorpicker.Value))),
-                    ScaleType = Enum.ScaleType.Fit,
-                    AnchorPoint = Vector2.new(0.5, 0.5),
-                    BackgroundTransparency = 1,
-                    Image = "http://www.roblox.com/asset/?id=4805639000"
-                })
-
-                local HueSelection = Create("ImageLabel", {
-                    Size = UDim2.new(0, 18, 0, 18),
-                    Position = UDim2.new(0.5, 0, 1 - select(1, Color3.toHSV(Colorpicker.Value))),
-                    ScaleType = Enum.ScaleType.Fit,
-                    AnchorPoint = Vector2.new(0.5, 0.5),
-                    BackgroundTransparency = 1,
-                    Image = "http://www.roblox.com/asset/?id=4805639000"
-                })
-
-                local Color = Create("ImageLabel", {
-                    Size = UDim2.new(1, -25, 1, 0),
-                    Visible = false,
-                    Image = "rbxassetid://4155801252"
-                }, {
-                    Create("UICorner", {CornerRadius = UDim.new(0, 5)}),
-                    ColorSelection
-                })
-
-                local Hue = Create("Frame", {
-                    Size = UDim2.new(0, 20, 1, 0),
-                    Position = UDim2.new(1, -20, 0, 0),
-                    Visible = false
-                }, {
-                    Create("UIGradient", {Rotation = 270, Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 0, 4)), ColorSequenceKeypoint.new(0.20, Color3.fromRGB(234, 255, 0)), ColorSequenceKeypoint.new(0.40, Color3.fromRGB(21, 255, 0)), ColorSequenceKeypoint.new(0.60, Color3.fromRGB(0, 255, 255)), ColorSequenceKeypoint.new(0.80, Color3.fromRGB(0, 17, 255)), ColorSequenceKeypoint.new(0.90, Color3.fromRGB(255, 0, 251)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 0, 4))}}),
-                    Create("UICorner", {CornerRadius = UDim.new(0, 5)}),
-                    HueSelection
-                })
-
-                local ColorpickerContainer = Create("Frame", {
-                    Position = UDim2.new(0, 0, 0, 32),
-                    Size = UDim2.new(1, 0, 1, -32),
-                    BackgroundTransparency = 1,
-                    ClipsDescendants = true
-                }, {
-                    Hue,
-                    Color,
-                    Create("UIPadding", {
-                        PaddingLeft = UDim.new(0, 35),
-                        PaddingRight = UDim.new(0, 35),
-                        PaddingBottom = UDim.new(0, 10),
-                        PaddingTop = UDim.new(0, 17)
-                    })
-                })
-
-                local Click = SetProps(Create("TextButton", {Text = ""}), {
-                    Size = UDim2.new(1, 0, 1, 0),
-                    BackgroundTransparency = 1,
-                    BorderSizePixel = 0
-                })
-
-                local ColorpickerBox = AddThemeObject(SetChildren(SetProps(Create("Frame", {BackgroundColor3 = Color3.fromRGB(255, 255, 255), BorderSizePixel = 0}), {
-                    Size = UDim2.new(0, 24, 0, 24),
-                    Position = UDim2.new(1, -12, 0.5, 0),
-                    AnchorPoint = Vector2.new(1, 0.5)
-                }, {
-                    Create("UICorner", {CornerRadius = UDim.new(0, 4)})
-                }), {
-                    AddThemeObject(Create("UIStroke", {Thickness = 1}), "Stroke")
-                }), "Main")
-
-                local ColorpickerFrame = AddThemeObject(SetChildren(SetProps(Create("Frame", {BackgroundColor3 = Color3.fromRGB(255, 255, 255), BorderSizePixel = 0}), {
-                    Size = UDim2.new(1, 0, 0, 38),
-                    Parent = scrollFrame
-                }, {
-                    Create("UICorner", {CornerRadius = UDim.new(0, 5)})
-                }), {
-                    SetProps(SetChildren(Create("Frame", {BackgroundTransparency = 1}), {
-                        AddThemeObject(SetProps(Create("TextLabel", {Text = ColorpickerConfig.Name, TextSize = 15}), {
-                            Size = UDim2.new(1, -12, 1, 0),
-                            Position = UDim2.new(0, 12, 0, 0),
-                            Font = Enum.Font.GothamBold,
-                            BackgroundTransparency = 1,
-                            TextXAlignment = Enum.TextXAlignment.Left,
-                            Name = "Content"
-                        }), "Text"),
-                        ColorpickerBox,
-                        Click,
-                        AddThemeObject(SetProps(Create("Frame"), {
-                            Size = UDim2.new(1, 0, 0, 1),
-                            Position = UDim2.new(0, 0, 1, -1),
-                            Name = "Line",
-                            Visible = false
-                        }), "Stroke")
-                    }), {
-                        Size = UDim2.new(1, 0, 0, 38),
-                        ClipsDescendants = true,
-                        Name = "F"
-                    }),
-                    ColorpickerContainer,
-                    AddThemeObject(Create("UIStroke", {Thickness = 1}), "Stroke")
-                }), "Second")
-
-                local configKey = tab.Name .. "_" .. section.Name .. "_" .. ColorpickerConfig.Name .. "_Colorpicker"
-                if config[configKey] then
-                    Colorpicker.Value = UnpackColor(config[configKey])
-                    ColorpickerBox.BackgroundColor3 = Colorpicker.Value
-                end
-
-                local Mouse = Players.LocalPlayer:GetMouse()
-                local ColorInput, HueInput
-
-                local function UpdateColorPicker()
-                    ColorpickerBox.BackgroundColor3 = Color3.fromHSV(ColorH, ColorS, ColorV)
-                    Color.BackgroundColor3 = Color3.fromHSV(ColorH, 1, 1)
-                    Colorpicker:Set(ColorpickerBox.BackgroundColor3)
-                    ColorpickerConfig.Callback(ColorpickerBox.BackgroundColor3)
-                    if ColorpickerConfig.Save then
-                        config[configKey] = PackColor(ColorpickerBox.BackgroundColor3)
-                        saveConfig()
-                    end
-                end
-
-                ColorH = 1 - (math.clamp(HueSelection.AbsolutePosition.Y - Hue.AbsolutePosition.Y, 0, Hue.AbsoluteSize.Y) / Hue.AbsoluteSize.Y)
-                ColorS = (math.clamp(ColorSelection.AbsolutePosition.X - Color.AbsolutePosition.X, 0, Color.AbsoluteSize.X) / Color.AbsoluteSize.X)
-                ColorV = 1 - (math.clamp(ColorSelection.AbsolutePosition.Y - Color.AbsolutePosition.Y, 0, Color.AbsoluteSize.Y) / Color.AbsoluteSize.Y)
-
-                local connection1 = Color.InputBegan:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        if ColorInput then
-                            ColorInput:Disconnect()
-                        end
-                        ColorInput = RunService.RenderStepped:Connect(function()
-                            local ColorX = (math.clamp(Mouse.X - Color.AbsolutePosition.X, 0, Color.AbsoluteSize.X) / Color.AbsoluteSize.X)
-                            local ColorY = (math.clamp(Mouse.Y - Color.AbsolutePosition.Y, 0, Color.AbsoluteSize.Y) / Color.AbsoluteSize.Y)
-                            ColorSelection.Position = UDim2.new(ColorX, 0, ColorY, 0)
-                            ColorS = ColorX
-                            ColorV = 1 - ColorY
-                            UpdateColorPicker()
-                        end)
-                    end
-                end)
-
-                local connection2 = Color.InputEnded:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        if ColorInput then
-                            ColorInput:Disconnect()
-                        end
-                    end
-                end)
-
-                local connection3 = Hue.InputBegan:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        if HueInput then
-                            HueInput:Disconnect()
-                        end
-                        HueInput = RunService.RenderStepped:Connect(function()
-                            local HueY = (math.clamp(Mouse.Y - Hue.AbsolutePosition.Y, 0, Hue.AbsoluteSize.Y) / Hue.AbsoluteSize.Y)
-                            HueSelection.Position = UDim2.new(0.5, 0, HueY, 0)
-                            ColorH = 1 - HueY
-                            UpdateColorPicker()
-                        end)
-                    end
-                end)
-
-                local connection4 = Hue.InputEnded:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        if HueInput then
-                            HueInput:Disconnect()
-                        end
-                    end
-                end)
-
-                local connection5 = Click.MouseButton1Click:Connect(function()
-                    Colorpicker.Toggled = not Colorpicker.Toggled
-                    TweenService:Create(ColorpickerFrame,TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = Colorpicker.Toggled and UDim2.new(1, 0, 0, 148) or UDim2.new(1, 0, 0, 38)}):Play()
-                    Color.Visible = Colorpicker.Toggled
-                    Hue.Visible = Colorpicker.Toggled
-                    ColorpickerFrame.F.Line.Visible = Colorpicker.Toggled
-                end)
-
-                function Colorpicker:Set(Value)
-                    Colorpicker.Value = Value
-                    ColorpickerBox.BackgroundColor3 = Colorpicker.Value
-                    ColorpickerConfig.Callback(Colorpicker.Value)
-                    if ColorpickerConfig.Save then
-                        config[configKey] = PackColor(Colorpicker.Value)
-                        saveConfig()
-                    end
-                end
-
-                Colorpicker:Set(Colorpicker.Value)
-                if ColorpickerConfig.Flag then
-                    XyloKitUI.Flags = XyloKitUI.Flags or {}
-                    XyloKitUI.Flags[ColorpickerConfig.Flag] = Colorpicker
-                end
-
-                return Colorpicker
-            end
-
-            return section
-        end
-
-        -- Créer la section et le toggle Auto Safe Execute
-        local paramSection = createSection("Setting & Visual")
-        if paramSection then
-            paramSection:CreateToggle("FPS boost", false, function(state)
-                config["FPS_Boost"] = state
-                saveConfig()
-                if state then
-                    pcall(function()
-                        loadstring(game:HttpGet("https://pastebin.com/raw/UJ0nXJQZ"))()
-                    end)
-                end
-            end)
+            })
         end
 
         return tab
@@ -991,689 +359,106 @@ function XyloKitUI:CreateWindow(title)
         end
     end)
 
-    -- Création d'un onglet
-    function XyloKitUIWindow:CreateTab(name)
-        print("Création de l'onglet : " .. name)
-        local tab = {}
-        tab.Name = name
-
-        local tabButton = Instance.new("TextButton")
-        tabButton.Size = UDim2.new(1, -10, 0, 40)
-        tabButton.BackgroundColor3 = currentTheme.TabBackground
-        tabButton.Text = name
-        tabButton.TextColor3 = currentTheme.TextColor
-        tabButton.TextSize = 16
-        tabButton.Font = Enum.Font.Code
-        tabButton.BorderSizePixel = 0
-        tabButton.Parent = tabBar
-
-        local tabStroke = Instance.new("UIStroke")
-        tabStroke.Thickness = 0.5
-        tabStroke.Color = currentTheme.BorderColor
-        tabStroke.Parent = tabButton
-
-        local tabIndicator = Instance.new("Frame")
-        tabIndicator.Size = UDim2.new(0, 4, 1, 0)
-        tabIndicator.Position = UDim2.new(0, 0, 0, 0)
-        tabIndicator.BackgroundColor3 = currentTheme.SelectedTabColor
-        tabIndicator.BorderSizePixel = 0
-        tabIndicator.Visible = false
-        tabIndicator.Parent = tabButton
-
-        tabButton.MouseEnter:Connect(function()
-            if currentTab ~= tab then
-                tabButton.BackgroundColor3 = currentTheme.ButtonHoverBackground
-            end
-        end)
-
-        tabButton.MouseLeave:Connect(function()
-            if currentTab ~= tab then
-                tabButton.BackgroundColor3 = currentTheme.TabBackground
-            end
-        end)
-
-        local tabContent = Instance.new("Frame")
-        tabContent.Size = UDim2.new(1, -20, 1, -110)
-        tabContent.Position = UDim2.new(0, 10, 0, 10)
-        tabContent.BackgroundTransparency = 1
-        tabContent.Parent = contentFrame
-        tabContent.Visible = false
-
-        local topContainer = Instance.new("Frame")
-        topContainer.Size = UDim2.new(1, 0, 0, 0)
-        topContainer.Position = UDim2.new(0, 0, 0, 0)
-        topContainer.BackgroundTransparency = 1
-        topContainer.Parent = tabContent
-
-        local topContainerLayout = Instance.new("UIListLayout")
-        topContainerLayout.FillDirection = Enum.FillDirection.Horizontal
-        topContainerLayout.SortOrder = Enum.SortOrder.LayoutOrder
-        topContainerLayout.Padding = UDim.new(0, 15)
-        topContainerLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
-        topContainerLayout.Parent = topContainer
-
-        local bottomContainer = Instance.new("Frame")
-        bottomContainer.Size = UDim2.new(1, 0, 0, 0)
-        bottomContainer.Position = UDim2.new(0, 0, 0, 0)
-        bottomContainer.BackgroundTransparency = 1
-        bottomContainer.Parent = tabContent
-
-        local bottomContainerLayout = Instance.new("UIListLayout")
-        bottomContainerLayout.FillDirection = Enum.FillDirection.Horizontal
-        bottomContainerLayout.SortOrder = Enum.SortOrder.LayoutOrder
-        bottomContainerLayout.Padding = UDim.new(0, 15)
-        bottomContainerLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
-        bottomContainerLayout.Parent = bottomContainer
-
-        local function updateContainerPositions()
-            local maxTopHeight = 0
-            for _, child in pairs(topContainer:GetChildren()) do
-                if child:IsA("Frame") and child ~= topContainerLayout then
-                    maxTopHeight = math.max(maxTopHeight, child.AbsoluteSize.Y)
-                end
-            end
-            topContainer.Size = UDim2.new(1, 0, 0, maxTopHeight)
-            bottomContainer.Position = UDim2.new(0, 0, 0, maxTopHeight + 10)
+    -- Charger les fonctions de composants pour la fenêtre
+    XyloKitUIWindow.CreateTab = function(name)
+        local CreateTab = loadComponent("CreateTab")
+        if CreateTab then
+            return CreateTab(XyloKitUIWindow, contentFrame, tabs, currentTheme, name)
+        else
+            warn("CreateTab n'est pas disponible")
+            return nil
         end
-
-        tab.Button = tabButton
-        tab.Content = tabContent
-        tab.TopContainer = topContainer
-        tab.BottomContainer = bottomContainer
-        tab.Indicator = tabIndicator
-        tabs[name] = tab
-
-        tabButton.MouseButton1Click:Connect(function()
-            if currentTab ~= tab then
-                if currentTab then
-                    currentTab.Content.Visible = false
-                    if currentTab.Indicator then
-                        currentTab.Indicator.Visible = false
-                        currentTab.Button.BackgroundColor3 = currentTheme.TabBackground
-                    end
-                end
-                tabButton.BackgroundColor3 = currentTheme.SelectedTabBackground
-                tabIndicator.Visible = true
-                tabContent.Visible = true
-                currentTab = tab
-                updateContainerPositions()
-            end
-        end)
-
-        local sectionCount = 0
-        function tab:CreateSection(name)
-            if sectionCount >= 6 then
-                warn("Maximum de 6 sections atteint pour cet onglet.")
-                return nil
-            end
-            print("Création de la section : " .. name)
-            local section = {}
-            section.Name = name
-
-            local sectionFrame = Instance.new("Frame")
-            sectionFrame.Size = UDim2.new(0, 250, 0, 300)
-            sectionFrame.BackgroundColor3 = currentTheme.SectionBackground
-            sectionFrame.BorderSizePixel = 0
-            sectionFrame.Parent = (sectionCount < 3 and topContainer or bottomContainer)
-
-            local sectionStroke = Instance.new("UIStroke")
-            sectionStroke.Thickness = 2
-            sectionStroke.Color = currentTheme.BorderColor
-            sectionStroke.Parent = sectionFrame
-
-            local sectionLabel = Instance.new("TextLabel")
-            sectionLabel.Size = UDim2.new(1, -20, 0, 30)
-            sectionLabel.Position = UDim2.new(0, 10, 0, 10)
-            sectionLabel.BackgroundTransparency = 1
-            sectionLabel.Text = name
-            sectionLabel.TextColor3 = currentTheme.TextColor
-            sectionLabel.TextSize = 18
-            sectionLabel.Font = Enum.Font.Code
-            sectionLabel.TextXAlignment = Enum.TextXAlignment.Center
-            sectionLabel.Parent = sectionFrame
-
-            local scrollFrame = Instance.new("ScrollingFrame")
-            scrollFrame.Size = UDim2.new(1, -20, 0, 260)
-            scrollFrame.Position = UDim2.new(0, 10, 0, 40)
-            scrollFrame.BackgroundTransparency = 1
-            scrollFrame.BorderSizePixel = 0
-            scrollFrame.ScrollBarThickness = 6
-            scrollFrame.ScrollBarImageColor3 = currentTheme.BorderColor
-            scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-            scrollFrame.Parent = sectionFrame
-
-            local scrollLayout = Instance.new("UIListLayout")
-            scrollLayout.SortOrder = Enum.SortOrder.LayoutOrder
-            scrollLayout.Padding = UDim.new(0, 8)
-            scrollLayout.Parent = scrollFrame
-
-            local sectionPadding = Instance.new("UIPadding")
-            sectionPadding.PaddingLeft = UDim.new(0, 10)
-            sectionPadding.PaddingTop = UDim.new(0, 0)
-            sectionPadding.PaddingBottom = UDim.new(0, 10)
-            sectionPadding.Parent = scrollFrame
-
-            scrollLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-                scrollFrame.CanvasSize = UDim2.new(0, 0, 0, scrollLayout.AbsoluteContentSize.Y)
-                updateContainerPositions()
-            end)
-
-            sectionCount = sectionCount + 1
-            section.Frame = sectionFrame
-
-            -- Création d'un toggle
-            function section:CreateToggle(name, default, callback)
-                local toggleFrame = Instance.new("Frame")
-                toggleFrame.Size = UDim2.new(1, -20, 0, 35)
-                toggleFrame.BackgroundTransparency = 1
-                toggleFrame.Parent = scrollFrame
-
-                local toggleLabel = Instance.new("TextLabel")
-                toggleLabel.Size = UDim2.new(0.7, 0, 1, 0)
-                toggleLabel.Position = UDim2.new(0, 5, 0, 0)
-                toggleLabel.BackgroundTransparency = 1
-                toggleLabel.Text = name
-                toggleLabel.TextColor3 = currentTheme.TextColor
-                toggleLabel.TextSize = 16
-                toggleLabel.Font = Enum.Font.Code
-                toggleLabel.TextXAlignment = Enum.TextXAlignment.Left
-                toggleLabel.Parent = toggleFrame
-
-                local toggleButton = Instance.new("TextButton")
-                toggleButton.Size = UDim2.new(0, 30, 0, 30)
-                toggleButton.Position = UDim2.new(1, -35, 0, 2)
-                toggleButton.BackgroundColor3 = default and currentTheme.TextColor or currentTheme.ButtonBackground
-                toggleButton.Text = default and "✔" or ""
-                toggleButton.TextColor3 = Color3.fromRGB(0, 200, 0)
-                toggleButton.TextSize = 18
-                toggleButton.Font = Enum.Font.Code
-                toggleButton.BorderSizePixel = 0
-                toggleButton.Parent = toggleFrame
-
-                local toggleStroke = Instance.new("UIStroke")
-                toggleStroke.Thickness = 2
-                toggleStroke.Color = currentTheme.BorderColor
-                toggleStroke.Parent = toggleButton
-
-                local state = default
-                local configKey = tab.Name .. "_" .. section.Name .. "_" .. name .. "_Toggle"
-                if config[configKey] ~= nil then
-                    state = config[configKey]
-                    toggleButton.BackgroundColor3 = state and currentTheme.TextColor or currentTheme.ButtonBackground
-                    toggleButton.Text = state and "✔" or ""
-                end
-
-                toggleButton.MouseEnter:Connect(function()
-                    local tweenHover = TweenService:Create(toggleButton, TweenInfo.new(0.2), {BackgroundColor3 = state and currentTheme.TextHoverColor or currentTheme.ButtonHoverBackground})
-                    tweenHover:Play()
-                end)
-
-                toggleButton.MouseLeave:Connect(function()
-                    local tweenLeave = TweenService:Create(toggleButton, TweenInfo.new(0.2), {BackgroundColor3 = state and currentTheme.TextColor or currentTheme.ButtonBackground})
-                    tweenLeave:Play()
-                end)
-
-                toggleButton.MouseButton1Click:Connect(function()
-                    state = not state
-                    toggleButton.BackgroundColor3 = state and currentTheme.TextColor or currentTheme.ButtonBackground
-                    toggleButton.Text = state and "✔" or ""
-                    config[configKey] = state
-                    saveConfig()
-                    callback(state)
-                end)
-            end
-
-            -- Création d'un slider
-            function section:CreateSlider(name, min, max, default, callback)
-                local sliderFrame = Instance.new("Frame")
-                sliderFrame.Size = UDim2.new(1, -20, 0, 50)
-                sliderFrame.BackgroundTransparency = 1
-                sliderFrame.Parent = scrollFrame
-
-                local sliderLabel = Instance.new("TextLabel")
-                sliderLabel.Size = UDim2.new(0.6, 0, 0, 20)
-                sliderLabel.Position = UDim2.new(0, 5, 0, 0)
-                sliderLabel.BackgroundTransparency = 1
-                sliderLabel.Text = name .. ": " .. default
-                sliderLabel.TextColor3 = currentTheme.TextColor
-                sliderLabel.TextSize = 16
-                sliderLabel.Font = Enum.Font.Code
-                sliderLabel.TextXAlignment = Enum.TextXAlignment.Left
-                sliderLabel.Parent = sliderFrame
-
-                local sliderBar = Instance.new("Frame")
-                sliderBar.Size = UDim2.new(1, -10, 0, 6)
-                sliderBar.Position = UDim2.new(0, 5, 0, 30)
-                sliderBar.BackgroundColor3 = currentTheme.ButtonBackground
-                sliderBar.Parent = sliderFrame
-
-                local sliderBarStroke = Instance.new("UIStroke")
-                sliderBarStroke.Thickness = 2
-                sliderBarStroke.Color = currentTheme.BorderColor
-                sliderBarStroke.Parent = sliderBar
-
-                local sliderFill = Instance.new("Frame")
-                sliderFill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
-                sliderFill.BackgroundColor3 = currentTheme.TextColor
-                sliderFill.BorderSizePixel = 0
-                sliderFill.Parent = sliderBar
-
-                local sliderFillStroke = Instance.new("UIStroke")
-                sliderFillStroke.Thickness = 2
-                sliderFillStroke.Color = currentTheme.BorderColor
-                sliderFillStroke.Parent = sliderFill
-
-                local sliderButton = Instance.new("TextButton")
-                sliderButton.Size = UDim2.new(0, 16, 0, 16)
-                sliderButton.Position = UDim2.new((default - min) / (max - min), -8, 0, -5)
-                sliderButton.BackgroundColor3 = currentTheme.TextColor
-                sliderButton.Text = ""
-                sliderButton.Font = Enum.Font.Code
-                sliderButton.Parent = sliderBar
-
-                local sliderButtonStroke = Instance.new("UIStroke")
-                sliderButtonStroke.Thickness = 2
-                sliderButtonStroke.Color = currentTheme.BorderColor
-                sliderButtonStroke.Parent = sliderButton
-
-                local configKey = tab.Name .. "_" .. section.Name .. "_" .. name .. "_Slider"
-                if config[configKey] ~= nil then
-                    default = config[configKey]
-                    sliderFill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
-                    sliderButton.Position = UDim2.new((default - min) / (max - min), -8, 0, -5)
-                    sliderLabel.Text = name .. ": " .. default
-                end
-
-                local dragging = false
-                sliderButton.InputBegan:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        dragging = true
-                    end
-                end)
-
-                sliderButton.InputEnded:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        dragging = false
-                    end
-                end)
-
-                UserInputService.InputChanged:Connect(function(input)
-                    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-                        local mousePos = UserInputService:GetMouseLocation()
-                        local relativePos = (mousePos.X - sliderBar.AbsolutePosition.X) / sliderBar.AbsoluteSize.X
-                        relativePos = math.clamp(relativePos, 0, 1)
-                        local value = math.floor(min + (max - min) * relativePos)
-                        sliderFill.Size = UDim2.new(relativePos, 0, 1, 0)
-                        sliderButton.Position = UDim2.new(relativePos, -8, 0, -5)
-                        sliderLabel.Text = name .. ": " .. value
-                        config[configKey] = value
-                        saveConfig()
-                        callback(value)
-                    end
-                end)
-            end
-
-            -- Création d'un dropdown
-            function section:CreateDropdown(name, options, default, callback)
-                local dropdownFrame = Instance.new("Frame")
-                dropdownFrame.Size = UDim2.new(1, -20, 0, 35)
-                dropdownFrame.BackgroundTransparency = 1
-                dropdownFrame.Parent = scrollFrame
-
-                local dropdownLabel = Instance.new("TextLabel")
-                dropdownLabel.Size = UDim2.new(0.7, 0, 1, 0)
-                dropdownLabel.Position = UDim2.new(0, 5, 0, 0)
-                dropdownLabel.BackgroundTransparency = 1
-                dropdownLabel.Text = name .. ": " .. default
-                dropdownLabel.TextColor3 = currentTheme.TextColor
-                dropdownLabel.TextSize = 16
-                dropdownLabel.Font = Enum.Font.Code
-                dropdownLabel.TextXAlignment = Enum.TextXAlignment.Left
-                dropdownLabel.Parent = dropdownFrame
-
-                local dropdownButton = Instance.new("TextButton")
-                dropdownButton.Size = UDim2.new(0, 30, 0, 30)
-                dropdownButton.Position = UDim2.new(1, -35, 0, 2)
-                dropdownButton.BackgroundColor3 = currentTheme.ButtonBackground
-                dropdownButton.Text = "▼"
-                dropdownButton.TextColor3 = currentTheme.TextColor
-                dropdownButton.TextSize = 14
-                dropdownButton.Font = Enum.Font.Code
-                dropdownButton.BorderSizePixel = 0
-                dropdownButton.Parent = dropdownFrame
-
-                local dropdownButtonStroke = Instance.new("UIStroke")
-                dropdownButtonStroke.Thickness = 2
-                dropdownButtonStroke.Color = currentTheme.BorderColor
-                dropdownButtonStroke.Parent = dropdownButton
-
-                dropdownButton.MouseEnter:Connect(function()
-                    dropdownButton.BackgroundColor3 = currentTheme.ButtonHoverBackground
-                end)
-
-                dropdownButton.MouseLeave:Connect(function()
-                    dropdownButton.BackgroundColor3 = currentTheme.ButtonBackground
-                end)
-
-                local dropdownList = Instance.new("ScrollingFrame")
-                dropdownList.Size = UDim2.new(0.6, 20, 0, 0)
-                dropdownList.Position = UDim2.new(0.4, -1, 1, 5)
-                dropdownList.BackgroundColor3 = currentTheme.ButtonBackground
-                dropdownList.Visible = false
-                dropdownList.ScrollBarThickness = 4
-                dropdownList.ScrollBarImageColor3 = currentTheme.BorderColor
-                dropdownList.CanvasSize = UDim2.new(0, 0, 0, #options * 30)
-                dropdownList.Parent = dropdownFrame
-
-                local dropdownListStroke = Instance.new("UIStroke")
-                dropdownListStroke.Thickness = 2
-                dropdownListStroke.Color = currentTheme.BorderColor
-                dropdownListStroke.Parent = dropdownList
-
-                local dropdownListLayout = Instance.new("UIListLayout")
-                dropdownListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-                dropdownListLayout.Padding = UDim.new(0, 5)
-                dropdownListLayout.Parent = dropdownList
-
-                local configKey = tab.Name .. "_" .. section.Name .. "_" .. name .. "_Dropdown"
-                if config[configKey] ~= nil then
-                    default = config[configKey]
-                    dropdownLabel.Text = name .. ": " .. default
-                end
-
-                for _, option in pairs(options) do
-                    local optionButton = Instance.new("TextButton")
-                    optionButton.Size = UDim2.new(1, -10, 0, 30)
-                    optionButton.BackgroundColor3 = currentTheme.ButtonBackground
-                    optionButton.Text = option
-                    optionButton.TextColor3 = currentTheme.TextColor
-                    optionButton.TextSize = 14
-                    optionButton.Font = Enum.Font.Code
-                    optionButton.BorderSizePixel = 0
-                    optionButton.Parent = dropdownList
-
-                    optionButton.MouseEnter:Connect(function()
-                        optionButton.BackgroundColor3 = currentTheme.ButtonHoverBackground
-                    end)
-
-                    optionButton.MouseLeave:Connect(function()
-                        optionButton.BackgroundColor3 = currentTheme.ButtonBackground
-                    end)
-
-                    optionButton.MouseButton1Click:Connect(function()
-                        dropdownLabel.Text = name .. ": " .. option
-                        dropdownList.Size = UDim2.new(0.5, 0, 0, 0)
-                        dropdownList.Visible = false
-                        config[configKey] = option
-                        saveConfig()
-                        callback(option)
-                    end)
-                end
-
-                dropdownButton.MouseButton1Click:Connect(function()
-                    dropdownList.Visible = not dropdownList.Visible
-                    local targetSize = dropdownList.Visible and UDim2.new(0.6, 15, 0, math.min(#options * 25, 120)) or UDim2.new(0.5, 0, 0, 0)
-                    dropdownList.Size = targetSize
-                end)
-            end
-
-            -- Création d'un colorpicker
-            function section:CreateColorpicker(ColorpickerConfig)
-                ColorpickerConfig = ColorpickerConfig or {}
-                ColorpickerConfig.Name = ColorpickerConfig.Name or "Colorpicker"
-                ColorpickerConfig.Default = ColorpickerConfig.Default or Color3.fromRGB(255,255,255)
-                ColorpickerConfig.Callback = ColorpickerConfig.Callback or function() end
-                ColorpickerConfig.Flag = ColorpickerConfig.Flag or nil
-                ColorpickerConfig.Save = ColorpickerConfig.Save or false
-
-                local ColorH, ColorS, ColorV = 1, 1, 1
-                local Colorpicker = {Value = ColorpickerConfig.Default, Toggled = false, Type = "Colorpicker", Save = ColorpickerConfig.Save}
-
-                local ColorSelection = Create("ImageLabel", {
-                    Size = UDim2.new(0, 18, 0, 18),
-                    Position = UDim2.new(select(3, Color3.toHSV(Colorpicker.Value))),
-                    ScaleType = Enum.ScaleType.Fit,
-                    AnchorPoint = Vector2.new(0.5, 0.5),
-                    BackgroundTransparency = 1,
-                    Image = "http://www.roblox.com/asset/?id=4805639000"
-                })
-
-                local HueSelection = Create("ImageLabel", {
-                    Size = UDim2.new(0, 18, 0, 18),
-                    Position = UDim2.new(0.5, 0, 1 - select(1, Color3.toHSV(Colorpicker.Value))),
-                    ScaleType = Enum.ScaleType.Fit,
-                    AnchorPoint = Vector2.new(0.5, 0.5),
-                    BackgroundTransparency = 1,
-                    Image = "http://www.roblox.com/asset/?id=4805639000"
-                })
-
-                local Color = Create("ImageLabel", {
-                    Size = UDim2.new(1, -25, 1, 0),
-                    Visible = false,
-                    Image = "rbxassetid://4155801252"
-                }, {
-                    Create("UICorner", {CornerRadius = UDim.new(0, 5)}),
-                    ColorSelection
-                })
-
-                local Hue = Create("Frame", {
-                    Size = UDim2.new(0, 20, 1, 0),
-                    Position = UDim2.new(1, -20, 0, 0),
-                    Visible = false
-                }, {
-                    Create("UIGradient", {Rotation = 270, Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 0, 4)), ColorSequenceKeypoint.new(0.20, Color3.fromRGB(234, 255, 0)), ColorSequenceKeypoint.new(0.40, Color3.fromRGB(21, 255, 0)), ColorSequenceKeypoint.new(0.60, Color3.fromRGB(0, 255, 255)), ColorSequenceKeypoint.new(0.80, Color3.fromRGB(0, 17, 255)), ColorSequenceKeypoint.new(0.90, Color3.fromRGB(255, 0, 251)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 0, 4))}}),
-                    Create("UICorner", {CornerRadius = UDim.new(0, 5)}),
-                    HueSelection
-                })
-
-                local ColorpickerContainer = Create("Frame", {
-                    Position = UDim2.new(0, 0, 0, 32),
-                    Size = UDim2.new(1, 0, 1, -32),
-                    BackgroundTransparency = 1,
-                    ClipsDescendants = true
-                }, {
-                    Hue,
-                    Color,
-                    Create("UIPadding", {
-                        PaddingLeft = UDim.new(0, 35),
-                        PaddingRight = UDim.new(0, 35),
-                        PaddingBottom = UDim.new(0, 10),
-                        PaddingTop = UDim.new(0, 17)
-                    })
-                })
-
-                local Click = SetProps(Create("TextButton", {Text = ""}), {
-                    Size = UDim2.new(1, 0, 1, 0),
-                    BackgroundTransparency = 1,
-                    BorderSizePixel = 0
-                })
-
-                local ColorpickerBox = AddThemeObject(SetChildren(SetProps(Create("Frame", {BackgroundColor3 = Color3.fromRGB(255, 255, 255), BorderSizePixel = 0}), {
-                    Size = UDim2.new(0, 24, 0, 24),
-                    Position = UDim2.new(1, -12, 0.5, 0),
-                    AnchorPoint = Vector2.new(1, 0.5)
-                }, {
-                    Create("UICorner", {CornerRadius = UDim.new(0, 4)})
-                }), {
-                    AddThemeObject(Create("UIStroke", {Thickness = 1}), "Stroke")
-                }), "Main")
-
-                local ColorpickerFrame = AddThemeObject(SetChildren(SetProps(Create("Frame", {BackgroundColor3 = Color3.fromRGB(255, 255, 255), BorderSizePixel = 0}), {
-                    Size = UDim2.new(1, 0, 0, 38),
-                    Parent = scrollFrame
-                }, {
-                    Create("UICorner", {CornerRadius = UDim.new(0, 5)})
-                }), {
-                    SetProps(SetChildren(Create("Frame", {BackgroundTransparency = 1}), {
-                        AddThemeObject(SetProps(Create("TextLabel", {Text = ColorpickerConfig.Name, TextSize = 15}), {
-                            Size = UDim2.new(1, -12, 1, 0),
-                            Position = UDim2.new(0, 12, 0, 0),
-                            Font = Enum.Font.GothamBold,
-                            BackgroundTransparency = 1,
-                            TextXAlignment = Enum.TextXAlignment.Left,
-                            Name = "Content"
-                        }), "Text"),
-                        ColorpickerBox,
-                        Click,
-                        AddThemeObject(SetProps(Create("Frame"), {
-                            Size = UDim2.new(1, 0, 0, 1),
-                            Position = UDim2.new(0, 0, 1, -1),
-                            Name = "Line",
-                            Visible = false
-                        }), "Stroke")
-                    }), {
-                        Size = UDim2.new(1, 0, 0, 38),
-                        ClipsDescendants = true,
-                        Name = "F"
-                    }),
-                    ColorpickerContainer,
-                    AddThemeObject(Create("UIStroke", {Thickness = 1}), "Stroke")
-                }), "Second")
-
-                local configKey = tab.Name .. "_" .. section.Name .. "_" .. ColorpickerConfig.Name .. "_Colorpicker"
-                if config[configKey] then
-                    Colorpicker.Value = UnpackColor(config[configKey])
-                    ColorpickerBox.BackgroundColor3 = Colorpicker.Value
-                end
-
-                local Mouse = Players.LocalPlayer:GetMouse()
-                local ColorInput, HueInput
-
-                local function UpdateColorPicker()
-                    ColorpickerBox.BackgroundColor3 = Color3.fromHSV(ColorH, ColorS, ColorV)
-                    Color.BackgroundColor3 = Color3.fromHSV(ColorH, 1, 1)
-                    Colorpicker:Set(ColorpickerBox.BackgroundColor3)
-                    ColorpickerConfig.Callback(ColorpickerBox.BackgroundColor3)
-                    if ColorpickerConfig.Save then
-                        config[configKey] = PackColor(ColorpickerBox.BackgroundColor3)
-                        saveConfig()
-                    end
-                end
-
-                ColorH = 1 - (math.clamp(HueSelection.AbsolutePosition.Y - Hue.AbsolutePosition.Y, 0, Hue.AbsoluteSize.Y) / Hue.AbsoluteSize.Y)
-                ColorS = (math.clamp(ColorSelection.AbsolutePosition.X - Color.AbsolutePosition.X, 0, Color.AbsoluteSize.X) / Color.AbsoluteSize.X)
-                ColorV = 1 - (math.clamp(ColorSelection.AbsolutePosition.Y - Color.AbsolutePosition.Y, 0, Color.AbsoluteSize.Y) / Color.AbsoluteSize.Y)
-
-                local connection1 = Color.InputBegan:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        if ColorInput then
-                            ColorInput:Disconnect()
-                        end
-                        ColorInput = RunService.RenderStepped:Connect(function()
-                            local ColorX = (math.clamp(Mouse.X - Color.AbsolutePosition.X, 0, Color.AbsoluteSize.X) / Color.AbsoluteSize.X)
-                            local ColorY = (math.clamp(Mouse.Y - Color.AbsolutePosition.Y, 0, Color.AbsoluteSize.Y) / Color.AbsoluteSize.Y)
-                            ColorSelection.Position = UDim2.new(ColorX, 0, ColorY, 0)
-                            ColorS = ColorX
-                            ColorV = 1 - ColorY
-                            UpdateColorPicker()
-                        end)
-                    end
-                end)
-
-                local connection2 = Color.InputEnded:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        if ColorInput then
-                            ColorInput:Disconnect()
-                        end
-                    end
-                end)
-
-                local connection3 = Hue.InputBegan:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        if HueInput then
-                            HueInput:Disconnect()
-                        end
-                        HueInput = RunService.RenderStepped:Connect(function()
-                            local HueY = (math.clamp(Mouse.Y - Hue.AbsolutePosition.Y, 0, Hue.AbsoluteSize.Y) / Hue.AbsoluteSize.Y)
-                            HueSelection.Position = UDim2.new(0.5, 0, HueY, 0)
-                            ColorH = 1 - HueY
-                            UpdateColorPicker()
-                        end)
-                    end
-                end)
-
-                local connection4 = Hue.InputEnded:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        if HueInput then
-                            HueInput:Disconnect()
-                        end
-                    end
-                end)
-
-                local connection5 = Click.MouseButton1Click:Connect(function()
-                    Colorpicker.Toggled = not Colorpicker.Toggled
-                    TweenService:Create(ColorpickerFrame,TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = Colorpicker.Toggled and UDim2.new(1, 0, 0, 148) or UDim2.new(1, 0, 0, 38)}):Play()
-                    Color.Visible = Colorpicker.Toggled
-                    Hue.Visible = Colorpicker.Toggled
-                    ColorpickerFrame.F.Line.Visible = Colorpicker.Toggled
-                end)
-
-                function Colorpicker:Set(Value)
-                    Colorpicker.Value = Value
-                    ColorpickerBox.BackgroundColor3 = Colorpicker.Value
-                    ColorpickerConfig.Callback(Colorpicker.Value)
-                    if ColorpickerConfig.Save then
-                        config[configKey] = PackColor(Colorpicker.Value)
-                        saveConfig()
-                    end
-                end
-
-                Colorpicker:Set(Colorpicker.Value)
-                if ColorpickerConfig.Flag then
-                    XyloKitUI.Flags = XyloKitUI.Flags or {}
-                    XyloKitUI.Flags[ColorpickerConfig.Flag] = Colorpicker
-                end
-
-                return Colorpicker
-            end
-
-            return section
+    end
+
+    XyloKitUIWindow.CreateSection = function(tab, name)
+        local CreateSection = loadComponent("CreateSection")
+        if CreateSection then
+            return CreateSection(tab, name)
+        else
+            warn("CreateSection n'est pas disponible")
+            return nil
         end
+    end
 
-        return tab
+    XyloKitUIWindow.CreateToggle = function(section, name, default, callback)
+        local CreateToggle = loadComponent("CreateToggle")
+        if CreateToggle then
+            return CreateToggle(section, name, default, callback)
+        else
+            warn("CreateToggle n'est pas disponible")
+            return nil
+        end
+    end
+
+    XyloKitUIWindow.CreateSlider = function(section, name, min, max, default, callback)
+        local CreateSlider = loadComponent("CreateSlider")
+        if CreateSlider then
+            return CreateSlider(section, name, min, max, default, callback)
+        else
+            warn("CreateSlider n'est pas disponible")
+            return nil
+        end
+    end
+
+    XyloKitUIWindow.CreateDropdown = function(section, name, options, default, callback)
+        local CreateDropdown = loadComponent("CreateDropdown")
+        if CreateDropdown then
+            return CreateDropdown(section, name, options, default, callback)
+        else
+            warn("CreateDropdown n'est pas disponible")
+            return nil
+        end
+    end
+
+    XyloKitUIWindow.CreateColorpicker = function(section, config)
+        local CreateColorpicker = loadComponent("CreateColorpicker")
+        if CreateColorpicker then
+            return CreateColorpicker(section, config)
+        else
+            warn("CreateColorpicker n'est pas disponible")
+            return nil
+        end
     end
 
     -- Profil du joueur
-local playerInfoFrame = Instance.new("Frame")
-playerInfoFrame.Size = UDim2.new(0, 198, 0, 60)
-playerInfoFrame.Position = UDim2.new(0, 0, 1, -60) -- Ajusté pour être en bas de la barre latérale
-playerInfoFrame.AnchorPoint = Vector2.new(0, 1)
-playerInfoFrame.BackgroundColor3 = currentTheme.TabBackground
-playerInfoFrame.BorderSizePixel = 0
-playerInfoFrame.Parent = mainFrame
+    local playerInfoFrame = Instance.new("Frame")
+    playerInfoFrame.Size = UDim2.new(0, 198, 0, 60)
+    playerInfoFrame.Position = UDim2.new(0, 0, 1, -60)
+    playerInfoFrame.AnchorPoint = Vector2.new(0, 1)
+    playerInfoFrame.BackgroundColor3 = currentTheme.TabBackground
+    playerInfoFrame.BorderSizePixel = 0
+    playerInfoFrame.Parent = mainFrame
 
-local playerInfoStroke = Instance.new("UIStroke")
-playerInfoStroke.Thickness = 2
-playerInfoStroke.Color = currentTheme.BorderColor
-playerInfoStroke.Parent = playerInfoFrame
+    local playerInfoStroke = Instance.new("UIStroke")
+    playerInfoStroke.Thickness = 2
+    playerInfoStroke.Color = currentTheme.BorderColor
+    playerInfoStroke.Parent = playerInfoFrame
 
-local playerIcon = Instance.new("ImageLabel")
-playerIcon.Size = UDim2.new(0, 40, 0, 40)
-playerIcon.Position = UDim2.new(0, 10, 0, 10)
-playerIcon.BackgroundTransparency = 1
-playerIcon.Image = player and "rbxthumb://type=AvatarHeadShot&id=" .. player.UserId .. "&w=420&h=420" or ""
-playerIcon.ClipsDescendants = true
-playerIcon.Parent = playerInfoFrame
+    local playerIcon = Instance.new("ImageLabel")
+    playerIcon.Size = UDim2.new(0, 40, 0, 40)
+    playerIcon.Position = UDim2.new(0, 10, 0, 10)
+    playerIcon.BackgroundTransparency = 1
+    playerIcon.Image = player and "rbxthumb://type=AvatarHeadShot&id=" .. player.UserId .. "&w=420&h=420" or ""
+    playerIcon.ClipsDescendants = true
+    playerIcon.Parent = playerInfoFrame
 
--- Effet de cercle pour l'icône
-local iconCircle = Instance.new("UICorner")
-iconCircle.CornerRadius = UDim.new(0.5, 0)
-iconCircle.Parent = playerIcon
+    local iconCircle = Instance.new("UICorner")
+    iconCircle.CornerRadius = UDim.new(0.5, 0)
+    iconCircle.Parent = playerIcon
 
-local playerName = Instance.new("TextLabel")
-playerName.Size = UDim2.new(0, 140, 0, 40)
-playerName.Position = UDim2.new(0, 50, 0, 10)
-playerName.BackgroundTransparency = 1
-playerName.Text = player and player.Name or "#ERROR_UNKNOWN_404"
-playerName.TextColor3 = currentTheme.TextColor
-playerName.TextSize = 16
-playerName.Font = Enum.Font.Code
-playerName.TextXAlignment = Enum.TextXAlignment.Left
-playerName.TextTruncate = Enum.TextTruncate.AtEnd
-playerName.Parent = playerInfoFrame
+    local playerName = Instance.new("TextLabel")
+    playerName.Size = UDim2.new(0, 140, 0, 40)
+    playerName.Position = UDim2.new(0, 50, 0, 10)
+    playerName.BackgroundTransparency = 1
+    playerName.Text = player and player.Name or "#ERROR_UNKNOWN_404"
+    playerName.TextColor3 = currentTheme.TextColor
+    playerName.TextSize = 16
+    playerName.Font = Enum.Font.Code
+    playerName.TextXAlignment = Enum.TextXAlignment.Left
+    playerName.TextTruncate = Enum.TextTruncate.AtEnd
+    playerName.Parent = playerInfoFrame
 
-return XyloKitUIWindow
+    return XyloKitUIWindow
 end
 
--- Renvoyer la table XyloKitUI
 return XyloKitUI
