@@ -1,4 +1,4 @@
--- Gestion de la mémoired
+-- Gedz
 if typeof(getgenv) == "function" then
     if not memorystats then
         memorystats = {}
@@ -28,6 +28,27 @@ local ComponentLoaders = {
     CreateDropdown = "https://raw.githubusercontent.com/CheaterOnTop/by-YTBmaxxmaxx_11-roblox-universal-V2/refs/heads/main/dropdown",
     CreateColorpicker = "https://raw.githubusercontent.com/CheaterOnTop/by-YTBmaxxmaxx_11-roblox-universal-V2/refs/heads/main/color%20picker"
 }
+
+-- Précharger les composants
+local LoadedComponents = {}
+for name, url in pairs(ComponentLoaders) do
+    local success, result = pcall(function()
+        local response = game:HttpGet(url)
+        if response and #response > 0 then
+            local func = loadstring(response)
+            if func and type(func) == "function" then
+                LoadedComponents[name] = func()
+            else
+                warn("Le script pour " .. name .. " ne retourne pas une fonction valide.")
+            end
+        else
+            warn("Échec de la récupération du script pour " .. name .. " : URL invalide ou inaccessible.")
+        end
+    end)
+    if not success then
+        warn("Erreur lors du chargement de " .. name .. " : " .. tostring(result))
+    end
+end
 
 -- Attendre que le jeu et le joueur soient chargés
 local function waitForGameLoaded()
@@ -90,35 +111,6 @@ end
 
 loadConfig()
 XyloKitUI.SaveConfig = saveConfig
-
--- Charger les composants dynamiquement
-local function loadComponent(componentName)
-    local url = ComponentLoaders[componentName]
-    if not url or url == "" then
-        warn("URL pour " .. componentName .. " non définie ou vide.")
-        return nil
-    end
-    local success, result = pcall(function()
-        local response = game:HttpGet(url)
-        if response and #response > 0 then
-            local func = loadstring(response)
-            if func and type(func) == "function" then
-                return func()
-            else
-                warn("Le script pour " .. componentName .. " ne retourne pas une fonction valide.")
-                return nil
-            end
-        else
-            warn("Échec de la récupération du script pour " .. componentName .. " : URL invalide ou inaccessible.")
-            return nil
-        end
-    end)
-    if not success then
-        warn("Erreur lors du chargement du composant " .. componentName .. " : " .. tostring(result))
-        return nil
-    end
-    return result
-end
 
 -- Création de la fenêtre principale
 function XyloKitUI:CreateWindow(title)
@@ -247,13 +239,16 @@ function XyloKitUI:CreateWindow(title)
     local settingsTab = nil
 
     local function createSettingsTab()
-        local CreateSection = loadComponent("CreateSection")
-        if not CreateSection then
-            warn("Impossible de charger CreateSection pour l'onglet Paramètres")
+        if not LoadedComponents.CreateSection then
+            warn("CreateSection non chargé pour l'onglet Paramètres")
+            return nil
+        end
+        if not LoadedComponents.CreateTab then
+            warn("CreateTab non chargé pour l'onglet Paramètres")
             return nil
         end
 
-        local tab = loadComponent("CreateTab")(XyloKitUIWindow, contentFrame, tabs, currentTheme, "Setting & Visual")
+        local tab = LoadedComponents.CreateTab(XyloKitUIWindow, contentFrame, tabs, currentTheme, "Setting & Visual")
         if not tab then
             warn("Impossible de créer l'onglet Paramètres")
             return nil
@@ -262,20 +257,21 @@ function XyloKitUI:CreateWindow(title)
         settingsTab = tab
         tabs[tab.Name] = tab
 
-        local section = CreateSection(tab, "Paramètres")
-        local CreateColorpicker = loadComponent("CreateColorpicker")
-        if CreateColorpicker then
-            CreateColorpicker(section, {
-                Name = "Couleur de fond",
-                Default = currentTheme.MainBackground,
-                Save = true,
-                Callback = function(color)
-                    if mainFrame then
-                        mainFrame.BackgroundColor3 = color
-                    end
-                end
-            })
+        local section = LoadedComponents.CreateSection(tab, "Paramètres")
+        if not LoadedComponents.CreateColorpicker then
+            warn("CreateColorpicker non chargé pour l'onglet Paramètres")
+            return tab
         end
+        LoadedComponents.CreateColorpicker(section, {
+            Name = "Couleur de fond",
+            Default = currentTheme.MainBackground,
+            Save = true,
+            Callback = function(color)
+                if mainFrame then
+                    mainFrame.BackgroundColor3 = color
+                end
+            end
+        })
 
         return tab
     end
@@ -291,7 +287,7 @@ function XyloKitUI:CreateWindow(title)
     end)
 
     settingsButton.MouseButton1Click:Connect(function()
-        if settingsTab and currentTab ~= settingsTab then
+        if settingsTab and currentTab ~= settingsTab.Name then
             if currentTab and tabs[currentTab] then
                 tabs[currentTab].Content.Visible = false
                 if tabs[currentTab].Indicator then
@@ -308,70 +304,58 @@ function XyloKitUI:CreateWindow(title)
 
     -- Charger les fonctions de composants pour la fenêtre
     XyloKitUIWindow.CreateTab = function(name)
-        local CreateTab = loadComponent("CreateTab")
-        if CreateTab and type(name) == "string" then
-            local tab = CreateTab(XyloKitUIWindow, contentFrame, tabs, currentTheme, name)
-            if tab and not currentTab then
-                currentTab = name
-                if tab.Content then tab.Content.Visible = true end
-                if tab.Indicator then tab.Indicator.Visible = true end
-                if tab.Button then tab.Button.BackgroundColor3 = currentTheme.SelectedTabBackground end
-            end
-            return tab
-        else
-            warn("CreateTab n'est pas disponible ou name n'est pas une chaîne")
+        if not LoadedComponents.CreateTab or type(name) ~= "string" then
+            warn("CreateTab non disponible ou name n'est pas une chaîne")
             return nil
         end
+        local tab = LoadedComponents.CreateTab(XyloKitUIWindow, contentFrame, tabs, currentTheme, name)
+        if tab and not currentTab then
+            currentTab = name
+            if tab.Content then tab.Content.Visible = true end
+            if tab.Indicator then tab.Indicator.Visible = true end
+            if tab.Button then tab.Button.BackgroundColor3 = currentTheme.SelectedTabBackground end
+        end
+        return tab
     end
 
     XyloKitUIWindow.CreateSection = function(tab, name)
-        local CreateSection = loadComponent("CreateSection")
-        if CreateSection and type(name) == "string" and tab and tab.TopContainer then
-            return CreateSection(tab, name)
-        else
-            warn("CreateSection n'est pas disponible ou paramètres invalides")
+        if not LoadedComponents.CreateSection or type(name) ~= "string" or not tab or not tab.TopContainer then
+            warn("CreateSection non disponible ou paramètres invalides")
             return nil
         end
+        return LoadedComponents.CreateSection(tab, name)
     end
 
     XyloKitUIWindow.CreateToggle = function(section, name, default, callback)
-        local CreateToggle = loadComponent("CreateToggle")
-        if CreateToggle and type(name) == "string" and section and section.Frame then
-            return CreateToggle(section, name, default, callback)
-        else
-            warn("CreateToggle n'est pas disponible ou paramètres invalides")
+        if not LoadedComponents.CreateToggle or type(name) ~= "string" or not section or not section.Frame then
+            warn("CreateToggle non disponible ou paramètres invalides")
             return nil
         end
+        return LoadedComponents.CreateToggle(section, name, default, callback)
     end
 
     XyloKitUIWindow.CreateSlider = function(section, name, min, max, default, callback)
-        local CreateSlider = loadComponent("CreateSlider")
-        if CreateSlider and type(name) == "string" and section and section.Frame then
-            return CreateSlider(section, name, min, max, default, callback)
-        else
-            warn("CreateSlider n'est pas disponible ou paramètres invalides")
+        if not LoadedComponents.CreateSlider or type(name) ~= "string" or not section or not section.Frame then
+            warn("CreateSlider non disponible ou paramètres invalides")
             return nil
         end
+        return LoadedComponents.CreateSlider(section, name, min, max, default, callback)
     end
 
     XyloKitUIWindow.CreateDropdown = function(section, name, options, default, callback)
-        local CreateDropdown = loadComponent("CreateDropdown")
-        if CreateDropdown and type(name) == "string" and section and section.Frame then
-            return CreateDropdown(section, name, options, default, callback)
-        else
-            warn("CreateDropdown n'est pas disponible ou paramètres invalides")
+        if not LoadedComponents.CreateDropdown or type(name) ~= "string" or not section or not section.Frame then
+            warn("CreateDropdown non disponible ou paramètres invalides")
             return nil
         end
+        return LoadedComponents.CreateDropdown(section, name, options, default, callback)
     end
 
     XyloKitUIWindow.CreateColorpicker = function(section, config)
-        local CreateColorpicker = loadComponent("CreateColorpicker")
-        if CreateColorpicker and section and section.Frame and config and type(config.Name) == "string" then
-            return CreateColorpicker(section, config)
-        else
-            warn("CreateColorpicker n'est pas disponible ou paramètres invalides")
+        if not LoadedComponents.CreateColorpicker or not section or not section.Frame or not config or type(config.Name) ~= "string" then
+            warn("CreateColorpicker non disponible ou paramètres invalides")
             return nil
         end
+        return LoadedComponents.CreateColorpicker(section, config)
     end
 
     -- Profil du joueur
