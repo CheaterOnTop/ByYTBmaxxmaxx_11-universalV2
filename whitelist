@@ -1,1 +1,12 @@
-return "test"
+[
+    {
+        "HWID": "32816A05-D638-469F-B681-5A6EB24B03A7",
+        "Key": "wdXnldMTcDnsiEjTnfDlUVOUkfLSyiwT",
+        "Ban": false
+    },
+    {
+        "HWID": "123e4567-e89b-12d3-a456-426614174000",
+        "Ban": true,
+        "Reason": "Tentative cheat"
+    }
+]
