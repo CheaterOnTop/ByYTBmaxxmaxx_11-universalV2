@@ -5,17 +5,17 @@
         "Ban": false
     },
     {
-        "HWID": "none",
-        "Key": "none",
+        "HWID": "789a1234-b56c-78d9-e123-456789abcdef",
+        "Key": "DEF456-UVW012",
         "Ban": true,
-        "Reason": "none"
+        "Reason": "Cheating detected"
     },
     {
         "KeyFreeAccessForAll": "wdXnldMTcDnsiEjTnfDlUVOUkfLSyiwT"
     },
     {
-        "HWID": "none",
-        "Key": "none",
-        "Ban": none
+        "HWID": "456f7890-c12d-34e5-f678-901234567890",
+        "Key": "GHI789-RST345",
+        "Ban": false
     }
 ]
