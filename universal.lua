@@ -1,5 +1,5 @@
 local id = game.PlaceId
-local universal = "https://raw.githubusercontent.com/CheaterOnTop/ByYTBmaxxmaxx_11-universalV2/refs/heads/main/universal.lua"
+local universal = "https://raw.githubusercontent.com/CheaterOnTop/ByYTBmaxxmaxx_11-universalV2/refs/heads/main/universal"
 local Counter_Blox = "https://raw.githubusercontent.com/CheaterOnTop/ByYTBmaxxmaxx_11-universalV2/refs/heads/main/Counter%20Blox%20Beta"
 
 if id == 286090429 then
